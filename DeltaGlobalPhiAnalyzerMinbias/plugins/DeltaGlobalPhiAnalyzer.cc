@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
-// Package:    ME0analyzer/DeltaGlobalPhiAnalyzer
-// Class:      DeltaGlobalPhiAnalyzer
+// Package:    ME0analyzer/DeltaGlobalPhiAnalyzerMinbias
+// Class:      DeltaGlobalPhiAnalyzerMinbias
 // 
-/**\class DeltaGlobalPhiAnalyzer DeltaGlobalPhiAnalyzer.cc ME0analyzer/DeltaGlobalPhiAnalyzer/plugins/DeltaGlobalPhiAnalyzer.cc
+/**\class DeltaGlobalPhiAnalyzerMinbias DeltaGlobalPhiAnalyzerMinbias.cc ME0analyzer/DeltaGlobalPhiAnalyzerMinbias/plugins/DeltaGlobalPhiAnalyzerMinbias.cc
 
  Description: [one line class summary]
 
@@ -61,7 +61,6 @@
 #include "DataFormats/GEMDigi/interface/ME0PadDigiClusterCollection.h"
 //#include "RecoLocalMuon/GEMSegment/plugins/GEMSegmentAlgorithm.h"
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
-#include "SimDataFormats/Track/interface/SimTrackContainer.h"
 
 //#include "typedefs.h"
 
@@ -125,10 +124,10 @@ TPaveText *t1=new TPaveText(0.145,0.88,0.37,0.94,"brNDC");
 // constructor "usesResource("TFileService");"
 // This will improve performance in multithreaded jobs.
 
-class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
+class DeltaGlobalPhiAnalyzerMinbias : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
    public:
-      explicit DeltaGlobalPhiAnalyzer(const edm::ParameterSet&);
-      ~DeltaGlobalPhiAnalyzer();
+      explicit DeltaGlobalPhiAnalyzerMinbias(const edm::ParameterSet&);
+      ~DeltaGlobalPhiAnalyzerMinbias();
 
       static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -151,7 +150,6 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       edm::EDGetTokenT<MuonDigiCollection<ME0DetId,ME0PadDigi>> ME0PadDigiToken_;
       edm::EDGetTokenT<MuonDigiCollection<ME0DetId,ME0PadDigiCluster>> ME0PadDigiClusterToken_;
       edm::EDGetTokenT<vector<PSimHit>> ME0SimHitToken_;
-      edm::EDGetTokenT<vector<SimTrack>> simTrackToken_;
 
       bool v = 1 ; //verbose initialization
       bool reco = 1; //reco initialization (to digi based)
@@ -500,8 +498,6 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       float muPt[3]	;
       float muEta[3]	;
       float muP[3]	;
-      int muIdx[3];
-      int muTrackId[3];
       float muVxDeath[3]	;
       float muVyDeath[3]	;
       float muVzDeath[3]	;
@@ -555,8 +551,6 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
 
       std::vector<Float_t> * deltaChamber = new std::vector<Float_t>(200) ;
 
-     int mismatchCount = 0;
-     int totalmismatchCount = 0;
 };
 
 //
@@ -570,11 +564,10 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
 //
 // constructors and destructor
 //
-DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig):
-    ME0SegmentToken_(consumes<ME0SegmentCollection>(iConfig.getParameter<InputTag>("me0Segments"))),
-    genToken_(consumes<GenParticleCollection>(iConfig.getParameter<InputTag>("genParticles"))),
-    ME0SimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("me0SimHits"))),
-    simTrackToken_(consumes<vector<SimTrack>>(iConfig.getParameter<InputTag>("simTracks")))
+DeltaGlobalPhiAnalyzerMinbias::DeltaGlobalPhiAnalyzerMinbias(const edm::ParameterSet& iConfig):
+    ME0SegmentToken_(consumes<ME0SegmentCollection>(iConfig.getParameter<InputTag>("me0Segments")))//,
+//    genToken_(consumes<GenParticleCollection>(iConfig.getParameter<InputTag>("genParticles"))),
+//    ME0SimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("me0SimHits")))
 {
    //now do what ever initialization is needed
    usesResource("TFileService");
@@ -1412,7 +1405,7 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
 }
 
 
-DeltaGlobalPhiAnalyzer::~DeltaGlobalPhiAnalyzer()
+DeltaGlobalPhiAnalyzerMinbias::~DeltaGlobalPhiAnalyzerMinbias()
 {
   cout << "nr. of tau -> 3mu found: " << N_myLFVdecay << "\n" << endl;
   cout << "nr. of B0 -> tau found: " << N_myB0decay << endl;
@@ -1432,7 +1425,7 @@ DeltaGlobalPhiAnalyzer::~DeltaGlobalPhiAnalyzer()
 
 // ------------ method called for each event  ------------
 void
-DeltaGlobalPhiAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+DeltaGlobalPhiAnalyzerMinbias::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
    using namespace std;
@@ -1480,8 +1473,8 @@ gStyle->SetOptTitle(0);
       diffEta_maxmin = 9999;  //muEta[3]-muEta[1]
       diffEta_medmin = 9999;  //muEta[2]-muEta[1]
 //------------------ GEN PARTICLES ------------------------------
-     Handle<GenParticleCollection> genParticles;
-     iEvent.getByToken(genToken_, genParticles);
+//     Handle<GenParticleCollection> genParticles;
+//     iEvent.getByToken(genToken_, genParticles);
 
      mesonPt  = 0;
      mesonEta = 0;
@@ -1523,372 +1516,289 @@ gStyle->SetOptTitle(0);
        muVyDeath[i] 	= 0; 
        muVzDeath[i] 	= 0; 
        muEta[i] 	= 0; 
-       muIdx[i]		= -1;
-       muTrackId[i]	= -1;
        muStatus[i] 	= 0; 
        }
 
-cout << "START LOOP on GEN PARTICLES" << endl;
-       cout << "Nr. of genParticles: " << genParticles->size()+1 << endl;
-cout << "Size of GenParticles: " << genParticles->size() << endl;
-     for(size_t i = 0; i < genParticles->size(); ++ i) 
-     {
-       if (v) cout << "GenParticle index: " << i << endl;
-       int pidx = i;
-       const GenParticle & p = (*genParticles)[i];
-       //const Candidate * mom =( p.mother());
-
-       if ( (fabs(p.pdgId()) != 511) && (fabs(p.pdgId()) != 15) && (fabs(p.pdgId()) != 431) ) continue;  //15=tau, 511=B0
-       //selects only tau and B0
-       if (v) 
-         {
-         cout  <<"id: "<<p.pdgId()<<"\tstatus: "<<p.status()
-         <<"\npt: "<<p.pt()<<"\teta: "<<p.eta()
-         <<"\npx: "<<p.px()<<"\tpy: "<<p.py()<<"\tpz: "<<p.pz()
-         <<"\nphi: "<<p.phi()<<"\tmass: "<<p.mass()
-         <<"\nvx: "<<p.vx()<<"\tvy "<<p.vy()
-         <<"\tvz: "<<p.vz() << "\n" << endl;
-         }
-
-      if ( fabs(p.pdgId()) == 511 ||  fabs(p.pdgId()) == 431 )	//511=B0, 431=Ds+
-      // set myB0decay=TRUE if a decay B0->tau + X is found
-        {
-	bool B0found = false;
-	bool Dsfound = false;
-	if ( fabs(p.pdgId()) == 511 )	{ B0found = true; nB0++; }
-	if ( fabs(p.pdgId()) == 431 )	{ Dsfound = true; nDs++; }
-        int n = p.numberOfDaughters();
-	int dauPdgId[n];
-        for(unsigned int j = 0; j < p.numberOfDaughters(); ++j) 
-	  {
-          const Candidate * d = p.daughter( j );
-	  dauPdgId[j] = d->pdgId();
-	  cout << "Daughter " << j << "is " << dauPdgId[j] << endl;
-	  }
-	bool myB0decay = false;
-	bool myDsdecay = false;
-	int n_tau = 0;
-        for(unsigned int j = 0; j < p.numberOfDaughters(); ++ j) 
-	  {
-	  if (fabs(dauPdgId[j]) == 15 ) 	n_tau++;
-	  }
-	if (n_tau > 0 && B0found)		myB0decay = true;
-	if (n_tau > 0 && Dsfound)		myDsdecay = true;
-	if (myB0decay)		
-	  {
-	  N_myB0decay++;
-	  nB0Tau++;
-	  cout << "B0 -> tau FOUND!" << endl;
-	  }
-	if (myDsdecay)		
-	  {
-	  N_myDsdecay++;
-	  nDsTau++;
-	  cout << "Ds -> tau FOUND!" << endl;
-	  }
-        }
-
-
-      if ( fabs(p.pdgId()) == 15 )  //15=tau
-      // set myTauDecay = TRUE if a decay tau->3mu + X is found
-        {
-	nTau++;
-	tauPdgId = p.pdgId();
-        int n = p.numberOfDaughters();
-	int dauPdgId[n];
-	int dauStatus[n];
-        for(unsigned int j = 0; j < p.numberOfDaughters(); ++j) 
-	  {
-          const Candidate * d = p.daughter( j );
-	  dauPdgId[j] = d->pdgId();
-	  dauStatus[j] = d->status();
-	  cout << "Daughter " << j << "is " << dauPdgId[j] << endl;
-	  cout << "status: " << dauStatus[j]  << endl;
-	  }
-	bool myTauDecay = false;
-	//bool myChain	= false;
-	int n_mu = 0;
-        for(unsigned int j = 0; j < p.numberOfDaughters(); ++ j) 
-	  {
-	  if (fabs(dauPdgId[j]) == 13 ) 	n_mu++;		//13=mu
-	  }
-	if (n_mu == 3)		myTauDecay = true;
-	if (myTauDecay)		
-	  {
-	  N_myLFVdecay++;
-	  nTau3Mu++;
-	  cout << "tau -> 3mu FOUND!" << endl;
-	  }
-        
-	const Candidate * mom =( p.mother());
-	if (myTauDecay && (fabs(mom->pdgId()) == 511) )	
-	  {
-	  //myChain = true;
-	  N_myB0Chain++;
-	  nB0Tau3Mu++;
-	  cout << "B0 -> tau -> 3mu FOUND!" << endl;
-	  mesonPt = mom->pt();
-	  mesonEta = mom->eta();
-	  mesonP = mom->p();
-	  mesonPx = mom->px();
-	  mesonPy = mom->py();
-	  mesonPz = mom->pz();
-	  mesonVxBirth = mom->vx();
-	  mesonVyBirth = mom->vy();
-	  mesonVzBirth = mom->vz();
-	  mesonVxDeath = p.vx();
-	  mesonVyDeath = p.vy();
-	  mesonVzDeath = p.vz();
-	  tauPt = p.pt();
-	  tauEta = p.eta();
-	  tauP = p.p();
-	  tauPx = p.px();
-	  tauPy = p.py();
-	  tauPz = p.pz();
-	  tauVxBirth = p.vx();
-	  tauVyBirth = p.vy();
-	  tauVzBirth = p.vz();
-	      const Candidate *gdaugh = p.daughter( 0 );
-	  tauVxDeath = gdaugh->vx();
-	  tauVyDeath = gdaugh->vy();
-	  tauVzDeath = gdaugh->vz();
-	  }
-	if (myTauDecay && (fabs(mom->pdgId()) == 431) )	
-	  {
-	  //myChain = true;
-	  N_myDsChain++;
-	  nDsTau3Mu++;
-	  cout << "Ds -> tau -> 3mu FOUND!" << endl;
-	  mesonPt = mom->pt();
-	  mesonEta = mom->eta();
-	  mesonP = mom->p();
-	  mesonPx = mom->px();
-	  mesonPy = mom->py();
-	  mesonPz = mom->pz();
-	  mesonVxBirth = mom->vx();
-	  mesonVyBirth = mom->vy();
-	  mesonVzBirth = mom->vz();
-	  mesonVxDeath = p.vx();
-	  mesonVyDeath = p.vy();
-	  mesonVzDeath = p.vz();
-	  tauPt = p.pt();
-	  tauEta = p.eta();
-	  tauP = p.p();
-	  tauPx = p.px();
-	  tauPy = p.py();
-	  tauPz = p.pz();
-	  tauVxBirth = p.vx();
-	  tauVyBirth = p.vy();
-	  tauVzBirth = p.vz();
-	      const Candidate *gdaugh = p.daughter( 0 );
-	  tauVxDeath = gdaugh->vx();
-	  tauVyDeath = gdaugh->vy();
-	  tauVzDeath = gdaugh->vz();
-	  }
-
-	//Fill histograms
-	if ( (myTauDecay && (fabs(mom->pdgId()) == 511)) || (myTauDecay && (fabs(mom->pdgId()) == 431))  )
-	  {
-	  //float muEta[3];
-	  //float muPt[3];o
-	  mesonPdgId = mom->pdgId();
-	  //int muPdgId[3];
-	  unsigned int i=0;
-          for(unsigned int j = 0; j < p.numberOfDaughters(); ++j) 
-	    {
-            const Candidate * d = p.daughter( j );
-	    if (fabs(d->pdgId())!=13)	continue;
-	    muPdgId[i] = d->pdgId();
-	    muPt[i] = d->pt();
-	    muP[i] = d->p();
-	    muPx[i] = d->px();
-	    muPy[i] = d->py();
-	    muPz[i] = d->pz();
-	    muVxBirth[i] = d->vx();
-	    muVyBirth[i] = d->vy();
-	    muVzBirth[i] = d->vz();
-	    muEta[i] = fabs(d->eta());
-	    muStatus[i] = d->status();
-	    //muGenPind[i] = d->index();
-	    //cout << "	!!! MU PARTICLE INDEX !!!   " <<  (d->track()).size() << endl;
-            //if (muStatus[i]==1)
-	    //  {
-	    //  muVxDeath[i] = 0;
-	    //  muVyDeath[i] = 0;
-	    //  muVzDeath[i] = 0;
-	    //  }
-
-	    if (muStatus[i]!=1)
-	      {
-	      const Candidate *gdaugh = d->daughter( 0 );
-	      muVxDeath[i] = gdaugh->vx();
-	      muVyDeath[i] = gdaugh->vy();
-	      muVzDeath[i] = gdaugh->vz();
-
-
-	    //canDeleteFromHere
-	      for( size_t i = 0; i < d->numberOfDaughters(); ++ i ) 
-	        {
-	        const Candidate * gdaugh = d->daughter( i );
-		cout << "VERTEX: " << gdaugh->vx()  << ", " << gdaugh->vy() << ", " << gdaugh->vz() << endl;
-	        }
-	    //canDeleteToHere
-	      }
-	    i++;
-	    }
-	    
-            cout << "\nTRY to compare particle taken from index with tau children" << endl;
-	    cout << "current mom i = " << pidx << endl;
-	    cout << "full chain: " << (*genParticles)[pidx-1].pdgId() << " -> " << (*genParticles)[pidx].pdgId() << " -> 3mu " << endl;
-	    //for ( int back = 1 ; back<pidx ; back ++)  
-	    //   {
-	    //   cout << "particle -" << back << "from tau:\t" << (*genParticles)[pidx-back].pdgId() << endl;
-	    //   if ( fabs( (*genParticles)[pidx-back].pdgId() ) == 511 )/*||  fabs( (*genParticles)[pidx-back].pdgId() ) == 431 )*/ break;
-	    //   }
-            const GenParticle & p1 = (*genParticles)[pidx+1];
-	    cout << "p1 eta= " << p1.eta() << "   child eta= " << muEta[0] << endl;
-            const GenParticle & p2 = (*genParticles)[pidx+2];
-	    cout << "p2 eta= " << p2.eta() << "   child eta= " << muEta[1] << endl;
-            const GenParticle & p3 = (*genParticles)[pidx+3];
-	    cout << "p2 eta= " << p3.eta() << "   child eta= " << muEta[2] << "\n" << endl;
-	    //muIdx[0] = pidx+1;
-	    //muIdx[1] = pidx+2;
-	    //muIdx[2] = pidx+3;
-	    cout << "MOM vertex: " << p.vertex() << endl;
-	    cout << "MUON1 vertex: " << p1.vertex() << endl;
-	    cout << "MUON2 vertex: " << p2.vertex() << endl;
-	    cout << "MUON3 vertex: " << p3.vertex() << endl;
-	    cout << "candidate isGlobalMuon = " <<  p3.isGlobalMuon() << endl;
-	    cout << "candidate isStandAloneMuon = " <<  p3.isStandAloneMuon() << endl;
-
-	  for (unsigned int i = 0; i < 3; i++)	h_PtVsEta->Fill( muEta[i], muPt[i] );
-          //std::sort(muPt, muPt+3);
-          //std::sort(muEta, muEta+3);
-
-	  // sort arrays according to increasing Pt
-	  int imax = distance(muPt, max_element(muPt, muPt + 3));
-	  std::swap(muPt[2], muPt[imax]);
-	  std::swap(muEta[2], muEta[imax]);
-	  std::swap(muStatus[2], muStatus[imax]);
-	  std::swap(muPdgId[2], muPdgId[imax]);
-	  std::swap(muP[2], muP[imax]);
-	  std::swap(muPx[2], muPx[imax]);
-	  std::swap(muPy[2], muPy[imax]);
-	  std::swap(muPz[2], muPz[imax]);
-	  std::swap(muVxBirth[2], muVxBirth[imax]);
-	  std::swap(muVyBirth[2], muVyBirth[imax]);
-	  std::swap(muVzBirth[2], muVzBirth[imax]);
-	  std::swap(muVxDeath[2], muVxDeath[imax]);
-	  std::swap(muVyDeath[2], muVyDeath[imax]);
-	  std::swap(muVzDeath[2], muVzDeath[imax]);
-	  //std::swap(muIdx[2], muIdx[imax]);
-	  int imin = distance(muPt, min_element(muPt, muPt + 3));
-	  std::swap(muPt[0], muPt[imin]);
-	  std::swap(muEta[0], muEta[imin]);
-	  std::swap(muStatus[0], muStatus[imin]);
-	  std::swap(muPdgId[0], muPdgId[imin]);
-	  std::swap(muP[0], muP[imin]);
-	  std::swap(muPx[0], muPx[imin]);
-	  std::swap(muPy[0], muPy[imin]);
-	  std::swap(muPz[0], muPz[imin]);
-	  std::swap(muVxBirth[0], muVxBirth[imin]);
-	  std::swap(muVyBirth[0], muVyBirth[imin]);
-	  std::swap(muVzBirth[0], muVzBirth[imin]);
-	  std::swap(muVxDeath[0], muVxDeath[imin]);
-	  std::swap(muVyDeath[0], muVyDeath[imin]);
-	  std::swap(muVzDeath[0], muVzDeath[imin]);
-	  //std::swap(muIdx[0], muIdx[imin]);
-	  // end sort arrays together
-
-	  h_Eta2D_max->Fill(muEta[2], muEta[1]) ; 		//(highest eta, second highest eta)
-	  h_Eta2D_min->Fill(muEta[0], muEta[1]) ; 		//(smallest eta, second highest eta)
-	  h_Eta3D->Fill(muEta[2], muEta[1], muEta[0]) ;		//(highest eta, second highest eta, smallest eta)
-	  h_Pt2D_max->Fill(muPt[2], muPt[1]) ; 			//(highest pt, second highest pt)
-	  h_Pt2D_min->Fill(muPt[0], muPt[1]) ; 			//(smallest pt, second highest pt)
-	  h_Pt3D->Fill(muPt[2], muPt[1], muPt[0]) ; 		//(highest pt, second highest pt, smallest pt)
-          for (auto i=0; i<3; i++)  cout << muPt[i] << "\t" << muEta[i] << "\t" << muPdgId[i] << endl;	
-
-	  for (auto i=0; i<3; i++)
-	    {
-	    if ( fabs(muEta[i])>1.8 && fabs(muEta[i])<3.0 )
-	      {
-	      mu_isME0[i] = 1;
-	      nME0++;
-	      if (muEta[i]>0)	{ mu_isME0pos[i] = 1; 	nME0_pos++; }
-	      else		{ mu_isME0neg[i] = 1;	nME0_neg++; }
-	      }
-	    }
-	  diffEta_32 = muEta[2]-muEta[1];
-	  diffEta_31 = muEta[2]-muEta[0];
-	  diffEta_21 = muEta[1]-muEta[0];
-	  int jmax = distance(muEta, max_element(muEta, muEta + 3));
-	  int jmin = distance(muEta, min_element(muEta, muEta + 3));
-	  int jmed = 3-jmax-jmin;
-	  diffEta_maxmed=muEta[jmax]-muEta[jmed];
-	  diffEta_maxmin=muEta[jmax]-muEta[jmin];
-	  diffEta_medmin=muEta[jmed]-muEta[jmin];
-	  }
-        }
-      // << "\nmother: "<<p.mother()<<"\tMOTHER id: "<<mom->pdgId()
-      // <<"\tMOTHER pt:"<<mom->pt()<<endl<<endl;
-
-     // if ( fabs(p.eta()) < 2.0 || fabs(p.eta()) > 2.8 ) return;
-     // if ( fabs(p.pt()) < 0.5 ) return;
-
-     }
-
-
-     int nMu = 0;
-     for(size_t i = 0; i < genParticles->size(); ++ i) 
-     {
-       if (v) cout << "GenParticle index: " << i << endl;
-       const GenParticle & p = (*genParticles)[i];
-       if ( fabs( p.pdgId() ) != 13 ) continue;
-       bool found = 0;
-       bool foundlast = 0;
-       const Candidate * momtemp =( p.mother());
-       Candidate * mom = momtemp->clone();
-       // run back the mothers until a non-muon is found
-       while ( fabs(mom->pdgId()) == 13 )
-         {
-	 const Candidate * momtemp1 = mom->mother();
-         mom = momtemp1->clone();
-	 }
-	 	
-       // check if the mother is a tau, and its mother is a B0 or Ds	--> if yes "found" is set to "true"
-       const Candidate * momtemp1 = mom->mother();
-       Candidate * mom2 = momtemp1->clone();
-       if ( fabs(mom->pdgId())==15 && ( fabs(mom2->pdgId())==511 || fabs(mom2->pdgId())==431 ) ) 
-	  {
-          cout << "meson -> tau -> 3mu found" << endl;
-          found = 1;
-	  }
-
-       // verify that p is the last muon in the chain  --> if yes "foundlast" is set to "true"
-       if (p.numberOfDaughters()==0)    //easy case: the muon has no daughters
-       {
-       foundlast=1;       
-       cout << "This muon has no daughters" << endl;
-       }
-       else	            //other case: the muon has daughters. Need NONE of them being a muon.
-         {
-	 foundlast = 1;
-         for(unsigned int j = 0; j < p.numberOfDaughters(); ++j)
-	   {
-	   cout << "This muon has daugters" << endl;
-	   const Candidate * d = p.daughter( j );
-	   if ( fabs(d->pdgId()) == 13 ) foundlast = 0;
-	   }
-	 }
-       if (found && foundlast) //this is my muon if "found" and "foundlast" are verified. I store the particle index
-         {
-         muIdx[nMu] = i;
-         nMu++;
-         }
-       if (nMu==3) break;
-      }
-     cout << "Muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
-
+//if (!signal)
+//{
+//cout << "START LOOP on GEN PARTICLES" << endl;
+//       cout << "Nr. of genParticles: " << genParticles->size()+1 << endl;
+//cout << "Size of GenParticles: " << genParticles->size() << endl;
+//     for(size_t i = 0; i < genParticles->size(); ++ i) 
+//     {
+//       //if (v) cout << "GenParticle index: " << i << endl;
+//       const GenParticle & p = (*genParticles)[i];
+//       //const Candidate * mom =( p.mother());
+//
+//       if ( (fabs(p.pdgId()) != 511) && (fabs(p.pdgId()) != 15) && (fabs(p.pdgId()) != 431) ) continue;  //15=tau, 511=B0
+//       //selects only tau and B0
+//       if (v) 
+//         {
+//         cout  <<"id: "<<p.pdgId()<<"\tstatus: "<<p.status()
+//         <<"\npt: "<<p.pt()<<"\teta: "<<p.eta()
+//         <<"\npx: "<<p.px()<<"\tpy: "<<p.py()<<"\tpz: "<<p.pz()
+//         <<"\nphi: "<<p.phi()<<"\tmass: "<<p.mass()
+//         <<"\nvx: "<<p.vx()<<"\tvy "<<p.vy()
+//         <<"\tvz: "<<p.vz() << "\n" << endl;
+//         }
+//
+//      if ( fabs(p.pdgId()) == 511 ||  fabs(p.pdgId()) == 431 )	//511=B0, 431=Ds+
+//      // set myB0decay=TRUE if a decay B0->tau + X is found
+//        {
+//	bool B0found = false;
+//	bool Dsfound = false;
+//	if ( fabs(p.pdgId()) == 511 )	{ B0found = true; nB0++; }
+//	if ( fabs(p.pdgId()) == 431 )	{ Dsfound = true; nDs++; }
+//        int n = p.numberOfDaughters();
+//	int dauPdgId[n];
+//        for(unsigned int j = 0; j < p.numberOfDaughters(); ++j) 
+//	  {
+//          const Candidate * d = p.daughter( j );
+//	  dauPdgId[j] = d->pdgId();
+//	  cout << "Daughter " << j << "is " << dauPdgId[j] << endl;
+//	  }
+//	bool myB0decay = false;
+//	bool myDsdecay = false;
+//	int n_tau = 0;
+//        for(unsigned int j = 0; j < p.numberOfDaughters(); ++ j) 
+//	  {
+//	  if (fabs(dauPdgId[j]) == 15 ) 	n_tau++;
+//	  }
+//	if (n_tau > 0 && B0found)		myB0decay = true;
+//	if (n_tau > 0 && Dsfound)		myDsdecay = true;
+//	if (myB0decay)		
+//	  {
+//	  N_myB0decay++;
+//	  nB0Tau++;
+//	  cout << "B0 -> tau FOUND!" << endl;
+//	  }
+//	if (myDsdecay)		
+//	  {
+//	  N_myDsdecay++;
+//	  nDsTau++;
+//	  cout << "Ds -> tau FOUND!" << endl;
+//	  }
+//        }
+//
+//
+//      if ( fabs(p.pdgId()) == 15 )  //15=tau
+//      // set myTauDecay = TRUE if a decay tau->3mu + X is found
+//        {
+//	nTau++;
+//	tauPdgId = p.pdgId();
+//        int n = p.numberOfDaughters();
+//	int dauPdgId[n];
+//	int dauStatus[n];
+//        for(unsigned int j = 0; j < p.numberOfDaughters(); ++j) 
+//	  {
+//          const Candidate * d = p.daughter( j );
+//	  dauPdgId[j] = d->pdgId();
+//	  dauStatus[j] = d->status();
+//	  cout << "Daughter " << j << "is " << dauPdgId[j] << endl;
+//	  cout << "status: " << dauStatus[j]  << endl;
+//	  }
+//	bool myTauDecay = false;
+//	//bool myChain	= false;
+//	int n_mu = 0;
+//        for(unsigned int j = 0; j < p.numberOfDaughters(); ++ j) 
+//	  {
+//	  if (fabs(dauPdgId[j]) == 13 ) 	n_mu++;		//13=mu
+//	  }
+//	if (n_mu == 3)		myTauDecay = true;
+//	if (myTauDecay)		
+//	  {
+//	  N_myLFVdecay++;
+//	  nTau3Mu++;
+//	  cout << "tau -> 3mu FOUND!" << endl;
+//	  }
+//        
+//	const Candidate * mom =( p.mother());
+//	if (myTauDecay && (fabs(mom->pdgId()) == 511) )	
+//	  {
+//	  //myChain = true;
+//	  N_myB0Chain++;
+//	  nB0Tau3Mu++;
+//	  cout << "B0 -> tau -> 3mu FOUND!" << endl;
+//	  mesonPt = mom->pt();
+//	  mesonEta = mom->eta();
+//	  mesonP = mom->p();
+//	  mesonPx = mom->px();
+//	  mesonPy = mom->py();
+//	  mesonPz = mom->pz();
+//	  mesonVxBirth = mom->vx();
+//	  mesonVyBirth = mom->vy();
+//	  mesonVzBirth = mom->vz();
+//	  mesonVxDeath = p.vx();
+//	  mesonVyDeath = p.vy();
+//	  mesonVzDeath = p.vz();
+//	  tauPt = p.pt();
+//	  tauEta = p.eta();
+//	  tauP = p.p();
+//	  tauPx = p.px();
+//	  tauPy = p.py();
+//	  tauPz = p.pz();
+//	  tauVxBirth = p.vx();
+//	  tauVyBirth = p.vy();
+//	  tauVzBirth = p.vz();
+//	      const Candidate *gdaugh = p.daughter( 0 );
+//	  tauVxDeath = gdaugh->vx();
+//	  tauVyDeath = gdaugh->vy();
+//	  tauVzDeath = gdaugh->vz();
+//	  }
+//	if (myTauDecay && (fabs(mom->pdgId()) == 431) )	
+//	  {
+//	  //myChain = true;
+//	  N_myDsChain++;
+//	  nDsTau3Mu++;
+//	  cout << "Ds -> tau -> 3mu FOUND!" << endl;
+//	  mesonPt = mom->pt();
+//	  mesonEta = mom->eta();
+//	  mesonP = mom->p();
+//	  mesonPx = mom->px();
+//	  mesonPy = mom->py();
+//	  mesonPz = mom->pz();
+//	  mesonVxBirth = mom->vx();
+//	  mesonVyBirth = mom->vy();
+//	  mesonVzBirth = mom->vz();
+//	  mesonVxDeath = p.vx();
+//	  mesonVyDeath = p.vy();
+//	  mesonVzDeath = p.vz();
+//	  tauPt = p.pt();
+//	  tauEta = p.eta();
+//	  tauP = p.p();
+//	  tauPx = p.px();
+//	  tauPy = p.py();
+//	  tauPz = p.pz();
+//	  tauVxBirth = p.vx();
+//	  tauVyBirth = p.vy();
+//	  tauVzBirth = p.vz();
+//	      const Candidate *gdaugh = p.daughter( 0 );
+//	  tauVxDeath = gdaugh->vx();
+//	  tauVyDeath = gdaugh->vy();
+//	  tauVzDeath = gdaugh->vz();
+//	  }
+//
+//	//Fill histograms
+//	if ( (myTauDecay && (fabs(mom->pdgId()) == 511)) || (myTauDecay && (fabs(mom->pdgId()) == 431))  )
+//	  {
+//	  //float muEta[3];
+//	  //float muPt[3];o
+//	  mesonPdgId = mom->pdgId();
+//	  //int muPdgId[3];
+//	  unsigned int i=0;
+//          for(unsigned int j = 0; j < p.numberOfDaughters(); ++j) 
+//	    {
+//            const Candidate * d = p.daughter( j );
+//	    if (fabs(d->pdgId())!=13)	continue;
+//	    muPdgId[i] = d->pdgId();
+//	    muPt[i] = d->pt();
+//	    muP[i] = d->p();
+//	    muPx[i] = d->px();
+//	    muPy[i] = d->py();
+//	    muPz[i] = d->pz();
+//	    muVxBirth[i] = d->vx();
+//	    muVyBirth[i] = d->vy();
+//	    muVzBirth[i] = d->vz();
+//	    muEta[i] = fabs(d->eta());
+//	    muStatus[i] = d->status();
+//            //if (muStatus[i]==1)
+//	    //  {
+//	    //  muVxDeath[i] = 0;
+//	    //  muVyDeath[i] = 0;
+//	    //  muVzDeath[i] = 0;
+//	    //  }
+//	    if (muStatus[i]!=1)
+//	      {
+//	      const Candidate *gdaugh = d->daughter( 0 );
+//	      muVxDeath[i] = gdaugh->vx();
+//	      muVyDeath[i] = gdaugh->vy();
+//	      muVzDeath[i] = gdaugh->vz();
+//
+//
+//	    //canDeleteFromHere
+//	      for( size_t i = 0; i < d->numberOfDaughters(); ++ i ) 
+//	        {
+//	        const Candidate * gdaugh = d->daughter( i );
+//		cout << "VERTEX: " << gdaugh->vx()  << ", " << gdaugh->vy() << ", " << gdaugh->vz() << endl;
+//	        }
+//	    //canDeleteToHere
+//	      }
+//	    i++;
+//	    }
+//	  for (unsigned int i = 0; i < 3; i++)	h_PtVsEta->Fill( muEta[i], muPt[i] );
+//          //std::sort(muPt, muPt+3);
+//          //std::sort(muEta, muEta+3);
+//
+//	  // sort arrays according to increasing Pt
+//	  int imax = distance(muPt, max_element(muPt, muPt + 3));
+//	  std::swap(muPt[2], muPt[imax]);
+//	  std::swap(muEta[2], muEta[imax]);
+//	  std::swap(muStatus[2], muStatus[imax]);
+//	  std::swap(muPdgId[2], muPdgId[imax]);
+//	  std::swap(muP[2], muP[imax]);
+//	  std::swap(muPx[2], muPx[imax]);
+//	  std::swap(muPy[2], muPy[imax]);
+//	  std::swap(muPz[2], muPz[imax]);
+//	  std::swap(muVxBirth[2], muVxBirth[imax]);
+//	  std::swap(muVyBirth[2], muVyBirth[imax]);
+//	  std::swap(muVzBirth[2], muVzBirth[imax]);
+//	  std::swap(muVxDeath[2], muVxDeath[imax]);
+//	  std::swap(muVyDeath[2], muVyDeath[imax]);
+//	  std::swap(muVzDeath[2], muVzDeath[imax]);
+//	  int imin = distance(muPt, min_element(muPt, muPt + 3));
+//	  std::swap(muPt[0], muPt[imin]);
+//	  std::swap(muEta[0], muEta[imin]);
+//	  std::swap(muStatus[0], muStatus[imin]);
+//	  std::swap(muPdgId[0], muPdgId[imin]);
+//	  std::swap(muP[0], muP[imin]);
+//	  std::swap(muPx[0], muPx[imin]);
+//	  std::swap(muPy[0], muPy[imin]);
+//	  std::swap(muPz[0], muPz[imin]);
+//	  std::swap(muVxBirth[0], muVxBirth[imin]);
+//	  std::swap(muVyBirth[0], muVyBirth[imin]);
+//	  std::swap(muVzBirth[0], muVzBirth[imin]);
+//	  std::swap(muVxDeath[0], muVxDeath[imin]);
+//	  std::swap(muVyDeath[0], muVyDeath[imin]);
+//	  std::swap(muVzDeath[0], muVzDeath[imin]);
+//	  // end sort arrays together
+//
+//	  h_Eta2D_max->Fill(muEta[2], muEta[1]) ; 		//(highest eta, second highest eta)
+//	  h_Eta2D_min->Fill(muEta[0], muEta[1]) ; 		//(smallest eta, second highest eta)
+//	  h_Eta3D->Fill(muEta[2], muEta[1], muEta[0]) ;		//(highest eta, second highest eta, smallest eta)
+//	  h_Pt2D_max->Fill(muPt[2], muPt[1]) ; 			//(highest pt, second highest pt)
+//	  h_Pt2D_min->Fill(muPt[0], muPt[1]) ; 			//(smallest pt, second highest pt)
+//	  h_Pt3D->Fill(muPt[2], muPt[1], muPt[0]) ; 		//(highest pt, second highest pt, smallest pt)
+//          for (auto i=0; i<3; i++)  cout << muPt[i] << "\t" << muEta[i] << "\t" << muPdgId[i] << endl;	
+//
+//	  for (auto i=0; i<3; i++)
+//	    {
+//	    if ( fabs(muEta[i])>1.8 && fabs(muEta[i])<3.0 )
+//	      {
+//	      mu_isME0[i] = 1;
+//	      nME0++;
+//	      if (muEta[i]>0)	{ mu_isME0pos[i] = 1; 	nME0_pos++; }
+//	      else		{ mu_isME0neg[i] = 1;	nME0_neg++; }
+//	      }
+//	    }
+//	  diffEta_32 = muEta[2]-muEta[1];
+//	  diffEta_31 = muEta[2]-muEta[0];
+//	  diffEta_21 = muEta[1]-muEta[0];
+//	  int jmax = distance(muEta, max_element(muEta, muEta + 3));
+//	  int jmin = distance(muEta, min_element(muEta, muEta + 3));
+//	  int jmed = 3-jmax-jmin;
+//	  diffEta_maxmed=muEta[jmax]-muEta[jmed];
+//	  diffEta_maxmin=muEta[jmax]-muEta[jmin];
+//	  diffEta_medmin=muEta[jmed]-muEta[jmin];
+//	  }
+//        }
+//      // << "\nmother: "<<p.mother()<<"\tMOTHER id: "<<mom->pdgId()
+//      // <<"\tMOTHER pt:"<<mom->pt()<<endl<<endl;
+//
+//     // if ( fabs(p.eta()) < 2.0 || fabs(p.eta()) > 2.8 ) return;
+//     // if ( fabs(p.pt()) < 0.5 ) return;
+//
+//     }
+//}
 //h_PtVsEta	->Draw("COLZ");
 //h_Eta2D_max	->Draw("COLZ");
 //h_Eta2D_min	->Draw("COLZ");
@@ -1897,51 +1807,18 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 //h_Pt2D_min	->Draw("COLZ");
 //h_Pt3D		->Draw("COLZ");
 
-     Handle<vector<SimTrack>> simTracksH;
-     iEvent.getByToken(simTrackToken_, simTracksH);
-     int count = 0;
-     for ( auto itk = simTracksH->begin(); itk != simTracksH->end(); ++itk )
-      {
-      int trackGenPIdx = (*itk).genpartIndex();
-      int trackId = (*itk).trackId();
-      cout << "current track.genpartIndex = " << trackGenPIdx << endl;
-      if       (trackGenPIdx == muIdx[0]+1)
-        {
-	cout << "Track of 1st muon found" << endl;
-	muTrackId[0] = trackId;
-	}
-      else if ( trackGenPIdx == muIdx[1]+1 )
-        {
-	cout << "Track of 2nd muon found" << endl;
-	muTrackId[1] = trackId;
-	}
-      else if ( trackGenPIdx == muIdx[2]+1 ) 
-        {
-	cout << "Track of 3rd muon found" << endl;
-	muTrackId[2] = trackId;
-	}
-      else   continue;
 
-      //adding also a check on the muType
-      if ( fabs((*itk).type()) != 13 ) 
-        {
-        cout << "ERROR, the track's particle type is NOT a muon!" << endl;
-        return;
-        }
-      }
-   cout << "Trackids of SimTracks matched to muons: " << muTrackId[0] << "  " << muTrackId[1] << "  " << muTrackId[2] << endl;
-
-   Handle<vector<PSimHit>> me0simHitH;
-   iEvent.getByToken(ME0SimHitToken_, me0simHitH);
-   for ( auto it = me0simHitH->begin(); it != me0simHitH->end(); ++it )
-   {
-   if ( fabs( (*it).particleType() ) != 13 )	continue;
-//   Local3DPoint locPosSH = (*it).localPosition();
-//   Local3DPoint entryPoint =   (*it).entryPoint();
-//   Local3DPoint exitPoint  =   (*it).exitPoint();
-   ME0DetId me0id = ME0DetId::DetId( (*it).detUnitId() );
-   (*deltaChamber).push_back(me0id.chamber());
-   }
+   //Handle<vector<PSimHit>> me0simHitH;
+   //iEvent.getByToken(ME0SimHitToken_, me0simHitH);
+   //for ( auto it = me0simHitH->begin(); it != me0simHitH->end(); ++it )
+   //{
+   //if ( fabs( (*it).particleType() ) != 13 )	continue;
+// //  Local3DPoint locPosSH = (*it).localPosition();
+// //  Local3DPoint entryPoint =   (*it).entryPoint();
+// //  Local3DPoint exitPoint  =   (*it).exitPoint();
+   //ME0DetId me0id = ME0DetId::DetId( (*it).detUnitId() );
+   //(*deltaChamber).push_back(me0id.chamber());
+   //}
 
    //calculate average chamber
    Int_t ent=0;
@@ -2934,23 +2811,23 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
   
 //=================GEN PARATICLES===========================
 
- //Handle<GenParticleCollection> genParticles;
- iEvent.getByToken(genToken_, genParticles);
-
- for(size_t i = 0; i < genParticles->size(); ++ i) 
-  {
-  //if (v) cout << "GenParticle index: " << i << endl;
-  const GenParticle & p = (*genParticles)[i];
-  //const Candidate * mom =( p.mother());
-
-  if (fabs(p.pdgId()) != 13)	continue; 
-  //(*muPdgId).push_back(p.pdgId());
-  //(*muPt).push_back(p.pt());
-  //(*muEta).push_back(p.eta());
-  //(*muPx).push_back(p.px());
-  //(*muPy).push_back(p.py());
-  //(*muPz).push_back(p.pz());
-  }
+// //Handle<GenParticleCollection> genParticles;
+// iEvent.getByToken(genToken_, genParticles);
+//
+// for(size_t i = 0; i < genParticles->size(); ++ i) 
+//  {
+//  //if (v) cout << "GenParticle index: " << i << endl;
+//  const GenParticle & p = (*genParticles)[i];
+//  //const Candidate * mom =( p.mother());
+//
+//  if (fabs(p.pdgId()) != 13)	continue; 
+//  //(*muPdgId).push_back(p.pdgId());
+//  //(*muPt).push_back(p.pt());
+//  //(*muEta).push_back(p.eta());
+//  //(*muPx).push_back(p.px());
+//  //(*muPy).push_back(p.py());
+//  //(*muPz).push_back(p.pz());
+//  }
 
  tr->Fill();
  cout << "etaPartList size = " << (*etaPartList).size() << endl;
@@ -2962,13 +2839,13 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-DeltaGlobalPhiAnalyzer::beginJob()
+DeltaGlobalPhiAnalyzerMinbias::beginJob()
 {
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
-DeltaGlobalPhiAnalyzer::endJob() 
+DeltaGlobalPhiAnalyzerMinbias::endJob() 
 {
  cout << "EndJob started:" << endl;
  lastEvent=nEvent;
@@ -3962,14 +3839,11 @@ TLatex textriple;
 textriple.SetTextSize(0.028);
 textriple.DrawLatexNDC(0.61,0.82, "#splitline{Triple muon}{#splitline{Threshold: muon p_{t}>10 GeV}{PU200}}");
 
-      cout << "\nTotal mismatchCount = " << mismatchCount << endl;
-      cout << "over considered totalmismatchCount = " << totalmismatchCount << endl;
-
 }
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-DeltaGlobalPhiAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+DeltaGlobalPhiAnalyzerMinbias::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -3978,7 +3852,7 @@ DeltaGlobalPhiAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descrip
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(DeltaGlobalPhiAnalyzer);
+DEFINE_FWK_MODULE(DeltaGlobalPhiAnalyzerMinbias);
 
 //errore sull'efficienza è:
 //TMath::Sqrt( e*(1-e)/T )
