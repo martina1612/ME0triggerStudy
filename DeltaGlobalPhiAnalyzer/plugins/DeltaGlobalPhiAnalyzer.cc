@@ -166,6 +166,20 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       TH2F * h_Pt2D_max	;
       TH2F * h_Pt2D_min	;
       TH3F * h_Pt3D	;
+      TH2F * h_xy_strange;
+      TH2F * h_xy_strangeL1;
+      TH2F * h_xy_strangeL2;
+      TH2F * h_xy_strangeL3;
+      TH2F * h_xy_strangeL4;
+      TH2F * h_xy_strangeL5;
+      TH2F * h_xy_strangeL6;
+      TH1F * h_z_strange;
+      TH1F * h_z_strangeL1;
+      TH1F * h_z_strangeL2;
+      TH1F * h_z_strangeL3;
+      TH1F * h_z_strangeL4;
+      TH1F * h_z_strangeL5;
+      TH1F * h_z_strangeL6;
 
    std::map<ME0DetId,vector<float>> deltaPhiMap;
    std::map<ME0DetId,vector<float>> alphaMap;
@@ -593,6 +607,20 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    h_Pt2D_max	= fs->make<TH2F>("h_Pt2D_max","h_Pt2D_max", 100, 0, 50, 100, 0, 50);
    h_Pt2D_min	= fs->make<TH2F>("h_Pt2D_min","h_Pt2D_min", 100, 0, 50, 100, 0, 50);
    h_Pt3D	= fs->make<TH3F>("h_Pt3D","h_Pt3D", 100, 0, 50, 100, 0, 50, 100, 0, 50);
+   h_xy_strange	= fs->make<TH2F>("h_xy_strange","h_xy_strange", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeL1	= fs->make<TH2F>("h_xy_strangeL1","h_xy_strangeL1", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeL2	= fs->make<TH2F>("h_xy_strangeL2","h_xy_strangeL2", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeL3	= fs->make<TH2F>("h_xy_strangeL3","h_xy_strangeL3", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeL4	= fs->make<TH2F>("h_xy_strangeL4","h_xy_strangeL4", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeL5	= fs->make<TH2F>("h_xy_strangeL5","h_xy_strangeL5", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeL6	= fs->make<TH2F>("h_xy_strangeL6","h_xy_strangeL6", 3000, -30, 30, 3000, -30, +30);         
+   h_z_strange	= fs->make<TH1F>("h_z_strange","h_z_strange", 1000, -1, +1);         
+   h_z_strangeL1	= fs->make<TH1F>("h_z_strangeL1","h_z_strangeL1", 1000, -1, +1);         
+   h_z_strangeL2	= fs->make<TH1F>("h_z_strangeL2","h_z_strangeL2", 1000, -1, +1);         
+   h_z_strangeL3	= fs->make<TH1F>("h_z_strangeL3","h_z_strangeL3", 1000, -1, +1);         
+   h_z_strangeL4	= fs->make<TH1F>("h_z_strangeL4","h_z_strangeL4", 1000, -1, +1);         
+   h_z_strangeL5	= fs->make<TH1F>("h_z_strangeL5","h_z_strangeL5", 1000, -1, +1);         
+   h_z_strangeL6	= fs->make<TH1F>("h_z_strangeL6","h_z_strangeL6", 1000, -1, +1);         
 
    tr = fs->make<TTree>("Event", "");
    trSum = fs->make<TTree>("EventSummary", "");
@@ -1904,7 +1932,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
       {
       int trackGenPIdx = (*itk).genpartIndex();
       int trackId = (*itk).trackId();
-      cout << "current track.genpartIndex = " << trackGenPIdx << endl;
+      //cout << "current track.genpartIndex = " << trackGenPIdx << endl;
       if       (trackGenPIdx == muIdx[0]+1)
         {
 	cout << "Track of 1st muon found" << endl;
@@ -1933,6 +1961,97 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 
    Handle<vector<PSimHit>> me0simHitH;
    iEvent.getByToken(ME0SimHitToken_, me0simHitH);
+
+   //loop on simihits to determine the farthest simhit in ME0 for each of the three muons
+   double muMax_z[3] = {-1000, -1000, -1000};
+   //bool atLeastOne;   
+
+   for ( auto it = me0simHitH->begin(); it != me0simHitH->end(); ++it )
+   { 
+     for ( int i=0; i<3; i++ )
+     {
+       //consider only hits of muons
+       if ( fabs( (*it).particleType() ) != 13 )	continue; 
+       
+       int idtrack = (*it).trackId();
+       
+       //verify there is at least one correspondence, 
+       //if not the muon has not arrived in ME0
+       //atLeastOne = false;
+       
+       if ( idtrack == muTrackId[i]  )
+       { 
+       ME0DetId * shMe0id = new ME0DetId( (*it).detUnitId() );
+       if (  (*it).entryPoint().z() > -0.298 )    // ||  (*it).exitPoint().z() < 0.29  )
+         {
+	 //float ytmp = (*it).entryPoint().y()*3
+	   h_z_strange->Fill( (*it).entryPoint().z() );
+	   if ( shMe0id->layer()==1 )			h_z_strangeL1->Fill( (*it).entryPoint().z() );
+	   if ( shMe0id->layer()==2 )			h_z_strangeL2->Fill( (*it).entryPoint().z() );
+	   if ( shMe0id->layer()==3 )			h_z_strangeL3->Fill( (*it).entryPoint().z() );
+	   if ( shMe0id->layer()==4 )			h_z_strangeL4->Fill( (*it).entryPoint().z() );
+	   if ( shMe0id->layer()==5 )			h_z_strangeL5->Fill( (*it).entryPoint().z() );
+	   if ( shMe0id->layer()==6 )			h_z_strangeL6->Fill( (*it).entryPoint().z() );
+
+           h_xy_strange->Fill( (*it).entryPoint().x(), (*it).entryPoint().y() );
+	   if ( shMe0id->layer()==1 )			h_xy_strangeL1->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+	   if ( shMe0id->layer()==2 )			h_xy_strangeL2->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+	   if ( shMe0id->layer()==3 )			h_xy_strangeL3->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+	   if ( shMe0id->layer()==4 )			h_xy_strangeL4->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+	   if ( shMe0id->layer()==5 )			h_xy_strangeL5->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+	   if ( shMe0id->layer()==6 )			h_xy_strangeL6->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+	   }
+       if (  (*it).exitPoint().z() < 0.29 )         
+	 {
+	   h_z_strange->Fill( (*it).exitPoint().z() );
+	   if ( shMe0id->layer()==1 )			h_z_strangeL1->Fill( (*it).exitPoint().z() );
+	   if ( shMe0id->layer()==2 )			h_z_strangeL2->Fill( (*it).exitPoint().z() );
+	   if ( shMe0id->layer()==3 )			h_z_strangeL3->Fill( (*it).exitPoint().z() );
+	   if ( shMe0id->layer()==4 )			h_z_strangeL4->Fill( (*it).exitPoint().z() );
+	   if ( shMe0id->layer()==5 )			h_z_strangeL5->Fill( (*it).exitPoint().z() );
+	   if ( shMe0id->layer()==6 )			h_z_strangeL6->Fill( (*it).exitPoint().z() );
+	   
+           h_xy_strange->Fill( (*it).exitPoint().x(), (*it).exitPoint().y() );
+	   if ( shMe0id->layer()==1 )			h_xy_strangeL1->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+	   if ( shMe0id->layer()==2 )			h_xy_strangeL2->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+	   if ( shMe0id->layer()==3 )			h_xy_strangeL3->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+	   if ( shMe0id->layer()==4 )			h_xy_strangeL4->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+	   if ( shMe0id->layer()==5 )			h_xy_strangeL5->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+	   if ( shMe0id->layer()==6 )			h_xy_strangeL6->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+	 }
+
+       cout << "\ni=" << i << "\tcurrent entryPoint z= " << (*it).entryPoint().z() << "\tx= " << (*it).entryPoint().x() << "\ty= " << (*it).entryPoint().y() << endl;
+       cout 	           << "\tcurrent exitPoint z= " << (*it).exitPoint().z()   << "\tx= " << (*it).exitPoint().x()  << "\ty= " << (*it).exitPoint().y()  << endl;
+       cout                << "\tand muMax_z= " << muMax_z[i] << endl; //MR
+       cout << "ME0DetId: endcap= " <<  shMe0id->region()  << " chamber= " << shMe0id->chamber() << " layer= " << shMe0id->layer() << endl;
+         //atLeastOne = true;
+         //identify the farthest hit for the current muon
+         if ( muMax_z[i] < (*it).entryPoint().z() )
+         {
+           muMax_z[i] = (*it).entryPoint().z();  
+           cout << "maxz changed" << muMax_z[i] << " i=" << i << endl;
+         }
+       
+       }
+        
+     //cout << atLeastOne << endl;  
+     } 
+   }      
+   h_xy_strange->SaveAs("h_xy_strange.root");
+   h_z_strange->SaveAs("h_z_strange.root");
+   
+   for (int i=0; i<3; i++)
+   {
+     if ( muMax_z[i] == -1000 )
+     {
+     cout << "The " << i << "-th mu didn't arrive in ME0!" << endl; 
+     }
+     else 
+     {
+     cout << "Max_z of " << i << "-th mu in ME0:" << muMax_z[i] << endl;  
+     }
+   }
+   
    for ( auto it = me0simHitH->begin(); it != me0simHitH->end(); ++it )
    {
    if ( fabs( (*it).particleType() ) != 13 )	continue;
