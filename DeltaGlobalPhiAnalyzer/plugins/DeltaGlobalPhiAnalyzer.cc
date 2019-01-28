@@ -529,6 +529,8 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       float muPx[3]	;
       float muPy[3]	;
       float muPz[3]	;
+      bool isMuVisible[3]; //whether each muon is visibile by ME0 (i.e. has produced ME0SimHits)
+      int nVisibleMu;    //number of muons visible by ME0 (from 0 to 3)
       int muStatus[3]	;
       float tauPt = 0	;
       float tauEta = 0	;
@@ -833,10 +835,14 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    tr->Branch("mesonVzDeath"  ,	&mesonVzDeath,	"mesonVzDeath"	);
    tr->Branch("muPt"     ,	&muPt[0]     , 	"mu1_Pt:mu2_Pt:mu3_Pt"     );
    tr->Branch("muEta"     ,	&muEta[0]     , 	"mu1_Eta:mu2_Eta:mu3_Eta"     );
+   tr->Branch("muIdx"     ,	&muIdx[0]     , 	"mu1_Idx/I:mu2_Idx/I:mu3_Idx/I"     );
+   tr->Branch("muTrackId"     ,	&muTrackId[0]     , 	"mu1_Idx/I:mu2_Idx/I:mu3_Idx/I"     );
    tr->Branch("muP"     ,	&muP[0]     , 	"mu1_P:mu2_P:mu3_P"     );
    tr->Branch("muPx"     ,	&muPx[0]     , 	"mu1_Px:mu2_Px:mu3_Px"     );
    tr->Branch("muPy"     ,	&muPy[0]     , 	"mu1_Py:mu2_Py:mu3_Py"     );
    tr->Branch("muPz"     ,	&muPz[0]     , 	"mu1_Pz:mu2_Pz:mu3_Pz"     );
+   tr->Branch("isMuVisible"     ,	&isMuVisible[0]     , 	"mu1_isVisible/O:mu2_isVisible/O:mu3_isVisible/O"     );
+   tr->Branch("nVisibleMu"  ,	&nVisibleMu,	"nVisibleMu/I"	);
    tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
    tr->Branch("muVyBirth"     ,	&muVyBirth[0]     , 	"mu1_VyBirth:mu2_VyBirth:mu3_VyBirth"     );
    tr->Branch("muVzBirth"     ,	&muVzBirth[0]     , 	"mu1_VzBirth:mu2_VzBirth:mu3_VzBirth"     );
@@ -1543,6 +1549,7 @@ gStyle->SetOptTitle(0);
      tauVxDeath = 0;
      tauVyDeath = 0;
      tauVzDeath = 0;
+     nVisibleMu = 0;
 
      for (int i=0; i<3; i++)
        {
@@ -1552,6 +1559,7 @@ gStyle->SetOptTitle(0);
        muPx[i] 		= 0; 
        muPy[i] 		= 0; 
        muPz[i] 		= 0; 
+       isMuVisible[i] 	= 0; 
        muVxBirth[i] 	= 0; 
        muVyBirth[i] 	= 0; 
        muVzBirth[i] 	= 0; 
@@ -1569,7 +1577,7 @@ cout << "START LOOP on GEN PARTICLES" << endl;
 cout << "Size of GenParticles: " << genParticles->size() << endl;
      for(size_t i = 0; i < genParticles->size(); ++ i) 
      {
-       if (v) cout << "GenParticle index: " << i << endl;
+       //if (v) cout << "GenParticle index: " << i << endl;
        int pidx = i;
        const GenParticle & p = (*genParticles)[i];
        //const Candidate * mom =( p.mother());
@@ -1773,29 +1781,27 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 	    i++;
 	    }
 	    
-            cout << "\nTRY to compare particle taken from index with tau children" << endl;
-	    cout << "current mom i = " << pidx << endl;
-	    cout << "full chain: " << (*genParticles)[pidx-1].pdgId() << " -> " << (*genParticles)[pidx].pdgId() << " -> 3mu " << endl;
+            //cout << "\nTRY to compare particle taken from index with tau children" << endl;
+	    //cout << "current mom i = " << pidx << endl;
+	    //cout << "full chain: " << (*genParticles)[pidx-1].pdgId() << " -> " << (*genParticles)[pidx].pdgId() << " -> 3mu " << endl;
 	    //for ( int back = 1 ; back<pidx ; back ++)  
 	    //   {
 	    //   cout << "particle -" << back << "from tau:\t" << (*genParticles)[pidx-back].pdgId() << endl;
 	    //   if ( fabs( (*genParticles)[pidx-back].pdgId() ) == 511 )/*||  fabs( (*genParticles)[pidx-back].pdgId() ) == 431 )*/ break;
 	    //   }
-            const GenParticle & p1 = (*genParticles)[pidx+1];
-	    cout << "p1 eta= " << p1.eta() << "   child eta= " << muEta[0] << endl;
-            const GenParticle & p2 = (*genParticles)[pidx+2];
-	    cout << "p2 eta= " << p2.eta() << "   child eta= " << muEta[1] << endl;
-            const GenParticle & p3 = (*genParticles)[pidx+3];
-	    cout << "p2 eta= " << p3.eta() << "   child eta= " << muEta[2] << "\n" << endl;
+            //const GenParticle & p1 = (*genParticles)[pidx+1];
+	    //cout << "p1 eta= " << p1.eta() << "   child eta= " << muEta[0] << endl;
+            //const GenParticle & p2 = (*genParticles)[pidx+2];
+	    //cout << "p2 eta= " << p2.eta() << "   child eta= " << muEta[1] << endl;
+            //const GenParticle & p3 = (*genParticles)[pidx+3];
+	    //cout << "p2 eta= " << p3.eta() << "   child eta= " << muEta[2] << "\n" << endl;
 	    //muIdx[0] = pidx+1;
 	    //muIdx[1] = pidx+2;
 	    //muIdx[2] = pidx+3;
-	    cout << "MOM vertex: " << p.vertex() << endl;
-	    cout << "MUON1 vertex: " << p1.vertex() << endl;
-	    cout << "MUON2 vertex: " << p2.vertex() << endl;
-	    cout << "MUON3 vertex: " << p3.vertex() << endl;
-	    cout << "candidate isGlobalMuon = " <<  p3.isGlobalMuon() << endl;
-	    cout << "candidate isStandAloneMuon = " <<  p3.isStandAloneMuon() << endl;
+	    //cout << "MOM vertex: " << p.vertex() << endl;
+	    //cout << "MUON1 vertex: " << p1.vertex() << endl;
+	    //cout << "MUON2 vertex: " << p2.vertex() << endl;
+	    //cout << "MUON3 vertex: " << p3.vertex() << endl;
 
 	  for (unsigned int i = 0; i < 3; i++)	h_PtVsEta->Fill( muEta[i], muPt[i] );
           //std::sort(muPt, muPt+3);
@@ -1836,9 +1842,9 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 	  //std::swap(muIdx[0], muIdx[imin]);
 	  // end sort arrays together
 
-	  h_Eta2D_max->Fill(muEta[2], muEta[1]) ; 		//(highest eta, second highest eta)
-	  h_Eta2D_min->Fill(muEta[0], muEta[1]) ; 		//(smallest eta, second highest eta)
-	  h_Eta3D->Fill(muEta[2], muEta[1], muEta[0]) ;		//(highest eta, second highest eta, smallest eta)
+	  h_Eta2D_max->Fill(muEta[2], muEta[1]) ; 		//(highest-pt eta, second highest-pt eta)
+	  h_Eta2D_min->Fill(muEta[0], muEta[1]) ; 		//(smallest-pt eta, second highest-pt eta)
+	  h_Eta3D->Fill(muEta[2], muEta[1], muEta[0]) ;		//(highest-pt eta, second highest-pt eta, smallest-pt eta)
 	  h_Pt2D_max->Fill(muPt[2], muPt[1]) ; 			//(highest pt, second highest pt)
 	  h_Pt2D_min->Fill(muPt[0], muPt[1]) ; 			//(smallest pt, second highest pt)
 	  h_Pt3D->Fill(muPt[2], muPt[1], muPt[0]) ; 		//(highest pt, second highest pt, smallest pt)
@@ -1874,10 +1880,11 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
      }
 
 
+     float muPtlocal[3] = { 0,0,0 };
      int nMu = 0;
      for(size_t i = 0; i < genParticles->size(); ++ i) 
      {
-       if (v) cout << "GenParticle index: " << i << endl;
+       //if (v) cout << "GenParticle index: " << i << endl;
        const GenParticle & p = (*genParticles)[i];
        if ( fabs( p.pdgId() ) != 13 ) continue;
        bool found = 0;
@@ -1907,23 +1914,35 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
        cout << "This muon has no daughters" << endl;
        }
        else	            //other case: the muon has daughters. Need NONE of them being a muon.
+       {
+       cout << "This muon has daugters" << endl;
+       foundlast = 1;
+       for(unsigned int j = 0; j < p.numberOfDaughters(); ++j)
          {
-	 foundlast = 1;
-         for(unsigned int j = 0; j < p.numberOfDaughters(); ++j)
-	   {
-	   cout << "This muon has daugters" << endl;
-	   const Candidate * d = p.daughter( j );
-	   if ( fabs(d->pdgId()) == 13 ) foundlast = 0;
-	   }
-	 }
+         const Candidate * d = p.daughter( j );
+         if ( fabs(d->pdgId()) == 13 ) foundlast = 0;
+         }
+       }
        if (found && foundlast) //this is my muon if "found" and "foundlast" are verified. I store the particle index
          {
          muIdx[nMu] = i;
+	 muPtlocal[nMu] = p.pt();
          nMu++;
          }
        if (nMu==3) break;
       }
      cout << "Muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
+     cout << "Muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
+	  // sort arrays according to increasing Pt
+	  int imax = distance(muPtlocal, max_element(muPtlocal, muPtlocal + 3));
+	  std::swap(muIdx[2], muIdx[imax]);
+	  std::swap(muPtlocal[2], muPtlocal[imax]);
+	  int imin = distance(muPtlocal, min_element(muPtlocal, muPtlocal + 3));
+	  cout << "imin=" << imin << "  imax=" << imax << endl;
+	  std::swap(muIdx[0], muIdx[imin]);
+	  std::swap(muPtlocal[0], muPtlocal[imin]);
+     //cout << "Ordered muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
+     //cout << "Ordered muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
 
 //h_PtVsEta	->Draw("COLZ");
 //h_Eta2D_max	->Draw("COLZ");
@@ -1989,6 +2008,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
        
        if ( idtrack == muTrackId[i]  )
        { 
+       isMuVisible[i] = 1;
        ME0DetId * shMe0id = new ME0DetId( (*it).detUnitId() );
        if (  (*it).entryPoint().z() > -0.298 )    // ||  (*it).exitPoint().z() < 0.29  )
          {
@@ -2066,6 +2086,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
      {
      cout << "Max_z of " << i << "-th mu in ME0:" << muMax_z[i] << endl;  
      }
+     if (isMuVisible[i])  nVisibleMu++;
    }
    
    for ( auto it = me0simHitH->begin(); it != me0simHitH->end(); ++it )
