@@ -471,8 +471,20 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
    Bool_t is_doubleME0close[15], is_tripleME0close[35];
    Int_t nEvent = 0;
    Int_t nEventSel = 0;
+   //define three different counters 
+   //nEventSel1 for the case with at least one muon in ME0 eta range coming from tau->3mu
+   //nEventSel2 for the case with at least two muon in ME0 eta range coming from tau->3mu
+   //nEventSel3 for the case with at least three muon in ME0 eta range coming from tau->3mu
+   
+   Int_t nEventSel1 = 0;
+   Int_t nEventSel2 = 0;
+   Int_t nEventSel3 = 0;
+
    Int_t lastEvent = 0;
    Int_t lastEventSel = 0;
+   Int_t lastEventSel1 = 0;
+   Int_t lastEventSel2 = 0;
+   Int_t lastEventSel3 = 0;
    Int_t estimatedNmu = 0;
    TTree *tr;
    TTree *trSum;
@@ -897,8 +909,14 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    //tr->Branch("muPz"     ,	&muPz    );
    tr->Branch("nEvent"     ,	&nEvent	, "nEvent/I"    );  //, 	"theta"     );
    tr->Branch("nEventSel"     ,	&nEventSel	, "nEventSel/I"    );  //, 	"theta"     );
+   tr->Branch("nEventSel1"     ,	&nEventSel1	, "nEventSel1/I"    );  //, 	"theta"     );
+   tr->Branch("nEventSel2"     ,        &nEventSel2     , "nEventSel2/I"    );  //,     "theta"     );
+   tr->Branch("nEventSel3"     ,        &nEventSel3     , "nEventSel3/I"    );  //,     "theta"     );
    trSum->Branch("lastEvent"     ,	&lastEvent	, "lastEvent/I"    );  //, 	"theta"     );
    trSum->Branch("lastEventSel"     ,	&lastEventSel	, "lastEventSel/I"    );  //, 	"theta"     );
+   trSum->Branch("lastEventSel1"     ,   &lastEventSel1 , "lastEventSel1/I"    );  //, 	"theta"     );
+   trSum->Branch("lastEventSel2"     ,   &lastEventSel2 , "lastEventSel2/I"    );  //,   "theta"     );
+   trSum->Branch("lastEventSel3"     ,   &lastEventSel3 , "lastEventSel3/I"    );  //,   "theta"     );
    tr->Branch("nSegments"     ,	&nSegments	, "nSegments/I"    );  //, 	"theta"     );
    tr->Branch("segmentNrecHits"     ,	&nSegmRecHitList ); //	, "etaPartList/I"    );  //, 	"theta"     );
    tr->Branch("segmentQuality"     ,	&qualityList ); // q=0 if nRH=4, q=1 if nRH=5, q=2 if nRH=6
@@ -2154,6 +2172,9 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 
    nEvent++;
    if (nME0>0) nEventSel++;
+   if (nME0>0) nEventSel1++;
+   if (nME0>1) nEventSel2++;
+   if (nME0>2) nEventSel3++;
 
    //bool is_singleME0[5], is_doubleME0[15];
    for ( int i=0; i<5; i++)	
@@ -3129,7 +3150,18 @@ DeltaGlobalPhiAnalyzer::endJob()
  cout << "EndJob started:" << endl;
  lastEvent=nEvent;
  lastEventSel=nEventSel;
+ lastEventSel1=nEventSel1;
+ lastEventSel2=nEventSel2;
+ lastEventSel3=nEventSel3;
+
  Int_t denom=-1;
+ Int_t denom1=-1;
+ Int_t denom2=-1;
+ Int_t denom3=-1;
+
+ if (nME0>0 && signal)  denom1=lastEventSel1;
+ if (nME0>1 && signal)  denom2=lastEventSel2;
+ if (nME0>2 && signal)  denom3=lastEventSel3;
  if (nME0>0 && signal)  denom=lastEventSel;
  if ( signal ) denom=lastEvent;//run trigger analysis only if there is at least one mu from the tau decay in the eta range 1.8<|eta!|<3 
 
@@ -3138,13 +3170,13 @@ DeltaGlobalPhiAnalyzer::endJob()
  for (int kk=0; kk<15; kk++)   	doubleME0rate[kk] = doubleME0count[kk]/(denom*25.0*1e-9);  //Hz
  for (int kk=0; kk<35; kk++)   	tripleME0rate[kk] = tripleME0count[kk]/(denom*25.0*1e-9);  //Hz
 
- for (int kk=0; kk<5; kk++)	singleME0efficiency[kk] = singleME0count[kk]*1.0/(denom); //Hz
- for (int kk=0; kk<15; kk++)   	doubleME0efficiency[kk] = doubleME0count[kk]*1.0/(denom);  //Hz
- for (int kk=0; kk<35; kk++)   	tripleME0efficiency[kk] = tripleME0count[kk]*1.0/(denom);  //Hz
+ for (int kk=0; kk<5; kk++)	singleME0efficiency[kk] = singleME0count[kk]*1.0/(denom1); //Hz
+ for (int kk=0; kk<15; kk++)   	doubleME0efficiency[kk] = doubleME0count[kk]*1.0/(denom2);  //Hz
+ for (int kk=0; kk<35; kk++)   	tripleME0efficiency[kk] = tripleME0count[kk]*1.0/(denom3);  //Hz
 
- for (int kk=0; kk<5; kk++)	singleME0efficiencyErr[kk] = TMath::Sqrt(singleME0efficiency[kk]*(1.0-singleME0efficiency[kk])/(denom*1.0)); //Hz
- for (int kk=0; kk<15; kk++)   	doubleME0efficiencyErr[kk] = TMath::Sqrt(doubleME0efficiency[kk]*(1.0-doubleME0efficiency[kk])/(denom*1.0));  //Hz
- for (int kk=0; kk<35; kk++)   	tripleME0efficiencyErr[kk] = TMath::Sqrt(tripleME0efficiency[kk]*(1.0-tripleME0efficiency[kk])/(denom*1.0));  //Hz
+ for (int kk=0; kk<5; kk++)	singleME0efficiencyErr[kk] = TMath::Sqrt(singleME0efficiency[kk]*(1.0-singleME0efficiency[kk])/(denom1*1.0)); //Hz
+ for (int kk=0; kk<15; kk++)   	doubleME0efficiencyErr[kk] = TMath::Sqrt(doubleME0efficiency[kk]*(1.0-doubleME0efficiency[kk])/(denom2*1.0));  //Hz
+ for (int kk=0; kk<35; kk++)   	tripleME0efficiencyErr[kk] = TMath::Sqrt(tripleME0efficiency[kk]*(1.0-tripleME0efficiency[kk])/(denom3*1.0));  //Hz
 
  for (int kk=0; kk<5; kk++)	singleME0rateError[kk] = singleME0efficiencyErr[kk]/(25.0*1e-9); //Hz
  for (int kk=0; kk<15; kk++)   	doubleME0rateError[kk] = doubleME0efficiencyErr[kk]/(25.0*1e-9);  //Hz
@@ -3154,11 +3186,11 @@ DeltaGlobalPhiAnalyzer::endJob()
  for (int kk=0; kk<15; kk++)   	doubleME0nearrate[kk] = doubleME0nearcount[kk]/(denom*25.0*1e-9);  //Hz
  for (int kk=0; kk<35; kk++)   	tripleME0nearrate[kk] = tripleME0nearcount[kk]/(denom*25.0*1e-9);  //Hz
 
- for (int kk=0; kk<15; kk++)   	doubleME0nearefficiency[kk] = doubleME0nearcount[kk]*1.0/(denom);  //Hz
- for (int kk=0; kk<35; kk++)   	tripleME0nearefficiency[kk] = tripleME0nearcount[kk]*1.0/(denom);  //Hz
+ for (int kk=0; kk<15; kk++)   	doubleME0nearefficiency[kk] = doubleME0nearcount[kk]*1.0/(denom2);  //Hz
+ for (int kk=0; kk<35; kk++)   	tripleME0nearefficiency[kk] = tripleME0nearcount[kk]*1.0/(denom3);  //Hz
 
- for (int kk=0; kk<15; kk++)   	doubleME0nearefficiencyErr[kk] = TMath::Sqrt(doubleME0nearefficiency[kk]*(1.0-doubleME0nearefficiency[kk])/(denom*1.0));  //Hz
- for (int kk=0; kk<35; kk++)   	tripleME0nearefficiencyErr[kk] = TMath::Sqrt(tripleME0nearefficiency[kk]*(1.0-tripleME0nearefficiency[kk])/(denom*1.0));  //Hz
+ for (int kk=0; kk<15; kk++)   	doubleME0nearefficiencyErr[kk] = TMath::Sqrt(doubleME0nearefficiency[kk]*(1.0-doubleME0nearefficiency[kk])/(denom2*1.0));  //Hz
+ for (int kk=0; kk<35; kk++)   	tripleME0nearefficiencyErr[kk] = TMath::Sqrt(tripleME0nearefficiency[kk]*(1.0-tripleME0nearefficiency[kk])/(denom3*1.0));  //Hz
 
  for (int kk=0; kk<15; kk++)   	doubleME0nearrateError[kk] = doubleME0nearefficiencyErr[kk]/(25.0*1e-9);  //Hz
  for (int kk=0; kk<35; kk++)   	tripleME0nearrateError[kk] = tripleME0nearefficiencyErr[kk]/(25.0*1e-9);  //Hz
@@ -3167,11 +3199,11 @@ DeltaGlobalPhiAnalyzer::endJob()
  for (int kk=0; kk<15; kk++)   	doubleME0closerate[kk] = doubleME0closecount[kk]/(denom*25.0*1e-9);  //Hz
  for (int kk=0; kk<35; kk++)   	tripleME0closerate[kk] = tripleME0closecount[kk]/(denom*25.0*1e-9);  //Hz
 
- for (int kk=0; kk<15; kk++)   	doubleME0closeefficiency[kk] = doubleME0closecount[kk]*1.0/(denom);  //Hz
- for (int kk=0; kk<35; kk++)   	tripleME0closeefficiency[kk] = tripleME0closecount[kk]*1.0/(denom);  //Hz
+ for (int kk=0; kk<15; kk++)   	doubleME0closeefficiency[kk] = doubleME0closecount[kk]*1.0/(denom2);  //Hz
+ for (int kk=0; kk<35; kk++)   	tripleME0closeefficiency[kk] = tripleME0closecount[kk]*1.0/(denom3);  //Hz
 
- for (int kk=0; kk<15; kk++)   	doubleME0closeefficiencyErr[kk] = TMath::Sqrt(doubleME0closeefficiency[kk]*(1.0-doubleME0closeefficiency[kk])/(1.0*denom));  //Hz
- for (int kk=0; kk<35; kk++)   	tripleME0closeefficiencyErr[kk] = TMath::Sqrt(tripleME0closeefficiency[kk]*(1.0-tripleME0closeefficiency[kk])/(1.0*denom));  //Hz
+ for (int kk=0; kk<15; kk++)   	doubleME0closeefficiencyErr[kk] = TMath::Sqrt(doubleME0closeefficiency[kk]*(1.0-doubleME0closeefficiency[kk])/(1.0*denom2));  //Hz
+ for (int kk=0; kk<35; kk++)   	tripleME0closeefficiencyErr[kk] = TMath::Sqrt(tripleME0closeefficiency[kk]*(1.0-tripleME0closeefficiency[kk])/(1.0*denom3));  //Hz
 
  for (int kk=0; kk<15; kk++)   	doubleME0closerateError[kk] = doubleME0closeefficiencyErr[kk]/(25.0*1e-9);  //Hz
  for (int kk=0; kk<35; kk++)   	tripleME0closerateError[kk] = tripleME0closeefficiencyErr[kk]/(25.0*1e-9);  //Hz
@@ -3246,141 +3278,141 @@ DeltaGlobalPhiAnalyzer::endJob()
 
  for (int kk=0; kk<5; kk++)	
    {
-   singleME0Quality0efficiency[kk] = singleME0Quality0count[kk]*1.0/(denom); //Hz
-   singleME0Quality1efficiency[kk] = singleME0Quality1count[kk]*1.0/(denom); //Hz
-   singleME0Quality2efficiency[kk] = singleME0Quality2count[kk]*1.0/(denom); //Hz
+   singleME0Quality0efficiency[kk] = singleME0Quality0count[kk]*1.0/(denom1); //Hz
+   singleME0Quality1efficiency[kk] = singleME0Quality1count[kk]*1.0/(denom1); //Hz
+   singleME0Quality2efficiency[kk] = singleME0Quality2count[kk]*1.0/(denom1); //Hz
 
-   singleME0Quality0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0efficiency[kk]*(1.0-singleME0Quality0efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1efficiency[kk]*(1.0-singleME0Quality1efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2efficiency[kk]*(1.0-singleME0Quality2efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0efficiency[kk]*(1.0-singleME0Quality0efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1efficiency[kk]*(1.0-singleME0Quality1efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2efficiency[kk]*(1.0-singleME0Quality2efficiency[kk])/(1.0*denom1)); //Hz
 
-   singleME0Veto0efficiency[kk] = singleME0Veto0count[kk]*1.0/(denom); //Hz
-   singleME0Veto1efficiency[kk] = singleME0Veto1count[kk]*1.0/(denom); //Hz
-   singleME0Veto2efficiency[kk] = singleME0Veto2count[kk]*1.0/(denom); //Hz
-   singleME0Veto3efficiency[kk] = singleME0Veto3count[kk]*1.0/(denom); //Hz
+   singleME0Veto0efficiency[kk] = singleME0Veto0count[kk]*1.0/(denom1); //Hz
+   singleME0Veto1efficiency[kk] = singleME0Veto1count[kk]*1.0/(denom1); //Hz
+   singleME0Veto2efficiency[kk] = singleME0Veto2count[kk]*1.0/(denom1); //Hz
+   singleME0Veto3efficiency[kk] = singleME0Veto3count[kk]*1.0/(denom1); //Hz
 
-   singleME0Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Veto0efficiency[kk]*(1.0-singleME0Veto0efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Veto1efficiency[kk]*(1.0-singleME0Veto1efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Veto2efficiency[kk]*(1.0-singleME0Veto2efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Veto3efficiency[kk]*(1.0-singleME0Veto3efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Veto0efficiency[kk]*(1.0-singleME0Veto0efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Veto1efficiency[kk]*(1.0-singleME0Veto1efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Veto2efficiency[kk]*(1.0-singleME0Veto2efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Veto3efficiency[kk]*(1.0-singleME0Veto3efficiency[kk])/(1.0*denom1)); //Hz
 
-   singleME0Quality0Veto0efficiency[kk] = singleME0Quality0Veto0count[kk]*1.0/(denom); //Hz
-   singleME0Quality0Veto1efficiency[kk] = singleME0Quality0Veto1count[kk]*1.0/(denom); //Hz
-   singleME0Quality0Veto2efficiency[kk] = singleME0Quality0Veto2count[kk]*1.0/(denom); //Hz
-   singleME0Quality0Veto3efficiency[kk] = singleME0Quality0Veto3count[kk]*1.0/(denom); //Hz
-   singleME0Quality1Veto0efficiency[kk] = singleME0Quality1Veto0count[kk]*1.0/(denom); //Hz
-   singleME0Quality1Veto1efficiency[kk] = singleME0Quality1Veto1count[kk]*1.0/(denom); //Hz
-   singleME0Quality1Veto2efficiency[kk] = singleME0Quality1Veto2count[kk]*1.0/(denom); //Hz
-   singleME0Quality1Veto3efficiency[kk] = singleME0Quality1Veto3count[kk]*1.0/(denom); //Hz
-   singleME0Quality2Veto0efficiency[kk] = singleME0Quality2Veto0count[kk]*1.0/(denom); //Hz
-   singleME0Quality2Veto1efficiency[kk] = singleME0Quality2Veto1count[kk]*1.0/(denom); //Hz
-   singleME0Quality2Veto2efficiency[kk] = singleME0Quality2Veto2count[kk]*1.0/(denom); //Hz
-   singleME0Quality2Veto3efficiency[kk] = singleME0Quality2Veto3count[kk]*1.0/(denom); //Hz
+   singleME0Quality0Veto0efficiency[kk] = singleME0Quality0Veto0count[kk]*1.0/(denom1); //Hz
+   singleME0Quality0Veto1efficiency[kk] = singleME0Quality0Veto1count[kk]*1.0/(denom1); //Hz
+   singleME0Quality0Veto2efficiency[kk] = singleME0Quality0Veto2count[kk]*1.0/(denom1); //Hz
+   singleME0Quality0Veto3efficiency[kk] = singleME0Quality0Veto3count[kk]*1.0/(denom1); //Hz
+   singleME0Quality1Veto0efficiency[kk] = singleME0Quality1Veto0count[kk]*1.0/(denom1); //Hz
+   singleME0Quality1Veto1efficiency[kk] = singleME0Quality1Veto1count[kk]*1.0/(denom1); //Hz
+   singleME0Quality1Veto2efficiency[kk] = singleME0Quality1Veto2count[kk]*1.0/(denom1); //Hz
+   singleME0Quality1Veto3efficiency[kk] = singleME0Quality1Veto3count[kk]*1.0/(denom1); //Hz
+   singleME0Quality2Veto0efficiency[kk] = singleME0Quality2Veto0count[kk]*1.0/(denom1); //Hz
+   singleME0Quality2Veto1efficiency[kk] = singleME0Quality2Veto1count[kk]*1.0/(denom1); //Hz
+   singleME0Quality2Veto2efficiency[kk] = singleME0Quality2Veto2count[kk]*1.0/(denom1); //Hz
+   singleME0Quality2Veto3efficiency[kk] = singleME0Quality2Veto3count[kk]*1.0/(denom1); //Hz
 
-   singleME0Quality0Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto0efficiency[kk]*(1.0-singleME0Quality0Veto0efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality0Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto1efficiency[kk]*(1.0-singleME0Quality0Veto1efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality0Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto2efficiency[kk]*(1.0-singleME0Quality0Veto2efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality0Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto3efficiency[kk]*(1.0-singleME0Quality0Veto3efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality1Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto0efficiency[kk]*(1.0-singleME0Quality1Veto0efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality1Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto1efficiency[kk]*(1.0-singleME0Quality1Veto1efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality1Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto2efficiency[kk]*(1.0-singleME0Quality1Veto2efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality1Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto3efficiency[kk]*(1.0-singleME0Quality1Veto3efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality2Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto0efficiency[kk]*(1.0-singleME0Quality2Veto0efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality2Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto1efficiency[kk]*(1.0-singleME0Quality2Veto1efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality2Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto2efficiency[kk]*(1.0-singleME0Quality2Veto2efficiency[kk])/(1.0*denom)); //Hz
-   singleME0Quality2Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto3efficiency[kk]*(1.0-singleME0Quality2Veto3efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality0Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto0efficiency[kk]*(1.0-singleME0Quality0Veto0efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality0Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto1efficiency[kk]*(1.0-singleME0Quality0Veto1efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality0Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto2efficiency[kk]*(1.0-singleME0Quality0Veto2efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality0Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto3efficiency[kk]*(1.0-singleME0Quality0Veto3efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality1Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto0efficiency[kk]*(1.0-singleME0Quality1Veto0efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality1Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto1efficiency[kk]*(1.0-singleME0Quality1Veto1efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality1Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto2efficiency[kk]*(1.0-singleME0Quality1Veto2efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality1Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto3efficiency[kk]*(1.0-singleME0Quality1Veto3efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality2Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto0efficiency[kk]*(1.0-singleME0Quality2Veto0efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality2Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto1efficiency[kk]*(1.0-singleME0Quality2Veto1efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality2Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto2efficiency[kk]*(1.0-singleME0Quality2Veto2efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality2Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto3efficiency[kk]*(1.0-singleME0Quality2Veto3efficiency[kk])/(1.0*denom1)); //Hz
    }
  for (int kk=0; kk<15; kk++)   	
    {
-   doubleME0nearQuality0efficiency[kk] = doubleME0nearQuality0count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality1efficiency[kk] = doubleME0nearQuality1count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality2efficiency[kk] = doubleME0nearQuality2count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality0efficiency[kk] = doubleME0nearQuality0count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality1efficiency[kk] = doubleME0nearQuality1count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality2efficiency[kk] = doubleME0nearQuality2count[kk]*1.0/(denom2);  //Hz
 
-   doubleME0nearQuality0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0efficiency[kk]*(1.0-doubleME0nearQuality0efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1efficiency[kk]*(1.0-doubleME0nearQuality1efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2efficiency[kk]*(1.0-doubleME0nearQuality2efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0efficiency[kk]*(1.0-doubleME0nearQuality0efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1efficiency[kk]*(1.0-doubleME0nearQuality1efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2efficiency[kk]*(1.0-doubleME0nearQuality2efficiency[kk])/(1.0*denom2));  //Hz
 
-   doubleME0nearVeto0efficiency[kk] = doubleME0nearVeto0count[kk]*1.0/(denom);  //Hz
-   doubleME0nearVeto1efficiency[kk] = doubleME0nearVeto1count[kk]*1.0/(denom);  //Hz
-   doubleME0nearVeto2efficiency[kk] = doubleME0nearVeto2count[kk]*1.0/(denom);  //Hz
-   doubleME0nearVeto3efficiency[kk] = doubleME0nearVeto3count[kk]*1.0/(denom);  //Hz
+   doubleME0nearVeto0efficiency[kk] = doubleME0nearVeto0count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearVeto1efficiency[kk] = doubleME0nearVeto1count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearVeto2efficiency[kk] = doubleME0nearVeto2count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearVeto3efficiency[kk] = doubleME0nearVeto3count[kk]*1.0/(denom2);  //Hz
 
-   doubleME0nearVeto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto0efficiency[kk]*(1.0-doubleME0nearVeto0efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearVeto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto1efficiency[kk]*(1.0-doubleME0nearVeto1efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearVeto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto2efficiency[kk]*(1.0-doubleME0nearVeto2efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearVeto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto3efficiency[kk]*(1.0-doubleME0nearVeto3efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearVeto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto0efficiency[kk]*(1.0-doubleME0nearVeto0efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearVeto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto1efficiency[kk]*(1.0-doubleME0nearVeto1efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearVeto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto2efficiency[kk]*(1.0-doubleME0nearVeto2efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearVeto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto3efficiency[kk]*(1.0-doubleME0nearVeto3efficiency[kk])/(1.0*denom2));  //Hz
 
-   doubleME0nearQuality0Veto0efficiency[kk] = doubleME0nearQuality0Veto0count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality0Veto1efficiency[kk] = doubleME0nearQuality0Veto1count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality0Veto2efficiency[kk] = doubleME0nearQuality0Veto2count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality0Veto3efficiency[kk] = doubleME0nearQuality0Veto3count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality1Veto0efficiency[kk] = doubleME0nearQuality1Veto0count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality1Veto1efficiency[kk] = doubleME0nearQuality1Veto1count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality1Veto2efficiency[kk] = doubleME0nearQuality1Veto2count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality1Veto3efficiency[kk] = doubleME0nearQuality1Veto3count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality2Veto0efficiency[kk] = doubleME0nearQuality2Veto0count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality2Veto1efficiency[kk] = doubleME0nearQuality2Veto1count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality2Veto2efficiency[kk] = doubleME0nearQuality2Veto2count[kk]*1.0/(denom);  //Hz
-   doubleME0nearQuality2Veto3efficiency[kk] = doubleME0nearQuality2Veto3count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality0Veto0efficiency[kk] = doubleME0nearQuality0Veto0count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality0Veto1efficiency[kk] = doubleME0nearQuality0Veto1count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality0Veto2efficiency[kk] = doubleME0nearQuality0Veto2count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality0Veto3efficiency[kk] = doubleME0nearQuality0Veto3count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality1Veto0efficiency[kk] = doubleME0nearQuality1Veto0count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality1Veto1efficiency[kk] = doubleME0nearQuality1Veto1count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality1Veto2efficiency[kk] = doubleME0nearQuality1Veto2count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality1Veto3efficiency[kk] = doubleME0nearQuality1Veto3count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality2Veto0efficiency[kk] = doubleME0nearQuality2Veto0count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality2Veto1efficiency[kk] = doubleME0nearQuality2Veto1count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality2Veto2efficiency[kk] = doubleME0nearQuality2Veto2count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality2Veto3efficiency[kk] = doubleME0nearQuality2Veto3count[kk]*1.0/(denom2);  //Hz
 
-   doubleME0nearQuality0Veto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto0efficiency[kk]*(1.0-doubleME0nearQuality0Veto0efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality0Veto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto1efficiency[kk]*(1.0-doubleME0nearQuality0Veto1efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality0Veto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto2efficiency[kk]*(1.0-doubleME0nearQuality0Veto2efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality0Veto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto3efficiency[kk]*(1.0-doubleME0nearQuality0Veto3efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality1Veto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto0efficiency[kk]*(1.0-doubleME0nearQuality1Veto0efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality1Veto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto1efficiency[kk]*(1.0-doubleME0nearQuality1Veto1efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality1Veto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto2efficiency[kk]*(1.0-doubleME0nearQuality1Veto2efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality1Veto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto3efficiency[kk]*(1.0-doubleME0nearQuality1Veto3efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality2Veto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto0efficiency[kk]*(1.0-doubleME0nearQuality2Veto0efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality2Veto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto1efficiency[kk]*(1.0-doubleME0nearQuality2Veto1efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality2Veto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto2efficiency[kk]*(1.0-doubleME0nearQuality2Veto2efficiency[kk])/(1.0*denom));  //Hz
-   doubleME0nearQuality2Veto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto3efficiency[kk]*(1.0-doubleME0nearQuality2Veto3efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality0Veto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto0efficiency[kk]*(1.0-doubleME0nearQuality0Veto0efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality0Veto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto1efficiency[kk]*(1.0-doubleME0nearQuality0Veto1efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality0Veto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto2efficiency[kk]*(1.0-doubleME0nearQuality0Veto2efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality0Veto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto3efficiency[kk]*(1.0-doubleME0nearQuality0Veto3efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality1Veto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto0efficiency[kk]*(1.0-doubleME0nearQuality1Veto0efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality1Veto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto1efficiency[kk]*(1.0-doubleME0nearQuality1Veto1efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality1Veto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto2efficiency[kk]*(1.0-doubleME0nearQuality1Veto2efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality1Veto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto3efficiency[kk]*(1.0-doubleME0nearQuality1Veto3efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality2Veto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto0efficiency[kk]*(1.0-doubleME0nearQuality2Veto0efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality2Veto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto1efficiency[kk]*(1.0-doubleME0nearQuality2Veto1efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality2Veto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto2efficiency[kk]*(1.0-doubleME0nearQuality2Veto2efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality2Veto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto3efficiency[kk]*(1.0-doubleME0nearQuality2Veto3efficiency[kk])/(1.0*denom2));  //Hz
    }
  for (int kk=0; kk<35; kk++)   	
    {
-   tripleME0nearQuality0efficiency[kk] = tripleME0nearQuality0count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality1efficiency[kk] = tripleME0nearQuality1count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality2efficiency[kk] = tripleME0nearQuality2count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality0efficiency[kk] = tripleME0nearQuality0count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality1efficiency[kk] = tripleME0nearQuality1count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality2efficiency[kk] = tripleME0nearQuality2count[kk]*1.0/(denom3);  //Hz
 
-   tripleME0nearQuality0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0efficiency[kk]*(1.0-tripleME0nearQuality0efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1efficiency[kk]*(1.0-tripleME0nearQuality1efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2efficiency[kk]*(1.0-tripleME0nearQuality2efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0efficiency[kk]*(1.0-tripleME0nearQuality0efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1efficiency[kk]*(1.0-tripleME0nearQuality1efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2efficiency[kk]*(1.0-tripleME0nearQuality2efficiency[kk])/(1.0*denom3));  //Hz
 
-   tripleME0nearVeto0efficiency[kk] = tripleME0nearVeto0count[kk]*1.0/(denom);  //Hz
-   tripleME0nearVeto1efficiency[kk] = tripleME0nearVeto1count[kk]*1.0/(denom);  //Hz
-   tripleME0nearVeto2efficiency[kk] = tripleME0nearVeto2count[kk]*1.0/(denom);  //Hz
-   tripleME0nearVeto3efficiency[kk] = tripleME0nearVeto3count[kk]*1.0/(denom);  //Hz
+   tripleME0nearVeto0efficiency[kk] = tripleME0nearVeto0count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearVeto1efficiency[kk] = tripleME0nearVeto1count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearVeto2efficiency[kk] = tripleME0nearVeto2count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearVeto3efficiency[kk] = tripleME0nearVeto3count[kk]*1.0/(denom3);  //Hz
 
-   tripleME0nearVeto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto0efficiency[kk]*(1.0-tripleME0nearVeto0efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearVeto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto1efficiency[kk]*(1.0-tripleME0nearVeto1efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearVeto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto2efficiency[kk]*(1.0-tripleME0nearVeto2efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearVeto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto3efficiency[kk]*(1.0-tripleME0nearVeto3efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearVeto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto0efficiency[kk]*(1.0-tripleME0nearVeto0efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearVeto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto1efficiency[kk]*(1.0-tripleME0nearVeto1efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearVeto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto2efficiency[kk]*(1.0-tripleME0nearVeto2efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearVeto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto3efficiency[kk]*(1.0-tripleME0nearVeto3efficiency[kk])/(1.0*denom3));  //Hz
 
-   tripleME0nearQuality0Veto0efficiency[kk] = tripleME0nearQuality0Veto0count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality0Veto1efficiency[kk] = tripleME0nearQuality0Veto1count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality0Veto2efficiency[kk] = tripleME0nearQuality0Veto2count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality0Veto3efficiency[kk] = tripleME0nearQuality0Veto3count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality1Veto0efficiency[kk] = tripleME0nearQuality1Veto0count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality1Veto1efficiency[kk] = tripleME0nearQuality1Veto1count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality1Veto2efficiency[kk] = tripleME0nearQuality1Veto2count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality1Veto3efficiency[kk] = tripleME0nearQuality1Veto3count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality2Veto0efficiency[kk] = tripleME0nearQuality2Veto0count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality2Veto1efficiency[kk] = tripleME0nearQuality2Veto1count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality2Veto2efficiency[kk] = tripleME0nearQuality2Veto2count[kk]*1.0/(denom);  //Hz
-   tripleME0nearQuality2Veto3efficiency[kk] = tripleME0nearQuality2Veto3count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality0Veto0efficiency[kk] = tripleME0nearQuality0Veto0count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality0Veto1efficiency[kk] = tripleME0nearQuality0Veto1count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality0Veto2efficiency[kk] = tripleME0nearQuality0Veto2count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality0Veto3efficiency[kk] = tripleME0nearQuality0Veto3count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality1Veto0efficiency[kk] = tripleME0nearQuality1Veto0count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality1Veto1efficiency[kk] = tripleME0nearQuality1Veto1count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality1Veto2efficiency[kk] = tripleME0nearQuality1Veto2count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality1Veto3efficiency[kk] = tripleME0nearQuality1Veto3count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality2Veto0efficiency[kk] = tripleME0nearQuality2Veto0count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality2Veto1efficiency[kk] = tripleME0nearQuality2Veto1count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality2Veto2efficiency[kk] = tripleME0nearQuality2Veto2count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality2Veto3efficiency[kk] = tripleME0nearQuality2Veto3count[kk]*1.0/(denom3);  //Hz
 
-   tripleME0nearQuality0Veto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto0efficiency[kk]*(1.0-tripleME0nearQuality0Veto0efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality0Veto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto1efficiency[kk]*(1.0-tripleME0nearQuality0Veto1efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality0Veto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto2efficiency[kk]*(1.0-tripleME0nearQuality0Veto2efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality0Veto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto3efficiency[kk]*(1.0-tripleME0nearQuality0Veto3efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality1Veto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto0efficiency[kk]*(1.0-tripleME0nearQuality1Veto0efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality1Veto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto1efficiency[kk]*(1.0-tripleME0nearQuality1Veto1efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality1Veto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto2efficiency[kk]*(1.0-tripleME0nearQuality1Veto2efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality1Veto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto3efficiency[kk]*(1.0-tripleME0nearQuality1Veto3efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality2Veto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto0efficiency[kk]*(1.0-tripleME0nearQuality2Veto0efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality2Veto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto1efficiency[kk]*(1.0-tripleME0nearQuality2Veto1efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality2Veto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto2efficiency[kk]*(1.0-tripleME0nearQuality2Veto2efficiency[kk])/(1.0*denom));  //Hz
-   tripleME0nearQuality2Veto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto3efficiency[kk]*(1.0-tripleME0nearQuality2Veto3efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality0Veto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto0efficiency[kk]*(1.0-tripleME0nearQuality0Veto0efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality0Veto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto1efficiency[kk]*(1.0-tripleME0nearQuality0Veto1efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality0Veto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto2efficiency[kk]*(1.0-tripleME0nearQuality0Veto2efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality0Veto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto3efficiency[kk]*(1.0-tripleME0nearQuality0Veto3efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality1Veto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto0efficiency[kk]*(1.0-tripleME0nearQuality1Veto0efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality1Veto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto1efficiency[kk]*(1.0-tripleME0nearQuality1Veto1efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality1Veto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto2efficiency[kk]*(1.0-tripleME0nearQuality1Veto2efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality1Veto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto3efficiency[kk]*(1.0-tripleME0nearQuality1Veto3efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality2Veto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto0efficiency[kk]*(1.0-tripleME0nearQuality2Veto0efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality2Veto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto1efficiency[kk]*(1.0-tripleME0nearQuality2Veto1efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality2Veto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto2efficiency[kk]*(1.0-tripleME0nearQuality2Veto2efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality2Veto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto3efficiency[kk]*(1.0-tripleME0nearQuality2Veto3efficiency[kk])/(1.0*denom3));  //Hz
 
    }
 
