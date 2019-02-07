@@ -469,7 +469,8 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
    Bool_t is_doubleME0nearQuality2Veto2[15], is_tripleME0nearQuality2Veto2[35];
    Bool_t is_doubleME0nearQuality2Veto3[15], is_tripleME0nearQuality2Veto3[35];
    Bool_t is_doubleME0close[15], is_tripleME0close[35];
-   Int_t nEvent = 0;
+   Int_t nEvent = 0;  //total number of events
+   Int_t nEventVis = 0;  //number of events visible in ME0
    Int_t nEventSel = 0;
    //define three different counters 
    //nEventSel1 for the case with at least one muon in ME0 eta range coming from tau->3mu
@@ -481,6 +482,7 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
    Int_t nEventSel3 = 0;
 
    Int_t lastEvent = 0;
+   Int_t lastEventVis = 0;
    Int_t lastEventSel = 0;
    Int_t lastEventSel1 = 0;
    Int_t lastEventSel2 = 0;
@@ -908,11 +910,13 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    //tr->Branch("muPy"     ,	&muPy    );
    //tr->Branch("muPz"     ,	&muPz    );
    tr->Branch("nEvent"     ,	&nEvent	, "nEvent/I"    );  //, 	"theta"     );
+   tr->Branch("nEventVis"     ,	&nEventVis	, "nEventVis/I"    );  //, 	"theta"     );
    tr->Branch("nEventSel"     ,	&nEventSel	, "nEventSel/I"    );  //, 	"theta"     );
    tr->Branch("nEventSel1"     ,	&nEventSel1	, "nEventSel1/I"    );  //, 	"theta"     );
    tr->Branch("nEventSel2"     ,        &nEventSel2     , "nEventSel2/I"    );  //,     "theta"     );
    tr->Branch("nEventSel3"     ,        &nEventSel3     , "nEventSel3/I"    );  //,     "theta"     );
    trSum->Branch("lastEvent"     ,	&lastEvent	, "lastEvent/I"    );  //, 	"theta"     );
+   trSum->Branch("lastEventVis"     ,	&lastEventVis	, "lastEventVis/I"    );  //, 	"theta"     );
    trSum->Branch("lastEventSel"     ,	&lastEventSel	, "lastEventSel/I"    );  //, 	"theta"     );
    trSum->Branch("lastEventSel1"     ,   &lastEventSel1 , "lastEventSel1/I"    );  //, 	"theta"     );
    trSum->Branch("lastEventSel2"     ,   &lastEventSel2 , "lastEventSel2/I"    );  //,   "theta"     );
@@ -2171,10 +2175,11 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
    nSegments = 0;
 
    nEvent++;
-   if (nME0>0) nEventSel++;
-   if (nME0>0) nEventSel1++;
-   if (nME0>1) nEventSel2++;
-   if (nME0>2) nEventSel3++;
+   if (nME0>0 && nVisibleMu>0) nEventVis++;
+   if (nME0>0 && nVisibleMu>0) nEventSel++;
+   if (nME0>0 && nVisibleMu>0) nEventSel1++;
+   if (nME0>1 && nVisibleMu>1) nEventSel2++;
+   if (nME0>2 && nVisibleMu>2) nEventSel3++;
 
    //bool is_singleME0[5], is_doubleME0[15];
    for ( int i=0; i<5; i++)	
@@ -2502,10 +2507,10 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
       int triple_ind = 0;
       for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-	cout << "pt1_ind " << pt1_ind;
+	//cout << "pt1_ind " << pt1_ind;
         for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
 	  {
-	  cout << "pt2_ind " << pt2_ind;
+	  //cout << "pt2_ind " << pt2_ind;
           found_double1 = false;
 	  found_double2 = false;
           for ( auto dp=(*deltaGlobalPhiLayer21List).begin(); dp!=(*deltaGlobalPhiLayer21List).end(); ++dp)
@@ -2523,12 +2528,12 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
           if ( found_double1 && found_double2 )			is_doubleME0[mixed_ind] = true;
 	  //cout << "result: is_doubleME0 = " << is_doubleME0[mixed_ind] << endl;
 
-	  cout << "mixed_ind =" << mixed_ind << endl;
+	  //cout << "mixed_ind =" << mixed_ind << endl;
 	  mixed_ind++;
           
 	  for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
             {
-	    cout << "pt3_ind " << pt2_ind;
+	    //cout << "pt3_ind " << pt2_ind;
 	    found_triple1 = false;
 	    found_triple2 = false;
 	    found_triple3 = false;
@@ -2551,7 +2556,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
             if ( found_triple1 && found_triple2 && found_triple3 )	is_tripleME0[triple_ind] = true;
   	    //cout << "result: is_tripleME0 = " << is_tripleME0[triple_ind] << endl;
   
-	    cout << "triple_ind =" << triple_ind << endl;
+	    //cout << "triple_ind =" << triple_ind << endl;
 	    triple_ind++;
 	    }
 	  }
@@ -2569,17 +2574,17 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
       mixed_ind = 0;
       for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-	cout << "pt1_ind = " << pt1_ind << endl;
+	//cout << "pt1_ind = " << pt1_ind << endl;
         for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
 	  {
-	  cout << "pt2_ind = " << pt2_ind << endl;
+	  //cout << "pt2_ind = " << pt2_ind << endl;
 	    bool good = false;
             for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
               {
-	      cout << "dp1_ind = " << dp1_ind << endl;
+	      //cout << "dp1_ind = " << dp1_ind << endl;
 	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
                 {
-	          cout << "dp2_ind = " << dp2_ind << endl;
+	          //cout << "dp2_ind = " << dp2_ind << endl;
 	       	  ME0DetId me01( (*me0List)[dp1_ind] );
 	       	  ME0DetId me02( (*me0List)[dp2_ind] );
 		  int end1 = me01.region(); 
@@ -2598,7 +2603,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    if (good) is_doubleME0near[mixed_ind] = true;
   
 	  mixed_ind++;
-	  cout << "mixed_ind = " << mixed_ind << endl;
+	  //cout << "mixed_ind = " << mixed_ind << endl;
 	  } //loop over pt2_ind (2nd thr value)
 	} //loop over pt1_ind (1st thr value)
       } //if there are at least 2 segments
@@ -2612,23 +2617,23 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
       triple_ind = 0;
       for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-	cout << "pt1_ind = " << pt1_ind << endl;
+	//cout << "pt1_ind = " << pt1_ind << endl;
         for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
 	  {
-	  cout << "pt2_ind = " << pt2_ind << endl;
+	  //cout << "pt2_ind = " << pt2_ind << endl;
 	  for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
             {
-	    cout << "pt3_ind = " << pt3_ind << endl;
+	    //cout << "pt3_ind = " << pt3_ind << endl;
 	    bool good = false;
             for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
               {
-	      cout << "dp1_ind = " << dp1_ind << endl;
+	      //cout << "dp1_ind = " << dp1_ind << endl;
 	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
                 {
-	        cout << "dp2_ind = " << dp2_ind << endl;
+	        //cout << "dp2_ind = " << dp2_ind << endl;
 	        for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
 	          {
-	          cout << "dp3_ind = " << dp3_ind << endl;
+	          //cout << "dp3_ind = " << dp3_ind << endl;
 	       	  ME0DetId me01( (*me0List)[dp1_ind] );
 	       	  ME0DetId me02( (*me0List)[dp2_ind] );
 	       	  ME0DetId me03( (*me0List)[dp3_ind] );
@@ -2653,7 +2658,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	        }
 	      } //end loop over 3 deltaPhi combinations
 	    if (good) is_tripleME0near[triple_ind] = true;
-            cout << "triple_ind = " << triple_ind << endl; 
+            //cout << "triple_ind = " << triple_ind << endl; 
 	    triple_ind++;
 	    } // loop over pt3_ind (3rd thr value)
 	  } //loop over pt2_ind (2nd thr value)
@@ -2668,17 +2673,17 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
       mixed_ind = 0;
       for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-	cout << "pt1_ind = " << pt1_ind << endl;
+	//cout << "pt1_ind = " << pt1_ind << endl;
         for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
 	  {
-	  cout << "pt2_ind = " << pt2_ind << endl;
+	  //cout << "pt2_ind = " << pt2_ind << endl;
 	    bool good = false;
             for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
               {
-	      cout << "dp1_ind = " << dp1_ind << endl;
+	      //cout << "dp1_ind = " << dp1_ind << endl;
 	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
                 {
-	          cout << "dp2_ind = " << dp2_ind << endl;
+	          //cout << "dp2_ind = " << dp2_ind << endl;
 	       	  ME0DetId me01( (*me0List)[dp1_ind] );
 	       	  ME0DetId me02( (*me0List)[dp2_ind] );
 		  int end1 = me01.region(); 	//endcap
@@ -2700,7 +2705,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    if (good) is_doubleME0close[mixed_ind] = true;
   
 	  mixed_ind++;
-	  cout << "mixed_ind = " << mixed_ind << endl;
+	  //cout << "mixed_ind = " << mixed_ind << endl;
 	  } //loop over pt2_ind (2nd thr value)
 	} //loop over pt1_ind (1st thr value)
       } //if there are at least 2 segments
@@ -2714,23 +2719,23 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
       triple_ind = 0;
       for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-	cout << "pt1_ind = " << pt1_ind << endl;
+	//cout << "pt1_ind = " << pt1_ind << endl;
         for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
 	  {
-	  cout << "pt2_ind = " << pt2_ind << endl;
+	  //cout << "pt2_ind = " << pt2_ind << endl;
 	  for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
             {
-	    cout << "pt3_ind = " << pt3_ind << endl;
+	    //cout << "pt3_ind = " << pt3_ind << endl;
 	    bool good = false;
             for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
               {
-	      cout << "dp1_ind = " << dp1_ind << endl;
+	      //cout << "dp1_ind = " << dp1_ind << endl;
 	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
                 {
-	        cout << "dp2_ind = " << dp2_ind << endl;
+	        //cout << "dp2_ind = " << dp2_ind << endl;
 	        for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
 	          {
-	          cout << "dp3_ind = " << dp3_ind << endl;
+	          //cout << "dp3_ind = " << dp3_ind << endl;
 	       	  ME0DetId me01( (*me0List)[dp1_ind] );
 	       	  ME0DetId me02( (*me0List)[dp2_ind] );
 	       	  ME0DetId me03( (*me0List)[dp3_ind] );
@@ -2761,7 +2766,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	        }
 	      } //end loop over 3 deltaPhi combinations
 	    if (good) is_tripleME0close[triple_ind] = true;
-            cout << "triple_ind = " << triple_ind << endl; 
+            //cout << "triple_ind = " << triple_ind << endl; 
 	    triple_ind++;
 	    } // loop over pt3_ind (3rd thr value)
 	  } //loop over pt2_ind (2nd thr value)
@@ -2778,10 +2783,10 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
       mixed_ind = 0;
       for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-	cout << "pt1_ind = " << pt1_ind << endl;
+	//cout << "pt1_ind = " << pt1_ind << endl;
         for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
 	  {
-	  cout << "pt2_ind = " << pt2_ind << endl;
+	  //cout << "pt2_ind = " << pt2_ind << endl;
 	    bool goodQ0 = false;
 	    bool goodQ1 = false;
 	    bool goodQ2 = false;
@@ -2803,10 +2808,10 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
             bool goodQ2eveto3 = false;
             for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
               {
-	      cout << "dp1_ind = " << dp1_ind << endl;
+	      //cout << "dp1_ind = " << dp1_ind << endl;
 	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
                 {
-	          cout << "dp2_ind = " << dp2_ind << endl;
+	          //cout << "dp2_ind = " << dp2_ind << endl;
 	       	  ME0DetId me01( (*me0List)[dp1_ind] );
 	       	  ME0DetId me02( (*me0List)[dp2_ind] );
 		  int end1 = me01.region(); 
@@ -2872,7 +2877,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
             if (goodQ2eveto3) is_doubleME0nearQuality2Veto3[mixed_ind] = true;
   
 	  mixed_ind++;
-	  cout << "mixed_ind = " << mixed_ind << endl;
+	  //cout << "mixed_ind = " << mixed_ind << endl;
 	  } //loop over pt2_ind (2nd thr value)
 	} //loop over pt1_ind (1st thr value)
       } //if there are at least 2 segments
@@ -2886,13 +2891,13 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
       triple_ind = 0;
       for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-	cout << "pt1_ind = " << pt1_ind << endl;
+	//cout << "pt1_ind = " << pt1_ind << endl;
         for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
 	  {
-	  cout << "pt2_ind = " << pt2_ind << endl;
+	  //cout << "pt2_ind = " << pt2_ind << endl;
 	  for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
             {
-	    cout << "pt3_ind = " << pt3_ind << endl;
+	    //cout << "pt3_ind = " << pt3_ind << endl;
 	    bool goodQ0 = false;
 	    bool goodQ1 = false;
 	    bool goodQ2 = false;
@@ -2914,13 +2919,13 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
             bool goodQ2eveto3 = false;
             for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
               {
-	      cout << "dp1_ind = " << dp1_ind << endl;
+	      //cout << "dp1_ind = " << dp1_ind << endl;
 	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
                 {
-	        cout << "dp2_ind = " << dp2_ind << endl;
+	        //cout << "dp2_ind = " << dp2_ind << endl;
 	        for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
 	          {
-	          cout << "dp3_ind = " << dp3_ind << endl;
+	          //cout << "dp3_ind = " << dp3_ind << endl;
 	       	  ME0DetId me01( (*me0List)[dp1_ind] );
 	       	  ME0DetId me02( (*me0List)[dp2_ind] );
 	       	  ME0DetId me03( (*me0List)[dp3_ind] );
@@ -2992,7 +2997,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
             if (goodQ2eveto1) is_tripleME0nearQuality2Veto1[triple_ind] = true;
             if (goodQ2eveto2) is_tripleME0nearQuality2Veto2[triple_ind] = true;
             if (goodQ2eveto3) is_tripleME0nearQuality2Veto3[triple_ind] = true;
-            cout << "triple_ind = " << triple_ind << endl; 
+            //cout << "triple_ind = " << triple_ind << endl; 
 	    triple_ind++;
 	    } // loop over pt3_ind (3rd thr value)
 	  } //loop over pt2_ind (2nd thr value)
@@ -3149,6 +3154,7 @@ DeltaGlobalPhiAnalyzer::endJob()
 {
  cout << "EndJob started:" << endl;
  lastEvent=nEvent;
+ lastEventVis=nEventVis; //for the rate I have to use the total number of events, also the invisibles
  lastEventSel=nEventSel;
  lastEventSel1=nEventSel1;
  lastEventSel2=nEventSel2;
@@ -3158,13 +3164,36 @@ DeltaGlobalPhiAnalyzer::endJob()
  Int_t denom1=-1;
  Int_t denom2=-1;
  Int_t denom3=-1;
+ 
+ //mME0 is only the number of muons that are generate din eta region of ME0
+ //but they have to be visible: this is controlled by nVisibleMu
+  
+ 
+ //if (nME0>0 && nVisibleMu>0 && signal)  denom1=lastEventSel1; 
+ //if (nME0>1 && nVisibleMu>1 && signal)  denom2=lastEventSel2;
+ //if (nME0>2 && nVisibleMu>2 && signal)  denom3=lastEventSel3;
+ //if (nME0>0 && nVisibleMu>0 && signal)  denom=lastEventSel;
+ 
+ //I have to do in this way because the nME0 seen in the endjob is only that of the last event
+ //same for nVisibleMu  
+ if ( signal ) 
+ {
+   //to make efficiencies with the total of visibles
+   /*denom1   = lastEventVis;
+   denom2   = lastEventVis;
+   denom3   = lastEventVis;*/
+   
+   //to make efficiencies with single visibles, double visibles, triple visibles
+   denom1 = lastEventSel1;
+   denom2 = lastEventSel2;
+   denom3 = lastEventSel3;
+ }
+ 
+ if ( signal ) denom=lastEvent;//run trigger analysis only if there is at least one mu from the tau decay in the eta range 1.8<|eta!|<3
 
- if (nME0>0 && signal)  denom1=lastEventSel1;
- if (nME0>1 && signal)  denom2=lastEventSel2;
- if (nME0>2 && signal)  denom3=lastEventSel3;
- if (nME0>0 && signal)  denom=lastEventSel;
- if ( signal ) denom=lastEvent;//run trigger analysis only if there is at least one mu from the tau decay in the eta range 1.8<|eta!|<3 
+ cout << "lastEventSel1=" << lastEventSel1 << " lastEventSel2=" << lastEventSel2 << " lastEventSel3=" << lastEventSel3 << endl;
 
+ 
  cout << "Calculating rates and efficiencies (triggers without vicinity)" << endl;
  for (int kk=0; kk<5; kk++)	singleME0rate[kk] = singleME0count[kk]/(denom*25.0*1e-9); //Hz
  for (int kk=0; kk<15; kk++)   	doubleME0rate[kk] = doubleME0count[kk]/(denom*25.0*1e-9);  //Hz
