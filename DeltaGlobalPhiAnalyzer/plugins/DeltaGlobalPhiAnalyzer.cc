@@ -63,6 +63,9 @@
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
 
+#include "Geometry/CSCGeometry/interface/CSCGeometry.h"
+#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
+
 //#include "typedefs.h"
 
 #include <TTree.h>
@@ -151,6 +154,8 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       edm::EDGetTokenT<MuonDigiCollection<ME0DetId,ME0PadDigi>> ME0PadDigiToken_;
       edm::EDGetTokenT<MuonDigiCollection<ME0DetId,ME0PadDigiCluster>> ME0PadDigiClusterToken_;
       edm::EDGetTokenT<vector<PSimHit>> ME0SimHitToken_;
+      edm::EDGetTokenT<vector<PSimHit>> CSCSimHitToken_;
+      edm::EDGetTokenT<vector<PSimHit>> GEMSimHitToken_;
       edm::EDGetTokenT<vector<SimTrack>> simTrackToken_;
 
       bool v = 1 ; //verbose initialization
@@ -543,8 +548,14 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       float muPx[3]	;
       float muPy[3]	;
       float muPz[3]	;
-      bool isMuVisible[3]; //whether each muon is visibile by ME0 (i.e. has produced ME0SimHits)
-      int nVisibleMu;    //number of muons visible by ME0 (from 0 to 3)
+      bool isMuVisible[3]; //whether each muon is visibile by one of the detectors considered (i.e. has produced ME0SimHits)
+      bool isMuVisibleME0[3]; //whether each muon is visibile by ME0 
+      bool isMuVisibleCSC[3]; //whether each muon is visibile by CSC
+      bool isMuVisibleGEM[3]; //whether each muon is visibile by GEM 
+      int nVisibleMu;    //number of muons visible by all detectors considered (from 0 to 3)
+      int nVisibleMuME0;
+      int nVisibleMuCSC;
+      int nVisibleMuGEM;
       int muStatus[3]	;
       float tauPt = 0	;
       float tauEta = 0	;
@@ -608,6 +619,8 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
     ME0SegmentToken_(consumes<ME0SegmentCollection>(iConfig.getParameter<InputTag>("me0Segments"))),
     genToken_(consumes<GenParticleCollection>(iConfig.getParameter<InputTag>("genParticles"))),
     ME0SimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("me0SimHits"))),
+    CSCSimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("cscSimHits"))),
+    GEMSimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("gemSimHits"))),
     simTrackToken_(consumes<vector<SimTrack>>(iConfig.getParameter<InputTag>("simTracks")))
 {
    //now do what ever initialization is needed
@@ -855,8 +868,16 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    tr->Branch("muPx"     ,	&muPx[0]     , 	"mu1_Px:mu2_Px:mu3_Px"     );
    tr->Branch("muPy"     ,	&muPy[0]     , 	"mu1_Py:mu2_Py:mu3_Py"     );
    tr->Branch("muPz"     ,	&muPz[0]     , 	"mu1_Pz:mu2_Pz:mu3_Pz"     );
-   tr->Branch("isMuVisible"     ,	&isMuVisible[0]     , 	"mu1_isVisible/O:mu2_isVisible/O:mu3_isVisible/O"     );
-   tr->Branch("nVisibleMu"  ,	&nVisibleMu,	"nVisibleMu/I"	);
+   tr->Branch("isMuVisible"     ,	&isMuVisible[0]		     , 	"mu1_isVisible/O:mu2_isVisible/O:mu3_isVisible/O"     );
+   tr->Branch("isMuVisibleME0"     ,	&isMuVisibleME0[0]     , 	"mu1_isVisibleME0/O:mu2_isVisibleME0/O:mu3_isVisibleME0/O"     );
+   tr->Branch("isMuVisibleCSC"     ,	&isMuVisibleCSC[0]     , 	"mu1_isVisibleCSC/O:mu2_isVisibleCSC/O:mu3_isVisibleCSC/O"     );
+   tr->Branch("isMuVisibleGEM"     ,	&isMuVisibleGEM[0]     , 	"mu1_isVisibleGEM/O:mu2_isVisibleGEM/O:mu3_isVisibleGEM/O"     );
+   tr->Branch("nVisibleMu"  ,	&nVisibleMu,	"nVisibleMu/I" 	);
+   tr->Branch("nVisibleMuME0" ,	&nVisibleMuME0,	"nVisibleMuME0/I");
+   tr->Branch("nVisibleMuCSC" ,	&nVisibleMuCSC,	"nVisibleMuCSC/I"	);
+   tr->Branch("nVisibleMuGEM" ,	&nVisibleMuGEM,	"nVisibleMuGEM/I"	);
+   tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
+   tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
    tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
    tr->Branch("muVyBirth"     ,	&muVyBirth[0]     , 	"mu1_VyBirth:mu2_VyBirth:mu3_VyBirth"     );
    tr->Branch("muVzBirth"     ,	&muVzBirth[0]     , 	"mu1_VzBirth:mu2_VzBirth:mu3_VzBirth"     );
@@ -1572,6 +1593,9 @@ gStyle->SetOptTitle(0);
      tauVyDeath = 0;
      tauVzDeath = 0;
      nVisibleMu = 0;
+     nVisibleMuME0 = 0;
+     nVisibleMuCSC = 0;
+     nVisibleMuGEM = 0;
 
      for (int i=0; i<3; i++)
        {
@@ -1582,6 +1606,9 @@ gStyle->SetOptTitle(0);
        muPy[i] 		= 0; 
        muPz[i] 		= 0; 
        isMuVisible[i] 	= 0; 
+       isMuVisibleME0[i]= 0; 
+       isMuVisibleCSC[i]= 0; 
+       isMuVisibleGEM[i]= 0; 
        muVxBirth[i] 	= 0; 
        muVyBirth[i] 	= 0; 
        muVzBirth[i] 	= 0; 
@@ -2030,7 +2057,8 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
        
        if ( idtrack == muTrackId[i]  )
        { 
-       isMuVisible[i] = 1;
+       isMuVisible[i] 	 = 1;
+       isMuVisibleME0[i] = 1;
        ME0DetId * shMe0id = new ME0DetId( (*it).detUnitId() );
        if (  (*it).entryPoint().z() > -0.298 )    // ||  (*it).exitPoint().z() < 0.29  )
          {
@@ -2108,7 +2136,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
      {
      cout << "Max_z of " << i << "-th mu in ME0:" << muMax_z[i] << endl;  
      }
-     if (isMuVisible[i])  nVisibleMu++;
+     if (isMuVisibleME0[i])  nVisibleMuME0++;
    }
    
    for ( auto it = me0simHitH->begin(); it != me0simHitH->end(); ++it )
@@ -2138,6 +2166,74 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
      (*chit)=(*chit)-av;
      cout << "Chamber after shift: " << (*chit) << endl;
      }
+
+   //CSC SimHits
+   Handle<vector<PSimHit>> cscsimHitH;
+   iEvent.getByToken(CSCSimHitToken_, cscsimHitH);
+
+   for ( auto itc = cscsimHitH->begin(); itc != cscsimHitH->end(); ++itc )
+   { 
+     for ( int i=0; i<3; i++ )
+     {
+       //consider only hits of muons
+       if ( fabs( (*itc).particleType() ) != 13 )	continue; 
+       
+       int idtrack = (*itc).trackId();
+       
+       //verify there is at least one correspondence, 
+       //if not the muon has not arrived in ME0
+       //atLeastOne = false;
+       
+       if ( idtrack == muTrackId[i]  )
+       {
+       isMuVisible[i] 	 = 1;
+       isMuVisibleCSC[i] = 1;
+       }
+     }
+   }
+
+   //increment the nVisibleMuCSC counter
+   for (int i=0; i<3; i++)
+   {
+     if (isMuVisibleCSC[i])  nVisibleMuCSC++;
+   }
+
+
+   //GEM SimHits
+   Handle<vector<PSimHit>> gemsimHitH;
+   iEvent.getByToken(GEMSimHitToken_, gemsimHitH);
+
+   for ( auto itc = gemsimHitH->begin(); itc != gemsimHitH->end(); ++itc )
+   { 
+     for ( int i=0; i<3; i++ )
+     {
+       //consider only hits of muons
+       if ( fabs( (*itc).particleType() ) != 13 )	continue; 
+       
+       int idtrack = (*itc).trackId();
+       
+       //verify there is at least one correspondence, 
+       
+       if ( idtrack == muTrackId[i]  )
+       {
+       isMuVisible[i] 	 = 1;
+       isMuVisibleGEM[i] = 1;
+       }
+     }
+   }
+
+   //increment the nVisibleMuGEM counter
+   for (int i=0; i<3; i++)
+   {
+     if (isMuVisibleGEM[i])  nVisibleMuGEM++;
+   }
+
+   //increment the total nVisibleMu counter
+   for (int i=0; i<3; i++)                                                 
+   {
+     if (isMuVisible[i])  nVisibleMu++;
+   }
+
 
 
    ESHandle<ME0Geometry> me0Geom;
@@ -2175,11 +2271,11 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
    nSegments = 0;
 
    nEvent++;
-   if (nME0>0 && nVisibleMu>0) nEventVis++;
-   if (nME0>0 && nVisibleMu>0) nEventSel++;
-   if (nME0>0 && nVisibleMu>0) nEventSel1++;
-   if (nME0>1 && nVisibleMu>1) nEventSel2++;
-   if (nME0>2 && nVisibleMu>2) nEventSel3++;
+   if ( nVisibleMuME0>0) nEventVis++;
+   if ( nVisibleMuME0>0) nEventSel++;
+   if ( nVisibleMuME0>0) nEventSel1++;
+   if ( nVisibleMuME0>1) nEventSel2++;
+   if ( nVisibleMuME0>2) nEventSel3++;
 
    //bool is_singleME0[5], is_doubleME0[15];
    for ( int i=0; i<5; i++)	
@@ -2455,7 +2551,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 
         for ( int pt_ind = 0; pt_ind < 5 ; pt_ind++)
           {
-          if ( nVisibleMu<1 ) continue;
+          if ( nVisibleMuME0<1 ) continue;
 	  if ( fabs(sgDeltaGlobalPhi) < thr[pt_ind] )	
 	    {
             
@@ -2529,7 +2625,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    }
           if ( found_double1 && found_double2 )
           {
-            if ( nVisibleMu>1) 	is_doubleME0[mixed_ind] = true;
+            if ( nVisibleMuME0>1) 	is_doubleME0[mixed_ind] = true;
           }
 
 
@@ -2562,7 +2658,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
   	      }
             if ( found_triple1 && found_triple2 && found_triple3 )
             {	
-              if ( nVisibleMu>2 ) is_tripleME0[triple_ind] = true;
+              if ( nVisibleMuME0>2 ) is_tripleME0[triple_ind] = true;
             }
   	    //cout << "result: is_tripleME0 = " << is_tripleME0[triple_ind] << endl;
   
@@ -2579,7 +2675,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 
       //Trigger WITH chamber vicinity request (doubles)
       
-      if ( nVisibleMu > 1 )
+      if ( nVisibleMuME0 > 1 )
       {
         if ( (*deltaGlobalPhiLayer21List).size() > 1 )
         {
@@ -2625,7 +2721,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
       cout << "Starting to evaluate triple triggers with vicinity request" << endl;
 
       //Trigger WITH chamber vicinity request (triples)
-      if ( nVisibleMu > 2 )
+      if ( nVisibleMuME0 > 2 )
       {
         if ( (*deltaGlobalPhiLayer21List).size() > 2 )
         {
@@ -2679,11 +2775,11 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    } //loop over pt2_ind (2nd thr value)
 	  } //loop over pt1_ind (1st thr value)
         } // if there are at least 3 segments
-      }//if nVisibleMu > 2
+      }//if nVisibleMuME0 > 2
 
       //Trigger WITH eta partition vicinity request (doubles)
 
-      if ( nVisibleMu > 1 )
+      if ( nVisibleMuME0 > 1 )
       {
         if ( (*deltaGlobalPhiLayer21List).size() > 1 )
         {
@@ -2726,12 +2822,12 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    } //loop over pt2_ind (2nd thr value)
 	  } //loop over pt1_ind (1st thr value)
         } //if there are at least 2 segments
-      }//if nVisibleMu > 1
+      }//if nVisibleMuME0 > 1
 
       cout << "Starting to evaluate triple triggers with vicinity request" << endl;
 
       //Trigger WITH eta partition vicinity request (triples)
-      if ( nVisibleMu > 2 )
+      if ( nVisibleMuME0 > 2 )
       {
         if ( (*deltaGlobalPhiLayer21List).size() > 2 )
         {
@@ -2791,13 +2887,13 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    } //loop over pt2_ind (2nd thr value)
 	   } //loop over pt1_ind (1st thr value)
          } // if there are at least 3 segments
-      }//if nVisibleMu > 2 
+      }//if nVisibleMuME0 > 2 
 
 
 
       //Trigger WITH chamber vicinity and Quality request (doubles)
 
-      if (nVisibleMu > 1 )
+      if (nVisibleMuME0 > 1 )
       {
         if ( (*deltaGlobalPhiLayer21List).size() > 1 )
         {
@@ -2902,12 +2998,12 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    } //loop over pt2_ind (2nd thr value)
 	  } //loop over pt1_ind (1st thr value)
         } //if there are at least 2 segments
-      }//if nVisibleMu > 1
+      }//if nVisibleMuME0 > 1
 
       cout << "Starting to evaluate triple triggers with vicinity and quality request" << endl;
 
       //Trigger WITH chamber vicinity and Quality request (triples)
-      if ( nVisibleMu > 2 )
+      if ( nVisibleMuME0 > 2 )
       {
         if ( (*deltaGlobalPhiLayer21List).size() > 2 )
         {
@@ -3026,7 +3122,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    } //loop over pt2_ind (2nd thr value)
 	  } //loop over pt1_ind (1st thr value)
         } // if there are at least 3 segments
-     }//if nVisibleMu > 2
+     }//if nVisibleMuME0 > 2
 
 
      
@@ -3189,16 +3285,16 @@ DeltaGlobalPhiAnalyzer::endJob()
  Int_t denom3=-1;
  
  //mME0 is only the number of muons that are generate din eta region of ME0
- //but they have to be visible: this is controlled by nVisibleMu
+ //but they have to be visible: this is controlled by nVisibleMuME0
   
  
- //if (nME0>0 && nVisibleMu>0 && signal)  denom1=lastEventSel1; 
- //if (nME0>1 && nVisibleMu>1 && signal)  denom2=lastEventSel2;
- //if (nME0>2 && nVisibleMu>2 && signal)  denom3=lastEventSel3;
- //if (nME0>0 && nVisibleMu>0 && signal)  denom=lastEventSel;
+ //if (nME0>0 && nVisibleMuME0>0 && signal)  denom1=lastEventSel1; 
+ //if (nME0>1 && nVisibleMuME0>1 && signal)  denom2=lastEventSel2;
+ //if (nME0>2 && nVisibleMuME0>2 && signal)  denom3=lastEventSel3;
+ //if (nME0>0 && nVisibleMuME0>0 && signal)  denom=lastEventSel;
  
  //I have to do in this way because the nME0 seen in the endjob is only that of the last event
- //same for nVisibleMu  
+ //same for nVisibleMuME0  
  if ( signal ) 
  {
    //to make efficiencies with the total of visibles
