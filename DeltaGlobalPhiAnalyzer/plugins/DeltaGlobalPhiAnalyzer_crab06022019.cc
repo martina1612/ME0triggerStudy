@@ -63,9 +63,6 @@
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
 
-#include "Geometry/CSCGeometry/interface/CSCGeometry.h"
-#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
-
 //#include "typedefs.h"
 
 #include <TTree.h>
@@ -154,8 +151,6 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       edm::EDGetTokenT<MuonDigiCollection<ME0DetId,ME0PadDigi>> ME0PadDigiToken_;
       edm::EDGetTokenT<MuonDigiCollection<ME0DetId,ME0PadDigiCluster>> ME0PadDigiClusterToken_;
       edm::EDGetTokenT<vector<PSimHit>> ME0SimHitToken_;
-      edm::EDGetTokenT<vector<PSimHit>> CSCSimHitToken_;
-      edm::EDGetTokenT<vector<PSimHit>> GEMSimHitToken_;
       edm::EDGetTokenT<vector<SimTrack>> simTrackToken_;
 
       bool v = 1 ; //verbose initialization
@@ -548,14 +543,8 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       float muPx[3]	;
       float muPy[3]	;
       float muPz[3]	;
-      bool isMuVisible[3]; //whether each muon is visibile by one of the detectors considered (i.e. has produced ME0SimHits)
-      bool isMuVisibleME0[3]; //whether each muon is visibile by ME0 
-      bool isMuVisibleCSC[3]; //whether each muon is visibile by CSC
-      bool isMuVisibleGEM[3]; //whether each muon is visibile by GEM 
-      int nVisibleMu;    //number of muons visible by all detectors considered (from 0 to 3)
-      int nVisibleMuME0;
-      int nVisibleMuCSC;
-      int nVisibleMuGEM;
+      bool isMuVisible[3]; //whether each muon is visibile by ME0 (i.e. has produced ME0SimHits)
+      int nVisibleMu;    //number of muons visible by ME0 (from 0 to 3)
       int muStatus[3]	;
       float tauPt = 0	;
       float tauEta = 0	;
@@ -619,8 +608,6 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
     ME0SegmentToken_(consumes<ME0SegmentCollection>(iConfig.getParameter<InputTag>("me0Segments"))),
     genToken_(consumes<GenParticleCollection>(iConfig.getParameter<InputTag>("genParticles"))),
     ME0SimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("me0SimHits"))),
-    CSCSimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("cscSimHits"))),
-    GEMSimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("gemSimHits"))),
     simTrackToken_(consumes<vector<SimTrack>>(iConfig.getParameter<InputTag>("simTracks")))
 {
    //now do what ever initialization is needed
@@ -868,16 +855,8 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    tr->Branch("muPx"     ,	&muPx[0]     , 	"mu1_Px:mu2_Px:mu3_Px"     );
    tr->Branch("muPy"     ,	&muPy[0]     , 	"mu1_Py:mu2_Py:mu3_Py"     );
    tr->Branch("muPz"     ,	&muPz[0]     , 	"mu1_Pz:mu2_Pz:mu3_Pz"     );
-   tr->Branch("isMuVisible"     ,	&isMuVisible[0]		     , 	"mu1_isVisible/O:mu2_isVisible/O:mu3_isVisible/O"     );
-   tr->Branch("isMuVisibleME0"     ,	&isMuVisibleME0[0]     , 	"mu1_isVisibleME0/O:mu2_isVisibleME0/O:mu3_isVisibleME0/O"     );
-   tr->Branch("isMuVisibleCSC"     ,	&isMuVisibleCSC[0]     , 	"mu1_isVisibleCSC/O:mu2_isVisibleCSC/O:mu3_isVisibleCSC/O"     );
-   tr->Branch("isMuVisibleGEM"     ,	&isMuVisibleGEM[0]     , 	"mu1_isVisibleGEM/O:mu2_isVisibleGEM/O:mu3_isVisibleGEM/O"     );
-   tr->Branch("nVisibleMu"  ,	&nVisibleMu,	"nVisibleMu/I" 	);
-   tr->Branch("nVisibleMuME0" ,	&nVisibleMuME0,	"nVisibleMuME0/I");
-   tr->Branch("nVisibleMuCSC" ,	&nVisibleMuCSC,	"nVisibleMuCSC/I"	);
-   tr->Branch("nVisibleMuGEM" ,	&nVisibleMuGEM,	"nVisibleMuGEM/I"	);
-   tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
-   tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
+   tr->Branch("isMuVisible"     ,	&isMuVisible[0]     , 	"mu1_isVisible/O:mu2_isVisible/O:mu3_isVisible/O"     );
+   tr->Branch("nVisibleMu"  ,	&nVisibleMu,	"nVisibleMu/I"	);
    tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
    tr->Branch("muVyBirth"     ,	&muVyBirth[0]     , 	"mu1_VyBirth:mu2_VyBirth:mu3_VyBirth"     );
    tr->Branch("muVzBirth"     ,	&muVzBirth[0]     , 	"mu1_VzBirth:mu2_VzBirth:mu3_VzBirth"     );
@@ -1593,9 +1572,6 @@ gStyle->SetOptTitle(0);
      tauVyDeath = 0;
      tauVzDeath = 0;
      nVisibleMu = 0;
-     nVisibleMuME0 = 0;
-     nVisibleMuCSC = 0;
-     nVisibleMuGEM = 0;
 
      for (int i=0; i<3; i++)
        {
@@ -1606,9 +1582,6 @@ gStyle->SetOptTitle(0);
        muPy[i] 		= 0; 
        muPz[i] 		= 0; 
        isMuVisible[i] 	= 0; 
-       isMuVisibleME0[i]= 0; 
-       isMuVisibleCSC[i]= 0; 
-       isMuVisibleGEM[i]= 0; 
        muVxBirth[i] 	= 0; 
        muVyBirth[i] 	= 0; 
        muVzBirth[i] 	= 0; 
@@ -2057,8 +2030,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
        
        if ( idtrack == muTrackId[i]  )
        { 
-       isMuVisible[i] 	 = 1;
-       isMuVisibleME0[i] = 1;
+       isMuVisible[i] = 1;
        ME0DetId * shMe0id = new ME0DetId( (*it).detUnitId() );
        if (  (*it).entryPoint().z() > -0.298 )    // ||  (*it).exitPoint().z() < 0.29  )
          {
@@ -2136,7 +2108,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
      {
      cout << "Max_z of " << i << "-th mu in ME0:" << muMax_z[i] << endl;  
      }
-     if (isMuVisibleME0[i])  nVisibleMuME0++;
+     if (isMuVisible[i])  nVisibleMu++;
    }
    
    for ( auto it = me0simHitH->begin(); it != me0simHitH->end(); ++it )
@@ -2166,74 +2138,6 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
      (*chit)=(*chit)-av;
      cout << "Chamber after shift: " << (*chit) << endl;
      }
-
-   //CSC SimHits
-   Handle<vector<PSimHit>> cscsimHitH;
-   iEvent.getByToken(CSCSimHitToken_, cscsimHitH);
-
-   for ( auto itc = cscsimHitH->begin(); itc != cscsimHitH->end(); ++itc )
-   { 
-     for ( int i=0; i<3; i++ )
-     {
-       //consider only hits of muons
-       if ( fabs( (*itc).particleType() ) != 13 )	continue; 
-       
-       int idtrack = (*itc).trackId();
-       
-       //verify there is at least one correspondence, 
-       //if not the muon has not arrived in ME0
-       //atLeastOne = false;
-       
-       if ( idtrack == muTrackId[i]  )
-       {
-       isMuVisible[i] 	 = 1;
-       isMuVisibleCSC[i] = 1;
-       }
-     }
-   }
-
-   //increment the nVisibleMuCSC counter
-   for (int i=0; i<3; i++)
-   {
-     if (isMuVisibleCSC[i])  nVisibleMuCSC++;
-   }
-
-
-   //GEM SimHits
-   Handle<vector<PSimHit>> gemsimHitH;
-   iEvent.getByToken(GEMSimHitToken_, gemsimHitH);
-
-   for ( auto itc = gemsimHitH->begin(); itc != gemsimHitH->end(); ++itc )
-   { 
-     for ( int i=0; i<3; i++ )
-     {
-       //consider only hits of muons
-       if ( fabs( (*itc).particleType() ) != 13 )	continue; 
-       
-       int idtrack = (*itc).trackId();
-       
-       //verify there is at least one correspondence, 
-       
-       if ( idtrack == muTrackId[i]  )
-       {
-       isMuVisible[i] 	 = 1;
-       isMuVisibleGEM[i] = 1;
-       }
-     }
-   }
-
-   //increment the nVisibleMuGEM counter
-   for (int i=0; i<3; i++)
-   {
-     if (isMuVisibleGEM[i])  nVisibleMuGEM++;
-   }
-
-   //increment the total nVisibleMu counter
-   for (int i=0; i<3; i++)                                                 
-   {
-     if (isMuVisible[i])  nVisibleMu++;
-   }
-
 
 
    ESHandle<ME0Geometry> me0Geom;
@@ -2271,11 +2175,11 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
    nSegments = 0;
 
    nEvent++;
-   if ( nVisibleMuME0>0) nEventVis++;
-   if ( nVisibleMuME0>0) nEventSel++;
-   if ( nVisibleMuME0>0) nEventSel1++;
-   if ( nVisibleMuME0>1) nEventSel2++;
-   if ( nVisibleMuME0>2) nEventSel3++;
+   if (nME0>0 && nVisibleMu>0) nEventVis++;
+   if (nME0>0 && nVisibleMu>0) nEventSel++;
+   if (nME0>0 && nVisibleMu>0) nEventSel1++;
+   if (nME0>1 && nVisibleMu>1) nEventSel2++;
+   if (nME0>2 && nVisibleMu>2) nEventSel3++;
 
    //bool is_singleME0[5], is_doubleME0[15];
    for ( int i=0; i<5; i++)	
@@ -2551,10 +2455,8 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 
         for ( int pt_ind = 0; pt_ind < 5 ; pt_ind++)
           {
-          if ( nVisibleMuME0<1 ) continue;
 	  if ( fabs(sgDeltaGlobalPhi) < thr[pt_ind] )	
 	    {
-            
 	    is_singleME0[pt_ind] = true;
 	    multiplicity[pt_ind]++;
 	    if ( qtmp>= 0 )  is_singleME0Quality0[pt_ind] = true; 
@@ -2623,12 +2525,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	      }
 	    //cout << "deltaPhi = " << *dp << "   found_double1 = " << found_double1 << "   found_double2 = " << found_double2 << endl;
 	    }
-          if ( found_double1 && found_double2 )
-          {
-            if ( nVisibleMuME0>1) 	is_doubleME0[mixed_ind] = true;
-          }
-
-
+          if ( found_double1 && found_double2 )			is_doubleME0[mixed_ind] = true;
 	  //cout << "result: is_doubleME0 = " << is_doubleME0[mixed_ind] << endl;
 
 	  //cout << "mixed_ind =" << mixed_ind << endl;
@@ -2656,10 +2553,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	        }
 	      //cout << "deltaPhi = " << *dp << "   found_triple3 = " << found_triple3 << "   found_triple2 = " << found_triple2 << "   found_triple1 = " << found_triple1 << endl;
   	      }
-            if ( found_triple1 && found_triple2 && found_triple3 )
-            {	
-              if ( nVisibleMuME0>2 ) is_tripleME0[triple_ind] = true;
-            }
+            if ( found_triple1 && found_triple2 && found_triple3 )	is_tripleME0[triple_ind] = true;
   	    //cout << "result: is_tripleME0 = " << is_tripleME0[triple_ind] << endl;
   
 	    //cout << "triple_ind =" << triple_ind << endl;
@@ -2674,127 +2568,120 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
       cout << "me0List size = " << (*me0List).size() << endl;
 
       //Trigger WITH chamber vicinity request (doubles)
-      
-      if ( nVisibleMuME0 > 1 )
+
+      if ( (*deltaGlobalPhiLayer21List).size() > 1 )
       {
-        if ( (*deltaGlobalPhiLayer21List).size() > 1 )
+      mixed_ind = 0;
+      for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-        mixed_ind = 0;
-        for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
-          {
-          //cout << "pt1_ind = " << pt1_ind << endl;
-            for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
-  	    {
-	    //cout << "pt2_ind = " << pt2_ind << endl;
-	      bool good = false;
-              for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
+	//cout << "pt1_ind = " << pt1_ind << endl;
+        for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
+	  {
+	  //cout << "pt2_ind = " << pt2_ind << endl;
+	    bool good = false;
+            for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
+              {
+	      //cout << "dp1_ind = " << dp1_ind << endl;
+	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
                 {
-	        //cout << "dp1_ind = " << dp1_ind << endl;
-	        for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
-                  {
-	            //cout << "dp2_ind = " << dp2_ind << endl;
-	       	    ME0DetId me01( (*me0List)[dp1_ind] );
-	       	    ME0DetId me02( (*me0List)[dp2_ind] );
-		    int end1 = me01.region(); 
-		    int end2 = me02.region(); 
-	 	    int ch1  = me01.chamber();
-		    int ch2  = me02.chamber();
-		    if ( end1!=end2 ) continue; //two segments must be in the same endcap
-  		    if ( fabs(ch1-ch2)>1 ) continue; //three segments must be in the same chamber or in adjacent chambers
-		    //order deltaPhi by absolute value
-		    float dPhiFabs[2] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) };
-		    float maxDP = *std::max_element(dPhiFabs,dPhiFabs+2);
-		    float minDP = *std::min_element(dPhiFabs,dPhiFabs+2);
-                    if ( (minDP<thr[pt2_ind]) && (maxDP<thr[pt1_ind]) )	good=true;
-	          }
-	        } //end loop over 3 deltaPhi combinations
-	      if (good)  is_doubleME0near[mixed_ind] = true;
-            
+	          //cout << "dp2_ind = " << dp2_ind << endl;
+	       	  ME0DetId me01( (*me0List)[dp1_ind] );
+	       	  ME0DetId me02( (*me0List)[dp2_ind] );
+		  int end1 = me01.region(); 
+		  int end2 = me02.region(); 
+		  int ch1  = me01.chamber();
+		  int ch2  = me02.chamber();
+		  if ( end1!=end2 ) continue; //two segments must be in the same endcap
+  		  if ( fabs(ch1-ch2)>1 ) continue; //three segments must be in the same chamber or in adjacent chambers
+		  //order deltaPhi by absolute value
+		  float dPhiFabs[2] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) };
+		  float maxDP = *std::max_element(dPhiFabs,dPhiFabs+2);
+		  float minDP = *std::min_element(dPhiFabs,dPhiFabs+2);
+                  if ( (minDP<thr[pt2_ind]) && (maxDP<thr[pt1_ind]) )	good=true;
+	        }
+	      } //end loop over 3 deltaPhi combinations
+	    if (good) is_doubleME0near[mixed_ind] = true;
   
-	    mixed_ind++;
-	    //cout << "mixed_ind = " << mixed_ind << endl;
-	    } //loop over pt2_ind (2nd thr value)
- 	  } //loop over pt1_ind (1st thr value)
-        } //if there are at least 2 segments
-      }
+	  mixed_ind++;
+	  //cout << "mixed_ind = " << mixed_ind << endl;
+	  } //loop over pt2_ind (2nd thr value)
+	} //loop over pt1_ind (1st thr value)
+      } //if there are at least 2 segments
+
 
       cout << "Starting to evaluate triple triggers with vicinity request" << endl;
 
       //Trigger WITH chamber vicinity request (triples)
-      if ( nVisibleMuME0 > 2 )
+      if ( (*deltaGlobalPhiLayer21List).size() > 2 )
       {
-        if ( (*deltaGlobalPhiLayer21List).size() > 2 )
+      triple_ind = 0;
+      for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-          triple_ind = 0;
-          for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
-          {
-	    //cout << "pt1_ind = " << pt1_ind << endl;
-            for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
-	    {
-	      //cout << "pt2_ind = " << pt2_ind << endl;
-	      for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
+	//cout << "pt1_ind = " << pt1_ind << endl;
+        for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
+	  {
+	  //cout << "pt2_ind = " << pt2_ind << endl;
+	  for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
+            {
+	    //cout << "pt3_ind = " << pt3_ind << endl;
+	    bool good = false;
+            for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
               {
-	        //cout << "pt3_ind = " << pt3_ind << endl;
-	        bool good = false;
-                for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
+	      //cout << "dp1_ind = " << dp1_ind << endl;
+	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
                 {
-	          //cout << "dp1_ind = " << dp1_ind << endl;
-	          for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
-                  {
-	            //cout << "dp2_ind = " << dp2_ind << endl;
-	            for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
-	            {
-	              //cout << "dp3_ind = " << dp3_ind << endl;
-	       	      ME0DetId me01( (*me0List)[dp1_ind] );
-	       	      ME0DetId me02( (*me0List)[dp2_ind] );
-	       	      ME0DetId me03( (*me0List)[dp3_ind] );
-		      int end1 = me01.region(); 
-		      int end2 = me02.region(); 
-		      int end3 = me03.region(); 
-		      int ch1  = me01.chamber();
-		      int ch2  = me02.chamber();
-		      int ch3  = me03.chamber();
-		      if ( !(end1==end2 && end1==end3) ) continue; //three segments must be in the same endcap
-		      //three segments must be in the same chamber or in adjacent chambers
-		      if ( fabs(ch1-ch2)>1 ) continue;
-		      if ( fabs(ch1-ch3)>1 ) continue;
-		      if ( fabs(ch2-ch3)>1 ) continue;
-		      //order deltaPhi by absolute value
-		      float dPhiFabs[3] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp3_ind]) };
-		      float maxDP = *std::max_element(dPhiFabs,dPhiFabs+3);
-		      float minDP = *std::min_element(dPhiFabs,dPhiFabs+3);
-		      float medDP = dPhiFabs[0]+dPhiFabs[1]+dPhiFabs[2]-maxDP-minDP;
-                      if ( (minDP<thr[pt3_ind]) && (maxDP<thr[pt1_ind]) && (medDP<thr[pt2_ind]) )	good=true;
-		    }
-	          }
-	        } //end loop over 3 deltaPhi combinations
-	        if (good) is_tripleME0near[triple_ind] = true;
-                //cout << "triple_ind = " << triple_ind << endl; 
-	        triple_ind++;
-	      } // loop over pt3_ind (3rd thr value)
-	    } //loop over pt2_ind (2nd thr value)
-	  } //loop over pt1_ind (1st thr value)
-        } // if there are at least 3 segments
-      }//if nVisibleMuME0 > 2
+	        //cout << "dp2_ind = " << dp2_ind << endl;
+	        for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
+	          {
+	          //cout << "dp3_ind = " << dp3_ind << endl;
+	       	  ME0DetId me01( (*me0List)[dp1_ind] );
+	       	  ME0DetId me02( (*me0List)[dp2_ind] );
+	       	  ME0DetId me03( (*me0List)[dp3_ind] );
+		  int end1 = me01.region(); 
+		  int end2 = me02.region(); 
+		  int end3 = me03.region(); 
+		  int ch1  = me01.chamber();
+		  int ch2  = me02.chamber();
+		  int ch3  = me03.chamber();
+		  if ( !(end1==end2 && end1==end3) ) continue; //three segments must be in the same endcap
+		  //three segments must be in the same chamber or in adjacent chambers
+		  if ( fabs(ch1-ch2)>1 ) continue;
+		  if ( fabs(ch1-ch3)>1 ) continue;
+		  if ( fabs(ch2-ch3)>1 ) continue;
+		  //order deltaPhi by absolute value
+		  float dPhiFabs[3] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp3_ind]) };
+		  float maxDP = *std::max_element(dPhiFabs,dPhiFabs+3);
+		  float minDP = *std::min_element(dPhiFabs,dPhiFabs+3);
+		  float medDP = dPhiFabs[0]+dPhiFabs[1]+dPhiFabs[2]-maxDP-minDP;
+                  if ( (minDP<thr[pt3_ind]) && (maxDP<thr[pt1_ind]) && (medDP<thr[pt2_ind]) )	good=true;
+		  }
+	        }
+	      } //end loop over 3 deltaPhi combinations
+	    if (good) is_tripleME0near[triple_ind] = true;
+            //cout << "triple_ind = " << triple_ind << endl; 
+	    triple_ind++;
+	    } // loop over pt3_ind (3rd thr value)
+	  } //loop over pt2_ind (2nd thr value)
+	} //loop over pt1_ind (1st thr value)
+       } // if there are at least 3 segments
+       
 
       //Trigger WITH eta partition vicinity request (doubles)
 
-      if ( nVisibleMuME0 > 1 )
+      if ( (*deltaGlobalPhiLayer21List).size() > 1 )
       {
-        if ( (*deltaGlobalPhiLayer21List).size() > 1 )
+      mixed_ind = 0;
+      for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-          mixed_ind = 0;
-          for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
-          {
- 	    //cout << "pt1_ind = " << pt1_ind << endl;
-            for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
-	    {
-	      //cout << "pt2_ind = " << pt2_ind << endl;
-	      bool good = false;
-              for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
+	//cout << "pt1_ind = " << pt1_ind << endl;
+        for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
+	  {
+	  //cout << "pt2_ind = " << pt2_ind << endl;
+	    bool good = false;
+            for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
               {
-	        //cout << "dp1_ind = " << dp1_ind << endl;
-	        for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
+	      //cout << "dp1_ind = " << dp1_ind << endl;
+	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
                 {
 	          //cout << "dp2_ind = " << dp2_ind << endl;
 	       	  ME0DetId me01( (*me0List)[dp1_ind] );
@@ -2815,314 +2702,308 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
                   if ( (minDP<thr[pt2_ind]) && (maxDP<thr[pt1_ind]) )	good=true;
 	        }
 	      } //end loop over 3 deltaPhi combinations
-	      if (good) is_doubleME0close[mixed_ind] = true;
+	    if (good) is_doubleME0close[mixed_ind] = true;
   
- 	    mixed_ind++;
-	    //cout << "mixed_ind = " << mixed_ind << endl;
-	    } //loop over pt2_ind (2nd thr value)
-	  } //loop over pt1_ind (1st thr value)
-        } //if there are at least 2 segments
-      }//if nVisibleMuME0 > 1
+	  mixed_ind++;
+	  //cout << "mixed_ind = " << mixed_ind << endl;
+	  } //loop over pt2_ind (2nd thr value)
+	} //loop over pt1_ind (1st thr value)
+      } //if there are at least 2 segments
+
 
       cout << "Starting to evaluate triple triggers with vicinity request" << endl;
 
       //Trigger WITH eta partition vicinity request (triples)
-      if ( nVisibleMuME0 > 2 )
+      if ( (*deltaGlobalPhiLayer21List).size() > 2 )
       {
-        if ( (*deltaGlobalPhiLayer21List).size() > 2 )
+      triple_ind = 0;
+      for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-          triple_ind = 0;
-          for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
-          {
-	    //cout << "pt1_ind = " << pt1_ind << endl;
-            for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
-	    {
-	      //cout << "pt2_ind = " << pt2_ind << endl;
-	      for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
+	//cout << "pt1_ind = " << pt1_ind << endl;
+        for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
+	  {
+	  //cout << "pt2_ind = " << pt2_ind << endl;
+	  for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
+            {
+	    //cout << "pt3_ind = " << pt3_ind << endl;
+	    bool good = false;
+            for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
               {
-	        //cout << "pt3_ind = " << pt3_ind << endl;
-	        bool good = false;
-                for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
+	      //cout << "dp1_ind = " << dp1_ind << endl;
+	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
                 {
-	          //cout << "dp1_ind = " << dp1_ind << endl;
-	          for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
-                  {
-	            //cout << "dp2_ind = " << dp2_ind << endl;
-	            for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
-	            {
-	              //cout << "dp3_ind = " << dp3_ind << endl;
-	       	      ME0DetId me01( (*me0List)[dp1_ind] );
-	       	      ME0DetId me02( (*me0List)[dp2_ind] );
-	       	      ME0DetId me03( (*me0List)[dp3_ind] );
-		      int end1 = me01.region(); 
-		      int end2 = me02.region(); 
-		      int end3 = me03.region(); 
-		      int ch1  = me01.chamber();
-		      int ch2  = me02.chamber();
-		      int ch3  = me03.chamber();
-		      int etap1= (*etaPartList)[dp1_ind];
-		      int etap2= (*etaPartList)[dp2_ind];
-		      int etap3= (*etaPartList)[dp3_ind];
-		      if ( fabs(etap1-etap2)>1 ) continue;
-		      if ( fabs(etap1-etap3)>1 ) continue;
-		      if ( fabs(etap2-etap3)>1 ) continue; //two segments must be in nearby eta partition (limit to be defined)
-		      if ( !(end1==end2 && end1==end3) ) continue; //three segments must be in the same endcap
-		      //three segments must be in the same chamber or in adjacent chambers
-		      if ( fabs(ch1-ch2)>1 ) continue;
-		      if ( fabs(ch1-ch3)>1 ) continue;
-		      if ( fabs(ch2-ch3)>1 ) continue;
-		      //order deltaPhi by absolute value
-		      float dPhiFabs[3] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp3_ind]) };
-		      float maxDP = *std::max_element(dPhiFabs,dPhiFabs+3);
-		      float minDP = *std::min_element(dPhiFabs,dPhiFabs+3);
-		      float medDP = dPhiFabs[0]+dPhiFabs[1]+dPhiFabs[2]-maxDP-minDP;
-                      if ( (minDP<thr[pt3_ind]) && (maxDP<thr[pt1_ind]) && (medDP<thr[pt2_ind]) )	good=true;
-		    }
-	          }
-	        } //end loop over 3 deltaPhi combinations
-	        if (good) is_tripleME0close[triple_ind] = true;
-                //cout << "triple_ind = " << triple_ind << endl; 
-	        triple_ind++;
-	      } // loop over pt3_ind (3rd thr value)
-	    } //loop over pt2_ind (2nd thr value)
-	   } //loop over pt1_ind (1st thr value)
-         } // if there are at least 3 segments
-      }//if nVisibleMuME0 > 2 
+	        //cout << "dp2_ind = " << dp2_ind << endl;
+	        for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
+	          {
+	          //cout << "dp3_ind = " << dp3_ind << endl;
+	       	  ME0DetId me01( (*me0List)[dp1_ind] );
+	       	  ME0DetId me02( (*me0List)[dp2_ind] );
+	       	  ME0DetId me03( (*me0List)[dp3_ind] );
+		  int end1 = me01.region(); 
+		  int end2 = me02.region(); 
+		  int end3 = me03.region(); 
+		  int ch1  = me01.chamber();
+		  int ch2  = me02.chamber();
+		  int ch3  = me03.chamber();
+		  int etap1= (*etaPartList)[dp1_ind];
+		  int etap2= (*etaPartList)[dp2_ind];
+		  int etap3= (*etaPartList)[dp3_ind];
+		  if ( fabs(etap1-etap2)>1 ) continue;
+		  if ( fabs(etap1-etap3)>1 ) continue;
+		  if ( fabs(etap2-etap3)>1 ) continue; //two segments must be in nearby eta partition (limit to be defined)
+		  if ( !(end1==end2 && end1==end3) ) continue; //three segments must be in the same endcap
+		  //three segments must be in the same chamber or in adjacent chambers
+		  if ( fabs(ch1-ch2)>1 ) continue;
+		  if ( fabs(ch1-ch3)>1 ) continue;
+		  if ( fabs(ch2-ch3)>1 ) continue;
+		  //order deltaPhi by absolute value
+		  float dPhiFabs[3] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp3_ind]) };
+		  float maxDP = *std::max_element(dPhiFabs,dPhiFabs+3);
+		  float minDP = *std::min_element(dPhiFabs,dPhiFabs+3);
+		  float medDP = dPhiFabs[0]+dPhiFabs[1]+dPhiFabs[2]-maxDP-minDP;
+                  if ( (minDP<thr[pt3_ind]) && (maxDP<thr[pt1_ind]) && (medDP<thr[pt2_ind]) )	good=true;
+		  }
+	        }
+	      } //end loop over 3 deltaPhi combinations
+	    if (good) is_tripleME0close[triple_ind] = true;
+            //cout << "triple_ind = " << triple_ind << endl; 
+	    triple_ind++;
+	    } // loop over pt3_ind (3rd thr value)
+	  } //loop over pt2_ind (2nd thr value)
+	} //loop over pt1_ind (1st thr value)
+       } // if there are at least 3 segments
+
 
 
 
       //Trigger WITH chamber vicinity and Quality request (doubles)
 
-      if (nVisibleMuME0 > 1 )
+      if ( (*deltaGlobalPhiLayer21List).size() > 1 )
       {
-        if ( (*deltaGlobalPhiLayer21List).size() > 1 )
+      mixed_ind = 0;
+      for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-          mixed_ind = 0;
-          for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
-          {
- 	    //cout << "pt1_ind = " << pt1_ind << endl;
-            for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
-	    {
-	      //cout << "pt2_ind = " << pt2_ind << endl;
-	      bool goodQ0 = false;
-	      bool goodQ1 = false;
-	      bool goodQ2 = false;
-	      bool eveto0 = false;
-	      bool eveto1 = false;
-	      bool eveto2 = false;
-	      bool eveto3 = false;
-              bool goodQ0eveto0 = false;
-              bool goodQ0eveto1 = false;
-              bool goodQ0eveto2 = false;
-              bool goodQ0eveto3 = false;
-              bool goodQ1eveto0 = false;
-              bool goodQ1eveto1 = false;
-              bool goodQ1eveto2 = false;
-              bool goodQ1eveto3 = false;
-              bool goodQ2eveto0 = false;
-              bool goodQ2eveto1 = false;
-              bool goodQ2eveto2 = false;
-              bool goodQ2eveto3 = false;
-              for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
+	//cout << "pt1_ind = " << pt1_ind << endl;
+        for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
+	  {
+	  //cout << "pt2_ind = " << pt2_ind << endl;
+	    bool goodQ0 = false;
+	    bool goodQ1 = false;
+	    bool goodQ2 = false;
+	    bool eveto0 = false;
+	    bool eveto1 = false;
+	    bool eveto2 = false;
+	    bool eveto3 = false;
+            bool goodQ0eveto0 = false;
+            bool goodQ0eveto1 = false;
+            bool goodQ0eveto2 = false;
+            bool goodQ0eveto3 = false;
+            bool goodQ1eveto0 = false;
+            bool goodQ1eveto1 = false;
+            bool goodQ1eveto2 = false;
+            bool goodQ1eveto3 = false;
+            bool goodQ2eveto0 = false;
+            bool goodQ2eveto1 = false;
+            bool goodQ2eveto2 = false;
+            bool goodQ2eveto3 = false;
+            for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
               {
-	        //cout << "dp1_ind = " << dp1_ind << endl;
-	        for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
-                  {
-	            //cout << "dp2_ind = " << dp2_ind << endl;
-	       	    ME0DetId me01( (*me0List)[dp1_ind] );
-	       	    ME0DetId me02( (*me0List)[dp2_ind] );
-		    int end1 = me01.region(); 
-		    int end2 = me02.region(); 
-		    int ch1  = me01.chamber();
-		    int ch2  = me02.chamber();
-		    if ( end1!=end2 ) continue; //two segments must be in the same endcap
-  		    if ( fabs(ch1-ch2)>1 ) continue; //three segments must be in the same chamber or in adjacent chambers
-		    //order deltaPhi by absolute value
-		    float dPhiFabs[2] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) };
-		    float maxDP = *std::max_element(dPhiFabs,dPhiFabs+2);
-		    float minDP = *std::min_element(dPhiFabs,dPhiFabs+2);
-                    if ( ! ((minDP<thr[pt2_ind]) && (maxDP<thr[pt1_ind])) ) continue;
-		    if ( ((*qualityList)[dp1_ind]>=0) && ((*qualityList)[dp2_ind]>=0) ) goodQ0 = true;
-		    if ( ((*qualityList)[dp1_ind]>=1) && ((*qualityList)[dp2_ind]>=1) ) goodQ1 = true;
-		    if ( ((*qualityList)[dp1_ind]>=2) && ((*qualityList)[dp2_ind]>=2) ) goodQ2 = true;
-		    eveto0 = true;
-		    if ( ((*etaPartList)[dp1_ind]<8)  && ((*etaPartList)[dp2_ind]<8) )  eveto1  = true;
-		    if ( ((*etaPartList)[dp1_ind]<7)  && ((*etaPartList)[dp2_ind]<7) )  eveto2  = true;
-		    if ( ((*etaPartList)[dp1_ind]<6)  && ((*etaPartList)[dp2_ind]<6) )  eveto3  = true;
-		    //combinations
-		    if (goodQ0)
+	      //cout << "dp1_ind = " << dp1_ind << endl;
+	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
+                {
+	          //cout << "dp2_ind = " << dp2_ind << endl;
+	       	  ME0DetId me01( (*me0List)[dp1_ind] );
+	       	  ME0DetId me02( (*me0List)[dp2_ind] );
+		  int end1 = me01.region(); 
+		  int end2 = me02.region(); 
+		  int ch1  = me01.chamber();
+		  int ch2  = me02.chamber();
+		  if ( end1!=end2 ) continue; //two segments must be in the same endcap
+  		  if ( fabs(ch1-ch2)>1 ) continue; //three segments must be in the same chamber or in adjacent chambers
+		  //order deltaPhi by absolute value
+		  float dPhiFabs[2] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) };
+		  float maxDP = *std::max_element(dPhiFabs,dPhiFabs+2);
+		  float minDP = *std::min_element(dPhiFabs,dPhiFabs+2);
+                  if ( ! ((minDP<thr[pt2_ind]) && (maxDP<thr[pt1_ind])) ) continue;
+		  if ( ((*qualityList)[dp1_ind]>=0) && ((*qualityList)[dp2_ind]>=0) ) goodQ0 = true;
+		  if ( ((*qualityList)[dp1_ind]>=1) && ((*qualityList)[dp2_ind]>=1) ) goodQ1 = true;
+		  if ( ((*qualityList)[dp1_ind]>=2) && ((*qualityList)[dp2_ind]>=2) ) goodQ2 = true;
+		  eveto0 = true;
+		  if ( ((*etaPartList)[dp1_ind]<8)  && ((*etaPartList)[dp2_ind]<8) )  eveto1  = true;
+		  if ( ((*etaPartList)[dp1_ind]<7)  && ((*etaPartList)[dp2_ind]<7) )  eveto2  = true;
+		  if ( ((*etaPartList)[dp1_ind]<6)  && ((*etaPartList)[dp2_ind]<6) )  eveto3  = true;
+		  //combinations
+		  if (goodQ0)
 		    { 
-		      if (eveto0)	goodQ0eveto0 = true;
-		      if (eveto1)	goodQ0eveto1 = true;
-		      if (eveto2)	goodQ0eveto2 = true;
-		      if (eveto3)	goodQ0eveto3 = true;
+		    if (eveto0)	goodQ0eveto0 = true;
+		    if (eveto1)	goodQ0eveto1 = true;
+		    if (eveto2)	goodQ0eveto2 = true;
+		    if (eveto3)	goodQ0eveto3 = true;
 		    }
-		    if (goodQ1)
+		  if (goodQ1)
 		    { 
-		      if (eveto0)	goodQ1eveto0 = true;
-		      if (eveto1)	goodQ1eveto1 = true;
-		      if (eveto2)	goodQ1eveto2 = true;
-		      if (eveto3)	goodQ1eveto3 = true;
+		    if (eveto0)	goodQ1eveto0 = true;
+		    if (eveto1)	goodQ1eveto1 = true;
+		    if (eveto2)	goodQ1eveto2 = true;
+		    if (eveto3)	goodQ1eveto3 = true;
 		    }
-		    if (goodQ2)
+		  if (goodQ2)
 		    { 
-		      if (eveto0)	goodQ2eveto0 = true;
-		      if (eveto1)	goodQ2eveto1 = true;
-		      if (eveto2)	goodQ2eveto2 = true;
-		      if (eveto3)	goodQ2eveto3 = true;
+		    if (eveto0)	goodQ2eveto0 = true;
+		    if (eveto1)	goodQ2eveto1 = true;
+		    if (eveto2)	goodQ2eveto2 = true;
+		    if (eveto3)	goodQ2eveto3 = true;
 		    }
-	          }
-	        } //end loop over 3 deltaPhi combinations
-	      if (goodQ0) is_doubleME0nearQuality0[mixed_ind] = true;
-	      if (goodQ1) is_doubleME0nearQuality1[mixed_ind] = true;
-	      if (goodQ2) is_doubleME0nearQuality2[mixed_ind] = true;
-	      if (eveto0) is_doubleME0nearVeto0[mixed_ind] = true;
-	      if (eveto1) is_doubleME0nearVeto1[mixed_ind] = true;
-	      if (eveto2) is_doubleME0nearVeto2[mixed_ind] = true;
-	      if (eveto3) is_doubleME0nearVeto3[mixed_ind] = true;
-              if (goodQ0eveto0) is_doubleME0nearQuality0Veto0[mixed_ind] = true;
-              if (goodQ0eveto1) is_doubleME0nearQuality0Veto1[mixed_ind] = true;
-              if (goodQ0eveto2) is_doubleME0nearQuality0Veto2[mixed_ind] = true;
-              if (goodQ0eveto3) is_doubleME0nearQuality0Veto3[mixed_ind] = true;
-              if (goodQ1eveto0) is_doubleME0nearQuality1Veto0[mixed_ind] = true;
-              if (goodQ1eveto1) is_doubleME0nearQuality1Veto1[mixed_ind] = true;
-              if (goodQ1eveto2) is_doubleME0nearQuality1Veto2[mixed_ind] = true;
-              if (goodQ1eveto3) is_doubleME0nearQuality1Veto3[mixed_ind] = true;
-              if (goodQ2eveto0) is_doubleME0nearQuality2Veto0[mixed_ind] = true;
-              if (goodQ2eveto1) is_doubleME0nearQuality2Veto1[mixed_ind] = true;
-              if (goodQ2eveto2) is_doubleME0nearQuality2Veto2[mixed_ind] = true;
-              if (goodQ2eveto3) is_doubleME0nearQuality2Veto3[mixed_ind] = true;
+	        }
+	      } //end loop over 3 deltaPhi combinations
+	    if (goodQ0) is_doubleME0nearQuality0[mixed_ind] = true;
+	    if (goodQ1) is_doubleME0nearQuality1[mixed_ind] = true;
+	    if (goodQ2) is_doubleME0nearQuality2[mixed_ind] = true;
+	    if (eveto0) is_doubleME0nearVeto0[mixed_ind] = true;
+	    if (eveto1) is_doubleME0nearVeto1[mixed_ind] = true;
+	    if (eveto2) is_doubleME0nearVeto2[mixed_ind] = true;
+	    if (eveto3) is_doubleME0nearVeto3[mixed_ind] = true;
+            if (goodQ0eveto0) is_doubleME0nearQuality0Veto0[mixed_ind] = true;
+            if (goodQ0eveto1) is_doubleME0nearQuality0Veto1[mixed_ind] = true;
+            if (goodQ0eveto2) is_doubleME0nearQuality0Veto2[mixed_ind] = true;
+            if (goodQ0eveto3) is_doubleME0nearQuality0Veto3[mixed_ind] = true;
+            if (goodQ1eveto0) is_doubleME0nearQuality1Veto0[mixed_ind] = true;
+            if (goodQ1eveto1) is_doubleME0nearQuality1Veto1[mixed_ind] = true;
+            if (goodQ1eveto2) is_doubleME0nearQuality1Veto2[mixed_ind] = true;
+            if (goodQ1eveto3) is_doubleME0nearQuality1Veto3[mixed_ind] = true;
+            if (goodQ2eveto0) is_doubleME0nearQuality2Veto0[mixed_ind] = true;
+            if (goodQ2eveto1) is_doubleME0nearQuality2Veto1[mixed_ind] = true;
+            if (goodQ2eveto2) is_doubleME0nearQuality2Veto2[mixed_ind] = true;
+            if (goodQ2eveto3) is_doubleME0nearQuality2Veto3[mixed_ind] = true;
   
-	      mixed_ind++;
-	      //cout << "mixed_ind = " << mixed_ind << endl;
-	    } //loop over pt2_ind (2nd thr value)
-	  } //loop over pt1_ind (1st thr value)
-        } //if there are at least 2 segments
-      }//if nVisibleMuME0 > 1
+	  mixed_ind++;
+	  //cout << "mixed_ind = " << mixed_ind << endl;
+	  } //loop over pt2_ind (2nd thr value)
+	} //loop over pt1_ind (1st thr value)
+      } //if there are at least 2 segments
+
 
       cout << "Starting to evaluate triple triggers with vicinity and quality request" << endl;
 
       //Trigger WITH chamber vicinity and Quality request (triples)
-      if ( nVisibleMuME0 > 2 )
+      if ( (*deltaGlobalPhiLayer21List).size() > 2 )
       {
-        if ( (*deltaGlobalPhiLayer21List).size() > 2 )
+      triple_ind = 0;
+      for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-          triple_ind = 0;
-          for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
-          {
-	    //cout << "pt1_ind = " << pt1_ind << endl;
-            for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
-	    {
-	      //cout << "pt2_ind = " << pt2_ind << endl;
-	      for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
+	//cout << "pt1_ind = " << pt1_ind << endl;
+        for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
+	  {
+	  //cout << "pt2_ind = " << pt2_ind << endl;
+	  for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
+            {
+	    //cout << "pt3_ind = " << pt3_ind << endl;
+	    bool goodQ0 = false;
+	    bool goodQ1 = false;
+	    bool goodQ2 = false;
+	    bool eveto0 = false;
+	    bool eveto1 = false;
+	    bool eveto2 = false;
+	    bool eveto3 = false;
+            bool goodQ0eveto0 = false;
+            bool goodQ0eveto1 = false;
+            bool goodQ0eveto2 = false;
+            bool goodQ0eveto3 = false;
+            bool goodQ1eveto0 = false;
+            bool goodQ1eveto1 = false;
+            bool goodQ1eveto2 = false;
+            bool goodQ1eveto3 = false;
+            bool goodQ2eveto0 = false;
+            bool goodQ2eveto1 = false;
+            bool goodQ2eveto2 = false;
+            bool goodQ2eveto3 = false;
+            for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
               {
-	        //cout << "pt3_ind = " << pt3_ind << endl;
-	        bool goodQ0 = false;
-	        bool goodQ1 = false;
-	        bool goodQ2 = false;
-	        bool eveto0 = false;
-	        bool eveto1 = false;
-	        bool eveto2 = false;
-	        bool eveto3 = false;
-                bool goodQ0eveto0 = false;
-                bool goodQ0eveto1 = false;
-                bool goodQ0eveto2 = false;
-                bool goodQ0eveto3 = false;
-                bool goodQ1eveto0 = false;
-                bool goodQ1eveto1 = false;
-                bool goodQ1eveto2 = false;
-                bool goodQ1eveto3 = false;
-                bool goodQ2eveto0 = false;
-                bool goodQ2eveto1 = false;
-                bool goodQ2eveto2 = false;
-                bool goodQ2eveto3 = false;
-                for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
+	      //cout << "dp1_ind = " << dp1_ind << endl;
+	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
                 {
-	          //cout << "dp1_ind = " << dp1_ind << endl;
-	          for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
-                  {
-	            //cout << "dp2_ind = " << dp2_ind << endl;
-	            for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
-	            {
-	              //cout << "dp3_ind = " << dp3_ind << endl;
-	       	      ME0DetId me01( (*me0List)[dp1_ind] );
-	       	      ME0DetId me02( (*me0List)[dp2_ind] );
-	       	      ME0DetId me03( (*me0List)[dp3_ind] );
-		      int end1 = me01.region(); 
-		      int end2 = me02.region(); 
-		      int end3 = me03.region(); 
-		      int ch1  = me01.chamber();
-		      int ch2  = me02.chamber();
-		      int ch3  = me03.chamber();
-		      if ( !(end1==end2 && end1==end3) ) continue; //three segments must be in the same endcap
-		      //three segments must be in the same chamber or in adjacent chambers
-		      if ( fabs(ch1-ch2)>1 ) continue;
-		      if ( fabs(ch1-ch3)>1 ) continue;
-		      if ( fabs(ch2-ch3)>1 ) continue;
-		      //order deltaPhi by absolute value
-		      float dPhiFabs[3] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp3_ind]) };
-		      float maxDP = *std::max_element(dPhiFabs,dPhiFabs+3);
-		      float minDP = *std::min_element(dPhiFabs,dPhiFabs+3);
-		      float medDP = dPhiFabs[0]+dPhiFabs[1]+dPhiFabs[2]-maxDP-minDP;
-                      if ( !((minDP<thr[pt3_ind]) && (maxDP<thr[pt1_ind]) && (medDP<thr[pt2_ind])) )   continue;
-		      if ( ((*qualityList)[dp1_ind]>=0) && ((*qualityList)[dp2_ind]>=0) &&((*qualityList)[dp3_ind]>=0) )  goodQ0 = true;
-		      if ( ((*qualityList)[dp1_ind]>=1) && ((*qualityList)[dp2_ind]>=1) &&((*qualityList)[dp3_ind]>=1) )  goodQ1 = true;
-		      if ( ((*qualityList)[dp1_ind]>=2) && ((*qualityList)[dp2_ind]>=2) &&((*qualityList)[dp3_ind]>=2) )  goodQ2 = true;
-		      eveto0 = true;
-		      if ( ((*etaPartList)[dp1_ind]<8)  && ((*etaPartList)[dp2_ind]<8)  &&((*etaPartList)[dp3_ind]<8) )  eveto1 = true;
-		      if ( ((*etaPartList)[dp1_ind]<7)  && ((*etaPartList)[dp2_ind]<7)  &&((*etaPartList)[dp3_ind]<7) )  eveto2 = true;
-		      if ( ((*etaPartList)[dp1_ind]<6)  && ((*etaPartList)[dp2_ind]<6)  &&((*etaPartList)[dp3_ind]<6) )  eveto3 = true;
-		      //combinations
-		      if (goodQ0)
-		      { 
-		        if (eveto0)	goodQ0eveto0 = true;
-		        if (eveto1)	goodQ0eveto1 = true;
-		        if (eveto2)	goodQ0eveto2 = true;
-		        if (eveto3)	goodQ0eveto3 = true;
-		      }
-		      if (goodQ1)
-		      { 
-		        if (eveto0)	goodQ1eveto0 = true;
-		        if (eveto1)	goodQ1eveto1 = true;
-		        if (eveto2)	goodQ1eveto2 = true;
-		        if (eveto3)	goodQ1eveto3 = true;
-		      }
-		      if (goodQ2)
-		      { 
-		        if (eveto0)	goodQ2eveto0 = true;
-		        if (eveto1)	goodQ2eveto1 = true;
-		        if (eveto2)	goodQ2eveto2 = true;
-		        if (eveto3)	goodQ2eveto3 = true;
-		      }
-
+	        //cout << "dp2_ind = " << dp2_ind << endl;
+	        for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
+	          {
+	          //cout << "dp3_ind = " << dp3_ind << endl;
+	       	  ME0DetId me01( (*me0List)[dp1_ind] );
+	       	  ME0DetId me02( (*me0List)[dp2_ind] );
+	       	  ME0DetId me03( (*me0List)[dp3_ind] );
+		  int end1 = me01.region(); 
+		  int end2 = me02.region(); 
+		  int end3 = me03.region(); 
+		  int ch1  = me01.chamber();
+		  int ch2  = me02.chamber();
+		  int ch3  = me03.chamber();
+		  if ( !(end1==end2 && end1==end3) ) continue; //three segments must be in the same endcap
+		  //three segments must be in the same chamber or in adjacent chambers
+		  if ( fabs(ch1-ch2)>1 ) continue;
+		  if ( fabs(ch1-ch3)>1 ) continue;
+		  if ( fabs(ch2-ch3)>1 ) continue;
+		  //order deltaPhi by absolute value
+		  float dPhiFabs[3] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp3_ind]) };
+		  float maxDP = *std::max_element(dPhiFabs,dPhiFabs+3);
+		  float minDP = *std::min_element(dPhiFabs,dPhiFabs+3);
+		  float medDP = dPhiFabs[0]+dPhiFabs[1]+dPhiFabs[2]-maxDP-minDP;
+                  if ( !((minDP<thr[pt3_ind]) && (maxDP<thr[pt1_ind]) && (medDP<thr[pt2_ind])) )   continue;
+		  if ( ((*qualityList)[dp1_ind]>=0) && ((*qualityList)[dp2_ind]>=0) &&((*qualityList)[dp3_ind]>=0) )  goodQ0 = true;
+		  if ( ((*qualityList)[dp1_ind]>=1) && ((*qualityList)[dp2_ind]>=1) &&((*qualityList)[dp3_ind]>=1) )  goodQ1 = true;
+		  if ( ((*qualityList)[dp1_ind]>=2) && ((*qualityList)[dp2_ind]>=2) &&((*qualityList)[dp3_ind]>=2) )  goodQ2 = true;
+		  eveto0 = true;
+		  if ( ((*etaPartList)[dp1_ind]<8)  && ((*etaPartList)[dp2_ind]<8)  &&((*etaPartList)[dp3_ind]<8) )  eveto1 = true;
+		  if ( ((*etaPartList)[dp1_ind]<7)  && ((*etaPartList)[dp2_ind]<7)  &&((*etaPartList)[dp3_ind]<7) )  eveto2 = true;
+		  if ( ((*etaPartList)[dp1_ind]<6)  && ((*etaPartList)[dp2_ind]<6)  &&((*etaPartList)[dp3_ind]<6) )  eveto3 = true;
+		  //combinations
+		  if (goodQ0)
+		    { 
+		    if (eveto0)	goodQ0eveto0 = true;
+		    if (eveto1)	goodQ0eveto1 = true;
+		    if (eveto2)	goodQ0eveto2 = true;
+		    if (eveto3)	goodQ0eveto3 = true;
 		    }
-	          }
-	        } //end loop over 3 deltaPhi combinations
-	        if (goodQ0) is_tripleME0nearQuality0[triple_ind] = true;
-	        if (goodQ1) is_tripleME0nearQuality1[triple_ind] = true;
-	        if (goodQ2) is_tripleME0nearQuality2[triple_ind] = true;
-	        if (eveto0) is_tripleME0nearVeto0[triple_ind] = true;
-	        if (eveto1) is_tripleME0nearVeto1[triple_ind] = true;
-	        if (eveto2) is_tripleME0nearVeto2[triple_ind] = true;
-                if (goodQ0eveto0) is_tripleME0nearQuality0Veto0[triple_ind] = true;
-                if (goodQ0eveto1) is_tripleME0nearQuality0Veto1[triple_ind] = true;
-                if (goodQ0eveto2) is_tripleME0nearQuality0Veto2[triple_ind] = true;
-                if (goodQ0eveto3) is_tripleME0nearQuality0Veto3[triple_ind] = true;
-                if (goodQ1eveto0) is_tripleME0nearQuality1Veto0[triple_ind] = true;
-                if (goodQ1eveto1) is_tripleME0nearQuality1Veto1[triple_ind] = true;
-                if (goodQ1eveto2) is_tripleME0nearQuality1Veto2[triple_ind] = true;
-                if (goodQ1eveto3) is_tripleME0nearQuality1Veto3[triple_ind] = true;
-                if (goodQ2eveto0) is_tripleME0nearQuality2Veto0[triple_ind] = true;
-                if (goodQ2eveto1) is_tripleME0nearQuality2Veto1[triple_ind] = true;
-                if (goodQ2eveto2) is_tripleME0nearQuality2Veto2[triple_ind] = true;
-                if (goodQ2eveto3) is_tripleME0nearQuality2Veto3[triple_ind] = true;
-                //cout << "triple_ind = " << triple_ind << endl; 
-	        triple_ind++;
-	      } // loop over pt3_ind (3rd thr value)
-	    } //loop over pt2_ind (2nd thr value)
-	  } //loop over pt1_ind (1st thr value)
-        } // if there are at least 3 segments
-     }//if nVisibleMuME0 > 2
+		  if (goodQ1)
+		    { 
+		    if (eveto0)	goodQ1eveto0 = true;
+		    if (eveto1)	goodQ1eveto1 = true;
+		    if (eveto2)	goodQ1eveto2 = true;
+		    if (eveto3)	goodQ1eveto3 = true;
+		    }
+		  if (goodQ2)
+		    { 
+		    if (eveto0)	goodQ2eveto0 = true;
+		    if (eveto1)	goodQ2eveto1 = true;
+		    if (eveto2)	goodQ2eveto2 = true;
+		    if (eveto3)	goodQ2eveto3 = true;
+		    }
+
+		  }
+	        }
+	      } //end loop over 3 deltaPhi combinations
+	    if (goodQ0) is_tripleME0nearQuality0[triple_ind] = true;
+	    if (goodQ1) is_tripleME0nearQuality1[triple_ind] = true;
+	    if (goodQ2) is_tripleME0nearQuality2[triple_ind] = true;
+	    if (eveto0) is_tripleME0nearVeto0[triple_ind] = true;
+	    if (eveto1) is_tripleME0nearVeto1[triple_ind] = true;
+	    if (eveto2) is_tripleME0nearVeto2[triple_ind] = true;
+            if (goodQ0eveto0) is_tripleME0nearQuality0Veto0[triple_ind] = true;
+            if (goodQ0eveto1) is_tripleME0nearQuality0Veto1[triple_ind] = true;
+            if (goodQ0eveto2) is_tripleME0nearQuality0Veto2[triple_ind] = true;
+            if (goodQ0eveto3) is_tripleME0nearQuality0Veto3[triple_ind] = true;
+            if (goodQ1eveto0) is_tripleME0nearQuality1Veto0[triple_ind] = true;
+            if (goodQ1eveto1) is_tripleME0nearQuality1Veto1[triple_ind] = true;
+            if (goodQ1eveto2) is_tripleME0nearQuality1Veto2[triple_ind] = true;
+            if (goodQ1eveto3) is_tripleME0nearQuality1Veto3[triple_ind] = true;
+            if (goodQ2eveto0) is_tripleME0nearQuality2Veto0[triple_ind] = true;
+            if (goodQ2eveto1) is_tripleME0nearQuality2Veto1[triple_ind] = true;
+            if (goodQ2eveto2) is_tripleME0nearQuality2Veto2[triple_ind] = true;
+            if (goodQ2eveto3) is_tripleME0nearQuality2Veto3[triple_ind] = true;
+            //cout << "triple_ind = " << triple_ind << endl; 
+	    triple_ind++;
+	    } // loop over pt3_ind (3rd thr value)
+	  } //loop over pt2_ind (2nd thr value)
+	} //loop over pt1_ind (1st thr value)
+       } // if there are at least 3 segments
+
 
 
      
@@ -3285,16 +3166,16 @@ DeltaGlobalPhiAnalyzer::endJob()
  Int_t denom3=-1;
  
  //mME0 is only the number of muons that are generate din eta region of ME0
- //but they have to be visible: this is controlled by nVisibleMuME0
+ //but they have to be visible: this is controlled by nVisibleMu
   
  
- //if (nME0>0 && nVisibleMuME0>0 && signal)  denom1=lastEventSel1; 
- //if (nME0>1 && nVisibleMuME0>1 && signal)  denom2=lastEventSel2;
- //if (nME0>2 && nVisibleMuME0>2 && signal)  denom3=lastEventSel3;
- //if (nME0>0 && nVisibleMuME0>0 && signal)  denom=lastEventSel;
+ //if (nME0>0 && nVisibleMu>0 && signal)  denom1=lastEventSel1; 
+ //if (nME0>1 && nVisibleMu>1 && signal)  denom2=lastEventSel2;
+ //if (nME0>2 && nVisibleMu>2 && signal)  denom3=lastEventSel3;
+ //if (nME0>0 && nVisibleMu>0 && signal)  denom=lastEventSel;
  
  //I have to do in this way because the nME0 seen in the endjob is only that of the last event
- //same for nVisibleMuME0  
+ //same for nVisibleMu  
  if ( signal ) 
  {
    //to make efficiencies with the total of visibles
