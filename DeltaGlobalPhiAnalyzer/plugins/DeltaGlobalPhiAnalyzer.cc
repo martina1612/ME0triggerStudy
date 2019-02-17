@@ -43,12 +43,21 @@
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "Geometry/GEMGeometry/interface/ME0Geometry.h"
+#include "Geometry/CSCGeometry/interface/CSCGeometry.h"
+#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
+#include "Geometry/DTGeometry/interface/DTGeometry.h"
+#include "Geometry/RPCGeometry/interface/RPCGeometry.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/GEMDigi/interface/ME0Digi.h"
 #include "DataFormats/GEMRecHit/interface/ME0SegmentCollection.h"
 #include "DataFormats/GEMRecHit/interface/ME0Segment.h"
+#include "DataFormats/GEMRecHit/interface/GEMSegmentCollection.h"
+#include "DataFormats/GEMRecHit/interface/GEMSegment.h"
+#include "DataFormats/CSCRecHit/interface/CSCSegmentCollection.h"
+#include "DataFormats/CSCRecHit/interface/CSCSegment.h"
 #include "DataFormats/MuonData/interface/MuonDigiCollection.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
 #include "Geometry/GEMGeometry/interface/ME0EtaPartitionSpecs.h"
 #include "Geometry/GEMGeometry/interface/ME0EtaPartition.h"
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
@@ -59,12 +68,13 @@
 #include "DataFormats/GEMDigi/interface/ME0PadDigi.h"
 #include "DataFormats/GEMDigi/interface/ME0PadDigiCluster.h"
 #include "DataFormats/GEMDigi/interface/ME0PadDigiClusterCollection.h"
+#include "DataFormats/L1Trigger/interface/BXVector.h"
+#include "DataFormats/L1TMuon/interface/RegionalMuonCand.h"
+#include "DataFormats/L1TMuon/interface/RegionalMuonCandFwd.h"
+
 //#include "RecoLocalMuon/GEMSegment/plugins/GEMSegmentAlgorithm.h"
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
-
-#include "Geometry/CSCGeometry/interface/CSCGeometry.h"
-#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
 
 //#include "typedefs.h"
 
@@ -149,6 +159,8 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
 
       // ----------member data ---------------------------
       edm::EDGetTokenT<ME0SegmentCollection> ME0SegmentToken_;
+      edm::EDGetTokenT<CSCSegmentCollection> CSCSegmentToken_;
+      edm::EDGetTokenT<GEMSegmentCollection> GEMSegmentToken_;
       edm::EDGetTokenT<GenParticleCollection> genToken_;
       edm::EDGetTokenT<MuonDigiCollection<ME0DetId,ME0Digi>> ME0DigiToken_;
       edm::EDGetTokenT<MuonDigiCollection<ME0DetId,ME0PadDigi>> ME0PadDigiToken_;
@@ -156,7 +168,10 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       edm::EDGetTokenT<vector<PSimHit>> ME0SimHitToken_;
       edm::EDGetTokenT<vector<PSimHit>> CSCSimHitToken_;
       edm::EDGetTokenT<vector<PSimHit>> GEMSimHitToken_;
+      edm::EDGetTokenT<vector<PSimHit>> RPCSimHitToken_;
+      edm::EDGetTokenT<vector<PSimHit>> DTSimHitToken_;
       edm::EDGetTokenT<vector<SimTrack>> simTrackToken_;
+      edm::EDGetTokenT<BXVector<l1t::RegionalMuonCand>> L1TSegmentToken_;
 
       bool v = 1 ; //verbose initialization
       bool reco = 1; //reco initialization (to digi based)
@@ -260,7 +275,9 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
    Int_t doubleME0nearQuality2Veto2count[15], tripleME0nearQuality2Veto2count[35];
    Int_t doubleME0nearQuality2Veto3count[15], tripleME0nearQuality2Veto3count[35];
    Int_t doubleME0closecount[15], tripleME0closecount[35];
-   Int_t multiplicity[5];
+   Int_t multiplicityME0[5];
+   Int_t multiplicityCSC[5];
+   Int_t multiplicityGEM[5];
    Float_t singleME0rate[5];
    Float_t singleME0Quality0rate[5];
    Float_t singleME0Quality1rate[5];
@@ -474,24 +491,129 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
    Bool_t is_doubleME0nearQuality2Veto2[15], is_tripleME0nearQuality2Veto2[35];
    Bool_t is_doubleME0nearQuality2Veto3[15], is_tripleME0nearQuality2Veto3[35];
    Bool_t is_doubleME0close[15], is_tripleME0close[35];
-   Int_t nEvent = 0;  //total number of events
-   Int_t nEventVis = 0;  //number of events visible in ME0
-   Int_t nEventSel = 0;
+  
+   //CSC
+   Bool_t is_singleCSC[5];
+   Bool_t is_singleCSCQuality0[5];
+   Bool_t is_singleCSCQuality1[5];
+   Bool_t is_singleCSCQuality2[5];
+   Bool_t is_singleCSCVeto0[5];
+   Bool_t is_singleCSCVeto1[5];
+   Bool_t is_singleCSCVeto2[5];
+   Bool_t is_singleCSCVeto3[5];
+   Bool_t is_singleCSCQuality0Veto0[5];
+   Bool_t is_singleCSCQuality0Veto1[5];
+   Bool_t is_singleCSCQuality0Veto2[5];
+   Bool_t is_singleCSCQuality0Veto3[5];
+   Bool_t is_singleCSCQuality1Veto0[5];
+   Bool_t is_singleCSCQuality1Veto1[5];
+   Bool_t is_singleCSCQuality1Veto2[5];
+   Bool_t is_singleCSCQuality1Veto3[5];
+   Bool_t is_singleCSCQuality2Veto0[5];
+   Bool_t is_singleCSCQuality2Veto1[5];
+   Bool_t is_singleCSCQuality2Veto2[5];
+   Bool_t is_singleCSCQuality2Veto3[5];
+   Bool_t is_doubleCSC[15], is_tripleCSC[35];
+   Bool_t is_doubleCSCnear[15], is_tripleCSCnear[35];
+   Bool_t is_doubleCSCnearQuality0[15], is_tripleCSCnearQuality0[35];
+   Bool_t is_doubleCSCnearQuality1[15], is_tripleCSCnearQuality1[35];
+   Bool_t is_doubleCSCnearQuality2[15], is_tripleCSCnearQuality2[35];
+   Bool_t is_doubleCSCnearVeto0[15], is_tripleCSCnearVeto0[35];
+   Bool_t is_doubleCSCnearVeto1[15], is_tripleCSCnearVeto1[35];
+   Bool_t is_doubleCSCnearVeto2[15], is_tripleCSCnearVeto2[35];
+   Bool_t is_doubleCSCnearVeto3[15], is_tripleCSCnearVeto3[35];
+   Bool_t is_doubleCSCnearQuality0Veto0[15], is_tripleCSCnearQuality0Veto0[35];
+   Bool_t is_doubleCSCnearQuality0Veto1[15], is_tripleCSCnearQuality0Veto1[35];
+   Bool_t is_doubleCSCnearQuality0Veto2[15], is_tripleCSCnearQuality0Veto2[35];
+   Bool_t is_doubleCSCnearQuality0Veto3[15], is_tripleCSCnearQuality0Veto3[35];
+   Bool_t is_doubleCSCnearQuality1Veto0[15], is_tripleCSCnearQuality1Veto0[35];
+   Bool_t is_doubleCSCnearQuality1Veto1[15], is_tripleCSCnearQuality1Veto1[35];
+   Bool_t is_doubleCSCnearQuality1Veto2[15], is_tripleCSCnearQuality1Veto2[35];
+   Bool_t is_doubleCSCnearQuality1Veto3[15], is_tripleCSCnearQuality1Veto3[35];
+   Bool_t is_doubleCSCnearQuality2Veto0[15], is_tripleCSCnearQuality2Veto0[35];
+   Bool_t is_doubleCSCnearQuality2Veto1[15], is_tripleCSCnearQuality2Veto1[35];
+   Bool_t is_doubleCSCnearQuality2Veto2[15], is_tripleCSCnearQuality2Veto2[35];
+   Bool_t is_doubleCSCnearQuality2Veto3[15], is_tripleCSCnearQuality2Veto3[35];
+   Bool_t is_doubleCSCclose[15], is_tripleCSCclose[35];
+
+   //GEM
+   Bool_t is_singleGEM[5];
+   Bool_t is_singleGEMQuality0[5];
+   Bool_t is_singleGEMQuality1[5];
+   Bool_t is_singleGEMQuality2[5];
+   Bool_t is_singleGEMVeto0[5];
+   Bool_t is_singleGEMVeto1[5];
+   Bool_t is_singleGEMVeto2[5];
+   Bool_t is_singleGEMVeto3[5];
+   Bool_t is_singleGEMQuality0Veto0[5];
+   Bool_t is_singleGEMQuality0Veto1[5];
+   Bool_t is_singleGEMQuality0Veto2[5];
+   Bool_t is_singleGEMQuality0Veto3[5];
+   Bool_t is_singleGEMQuality1Veto0[5];
+   Bool_t is_singleGEMQuality1Veto1[5];
+   Bool_t is_singleGEMQuality1Veto2[5];
+   Bool_t is_singleGEMQuality1Veto3[5];
+   Bool_t is_singleGEMQuality2Veto0[5];
+   Bool_t is_singleGEMQuality2Veto1[5];
+   Bool_t is_singleGEMQuality2Veto2[5];
+   Bool_t is_singleGEMQuality2Veto3[5];
+   Bool_t is_doubleGEM[15], is_tripleGEM[35];
+   Bool_t is_doubleGEMnear[15], is_tripleGEMnear[35];
+   Bool_t is_doubleGEMnearQuality0[15], is_tripleGEMnearQuality0[35];
+   Bool_t is_doubleGEMnearQuality1[15], is_tripleGEMnearQuality1[35];
+   Bool_t is_doubleGEMnearQuality2[15], is_tripleGEMnearQuality2[35];
+   Bool_t is_doubleGEMnearVeto0[15], is_tripleGEMnearVeto0[35];
+   Bool_t is_doubleGEMnearVeto1[15], is_tripleGEMnearVeto1[35];
+   Bool_t is_doubleGEMnearVeto2[15], is_tripleGEMnearVeto2[35];
+   Bool_t is_doubleGEMnearVeto3[15], is_tripleGEMnearVeto3[35];
+   Bool_t is_doubleGEMnearQuality0Veto0[15], is_tripleGEMnearQuality0Veto0[35];
+   Bool_t is_doubleGEMnearQuality0Veto1[15], is_tripleGEMnearQuality0Veto1[35];
+   Bool_t is_doubleGEMnearQuality0Veto2[15], is_tripleGEMnearQuality0Veto2[35];
+   Bool_t is_doubleGEMnearQuality0Veto3[15], is_tripleGEMnearQuality0Veto3[35];
+   Bool_t is_doubleGEMnearQuality1Veto0[15], is_tripleGEMnearQuality1Veto0[35];
+   Bool_t is_doubleGEMnearQuality1Veto1[15], is_tripleGEMnearQuality1Veto1[35];
+   Bool_t is_doubleGEMnearQuality1Veto2[15], is_tripleGEMnearQuality1Veto2[35];
+   Bool_t is_doubleGEMnearQuality1Veto3[15], is_tripleGEMnearQuality1Veto3[35];
+   Bool_t is_doubleGEMnearQuality2Veto0[15], is_tripleGEMnearQuality2Veto0[35];
+   Bool_t is_doubleGEMnearQuality2Veto1[15], is_tripleGEMnearQuality2Veto1[35];
+   Bool_t is_doubleGEMnearQuality2Veto2[15], is_tripleGEMnearQuality2Veto2[35];
+   Bool_t is_doubleGEMnearQuality2Veto3[15], is_tripleGEMnearQuality2Veto3[35];
+   Bool_t is_doubleGEMclose[15], is_tripleGEMclose[35];
+
+
    //define three different counters 
    //nEventSel1 for the case with at least one muon in ME0 eta range coming from tau->3mu
    //nEventSel2 for the case with at least two muon in ME0 eta range coming from tau->3mu
    //nEventSel3 for the case with at least three muon in ME0 eta range coming from tau->3mu
+   Int_t nEvent = 0;  //total number of events             
+   Int_t nEventVis = 0;  //number of events visible in ME0
+   Int_t nEventSelME0 = 0;
+   Int_t nEventSelME01 = 0;
+   Int_t nEventSelME02 = 0;
+   Int_t nEventSelME03 = 0;
    
-   Int_t nEventSel1 = 0;
-   Int_t nEventSel2 = 0;
-   Int_t nEventSel3 = 0;
+   Int_t nEventSelCSC1 = 0;
+   Int_t nEventSelCSC2 = 0;
+   Int_t nEventSelCSC3 = 0;
+
+   Int_t nEventSelGEM1 = 0;
+   Int_t nEventSelGEM2 = 0;
+   Int_t nEventSelGEM3 = 0;
 
    Int_t lastEvent = 0;
    Int_t lastEventVis = 0;
-   Int_t lastEventSel = 0;
-   Int_t lastEventSel1 = 0;
-   Int_t lastEventSel2 = 0;
-   Int_t lastEventSel3 = 0;
+   Int_t lastEventSelME0 = 0;
+   Int_t lastEventSelME01 = 0;
+   Int_t lastEventSelME02 = 0;
+   Int_t lastEventSelME03 = 0;
+
+   Int_t lastEventSelCSC1 = 0;  
+   Int_t lastEventSelCSC2 = 0;
+   Int_t lastEventSelCSC3 = 0;
+
+   Int_t lastEventSelGEM1 = 0;
+   Int_t lastEventSelGEM2 = 0;
+   Int_t lastEventSelGEM3 = 0;
    Int_t estimatedNmu = 0;
    TTree *tr;
    TTree *trSum;
@@ -552,10 +674,14 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       bool isMuVisibleME0[3]; //whether each muon is visibile by ME0 
       bool isMuVisibleCSC[3]; //whether each muon is visibile by CSC
       bool isMuVisibleGEM[3]; //whether each muon is visibile by GEM 
+      bool isMuVisibleRPC[3]; //whether each muon is visibile by RPC 
+      bool isMuVisibleDT[3]; //whether each muon is visibile by DT
       int nVisibleMu;    //number of muons visible by all detectors considered (from 0 to 3)
       int nVisibleMuME0;
       int nVisibleMuCSC;
       int nVisibleMuGEM;
+      int nVisibleMuRPC;
+      int nVisibleMuDT;
       int muStatus[3]	;
       float tauPt = 0	;
       float tauEta = 0	;
@@ -581,7 +707,23 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       float mesonVxDeath = 0;
       float mesonVyDeath = 0;
       float mesonVzDeath = 0;
-      
+
+      int nBarrel  = 0;                      
+      int nOverlap = 0;
+      int nEndcap  = 0;
+      int nEndcapME0  = 0;
+      int nBBB     = 0; // ten combiantions
+      int nBBO     = 0;                        
+      int nBBE     = 0;
+      int nBOO     = 0;
+      int nBOE     = 0;
+      int nBEE     = 0;
+      int nOOO     = 0;
+      int nOOE     = 0;
+      int nOEE     = 0;
+      int nEEE     = 0;
+      int nEEEME0  = 0;
+
       Bool_t mu_isME0[3]		;	//true if mu in 1.8 < |eta| < 3 
       Bool_t mu_isME0pos[3]	;       //true if mu in +1.8 < eta < +3
       Bool_t mu_isME0neg[3]	;       //true if mu in -1.8 < eta < -3
@@ -617,11 +759,16 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
 //
 DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig):
     ME0SegmentToken_(consumes<ME0SegmentCollection>(iConfig.getParameter<InputTag>("me0Segments"))),
+    CSCSegmentToken_(consumes<CSCSegmentCollection>(iConfig.getParameter<InputTag>("cscSegments"))),
+    GEMSegmentToken_(consumes<GEMSegmentCollection>(iConfig.getParameter<InputTag>("gemSegments"))),
     genToken_(consumes<GenParticleCollection>(iConfig.getParameter<InputTag>("genParticles"))),
     ME0SimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("me0SimHits"))),
     CSCSimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("cscSimHits"))),
     GEMSimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("gemSimHits"))),
-    simTrackToken_(consumes<vector<SimTrack>>(iConfig.getParameter<InputTag>("simTracks")))
+    RPCSimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("rpcSimHits"))),
+    DTSimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("dtSimHits"))),
+    simTrackToken_(consumes<vector<SimTrack>>(iConfig.getParameter<InputTag>("simTracks"))),
+    L1TSegmentToken_(consumes<BXVector<l1t::RegionalMuonCand>>(iConfig.getParameter<InputTag>("l1tSegments")))
 {
    //now do what ever initialization is needed
    usesResource("TFileService");
@@ -872,10 +1019,14 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    tr->Branch("isMuVisibleME0"     ,	&isMuVisibleME0[0]     , 	"mu1_isVisibleME0/O:mu2_isVisibleME0/O:mu3_isVisibleME0/O"     );
    tr->Branch("isMuVisibleCSC"     ,	&isMuVisibleCSC[0]     , 	"mu1_isVisibleCSC/O:mu2_isVisibleCSC/O:mu3_isVisibleCSC/O"     );
    tr->Branch("isMuVisibleGEM"     ,	&isMuVisibleGEM[0]     , 	"mu1_isVisibleGEM/O:mu2_isVisibleGEM/O:mu3_isVisibleGEM/O"     );
+   tr->Branch("isMuVisibleRPC"     ,	&isMuVisibleRPC[0]     , 	"mu1_isVisibleRPC/O:mu2_isVisibleRPC/O:mu3_isVisibleRPC/O"     );
+   tr->Branch("isMuVisibleDT"     ,	&isMuVisibleDT[0]     , 	"mu1_isVisibleDT/O:mu2_isVisibleDT/O:mu3_isVisibleDT/O"     );
    tr->Branch("nVisibleMu"  ,	&nVisibleMu,	"nVisibleMu/I" 	);
    tr->Branch("nVisibleMuME0" ,	&nVisibleMuME0,	"nVisibleMuME0/I");
    tr->Branch("nVisibleMuCSC" ,	&nVisibleMuCSC,	"nVisibleMuCSC/I"	);
    tr->Branch("nVisibleMuGEM" ,	&nVisibleMuGEM,	"nVisibleMuGEM/I"	);
+   tr->Branch("nVisibleMuRPC" ,	&nVisibleMuRPC,	"nVisibleMuRPC/I"	);
+   tr->Branch("nVisibleMuDT" ,	&nVisibleMuDT,	"nVisibleMuDT/I"	);
    tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
    tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
    tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
@@ -904,8 +1055,22 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    tr->Branch("diffEta_maxmin"  ,	&diffEta_maxmin,	"diffEta_maxmin"	);
    tr->Branch("diffEta_medmin"  ,	&diffEta_medmin,	"diffEta_medmin"	);
    tr->Branch("deltaChamber"     ,	&deltaChamber ); //	, "deltaChamber/I"    );
-
-
+   
+   //B= barrel O= overlap E= endcap
+   tr->Branch("nBarrel"  ,	&nBarrel,	"nBarrel/I"	);
+   tr->Branch("nOverlap"  ,	&nOverlap,	"nOverlap/I"	);
+   tr->Branch("nEndcap"  ,	&nEndcap,	"nEndcap/I"	);
+   tr->Branch("nBBB"  ,	&nBBB,	"nBBB/I"	);
+   tr->Branch("nBBO"  ,	&nBBO,	"nBBO/I"	);
+   tr->Branch("nBBE"  ,	&nBBE,	"nBBE/I"	);
+   tr->Branch("nBOO"  ,	&nBOO,	"nBOO/I"	);
+   tr->Branch("nBOE"  ,	&nBOE,	"nBOE/I"	);
+   tr->Branch("nBEE"  ,	&nBEE,	"nBEE/I"	);
+   tr->Branch("nOOO"  ,	&nOOO,	"nOOO/I"	);
+   tr->Branch("nOOE"  ,	&nOOE,	"nOOE/I"	);
+   tr->Branch("nOEE"  ,	&nOEE,	"nOEE/I"	);
+   tr->Branch("nEEE"  ,	&nEEE,	"nEEE/I"	);
+   tr->Branch("nEEEME0"  ,	&nEEEME0,	"nEEEME0/I"	);
 
    //tr->Branch("deltaPhi"     ,	&deltaPhiMap     , 	"deltaPhiMap"     );
    tr->Branch("ME0RawId"     ,	&me0List      );  //, 	"ME0DetId/i"     );
@@ -932,16 +1097,22 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    //tr->Branch("muPz"     ,	&muPz    );
    tr->Branch("nEvent"     ,	&nEvent	, "nEvent/I"    );  //, 	"theta"     );
    tr->Branch("nEventVis"     ,	&nEventVis	, "nEventVis/I"    );  //, 	"theta"     );
-   tr->Branch("nEventSel"     ,	&nEventSel	, "nEventSel/I"    );  //, 	"theta"     );
-   tr->Branch("nEventSel1"     ,	&nEventSel1	, "nEventSel1/I"    );  //, 	"theta"     );
-   tr->Branch("nEventSel2"     ,        &nEventSel2     , "nEventSel2/I"    );  //,     "theta"     );
-   tr->Branch("nEventSel3"     ,        &nEventSel3     , "nEventSel3/I"    );  //,     "theta"     );
+   tr->Branch("nEventSelME0"     ,	&nEventSelME0	, "nEventSelME0/I"    );  //, 	"theta"     );
+   tr->Branch("nEventSelME01"     ,	&nEventSelME01	, "nEventSelME01/I"    );  //, 	"theta"     );
+   tr->Branch("nEventSelME02"  ,        &nEventSelME02  , "nEventSelME02/I"    );  //,     "theta"     );
+   tr->Branch("nEventSelME03"  ,        &nEventSelME03  , "nEventSelME03/I"    );  //,     "theta"     );
+   tr->Branch("nEventSelCSC1"     ,	&nEventSelCSC1	, "nEventSelCSC1/I"    );  //, 	"theta"     );
+   tr->Branch("nEventSelCSC2"     ,     &nEventSelCSC2  , "nEventSelCSC2/I"    );  //,     "theta"     );
+   tr->Branch("nEventSelCSC3"     ,     &nEventSelCSC3  , "nEventSelCSC3/I"    );  //,     "theta"     );
+   tr->Branch("nEventSelGEM1"     ,	&nEventSelGEM1	, "nEventSelGEM1/I"    );  //, 	"theta"     );
+   tr->Branch("nEventSelGEM2"     ,     &nEventSelGEM2  , "nEventSelGEM2/I"    );  //,     "theta"     );
+   tr->Branch("nEventSelGEM3"     ,     &nEventSelGEM3  , "nEventSelGEM3/I"    );  //,     "theta"     );
    trSum->Branch("lastEvent"     ,	&lastEvent	, "lastEvent/I"    );  //, 	"theta"     );
    trSum->Branch("lastEventVis"     ,	&lastEventVis	, "lastEventVis/I"    );  //, 	"theta"     );
-   trSum->Branch("lastEventSel"     ,	&lastEventSel	, "lastEventSel/I"    );  //, 	"theta"     );
-   trSum->Branch("lastEventSel1"     ,   &lastEventSel1 , "lastEventSel1/I"    );  //, 	"theta"     );
-   trSum->Branch("lastEventSel2"     ,   &lastEventSel2 , "lastEventSel2/I"    );  //,   "theta"     );
-   trSum->Branch("lastEventSel3"     ,   &lastEventSel3 , "lastEventSel3/I"    );  //,   "theta"     );
+   trSum->Branch("lastEventSelME0"     ,    &lastEventSelME0  , "lastEventSelME0/I"    );  //, 	"theta"     );
+   trSum->Branch("lastEventSelME01"     ,   &lastEventSelME01 , "lastEventSelME01/I"    );  //, 	"theta"     );
+   trSum->Branch("lastEventSelME02"     ,   &lastEventSelME02 , "lastEventSelME02/I"    );  //,   "theta"     );
+   trSum->Branch("lastEventSelME03"     ,   &lastEventSelME03 , "lastEventSelME03/I"    );  //,   "theta"     );
    tr->Branch("nSegments"     ,	&nSegments	, "nSegments/I"    );  //, 	"theta"     );
    tr->Branch("segmentNrecHits"     ,	&nSegmRecHitList ); //	, "etaPartList/I"    );  //, 	"theta"     );
    tr->Branch("segmentQuality"     ,	&qualityList ); // q=0 if nRH=4, q=1 if nRH=5, q=2 if nRH=6
@@ -1010,7 +1181,141 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    tr->Branch("is_tripleME0nearQuality2Veto2", &is_tripleME0nearQuality2Veto2[0] , tripleStringBool);
    tr->Branch("is_tripleME0nearQuality2Veto3", &is_tripleME0nearQuality2Veto3[0] , tripleStringBool);
    tr->Branch("is_tripleME0close", &is_tripleME0close[0] , tripleStringBool);
-   tr->Branch("singleME0_multiplicity", &multiplicity[0] , "3GeV/I:5GeV/I:10GeV/I:20GeV/I:50GeV/I");
+   tr->Branch("singleME0_multiplicity", &multiplicityME0[0] , "3GeV/I:5GeV/I:10GeV/I:20GeV/I:50GeV/I");
+   tr->Branch("singleCSC_multiplicity", &multiplicityCSC[0] , "3GeV/I:5GeV/I:10GeV/I:20GeV/I:50GeV/I");
+   tr->Branch("singleGEM_multiplicity", &multiplicityGEM[0] , "3GeV/I:5GeV/I:10GeV/I:20GeV/I:50GeV/I");
+
+   //CSC
+   tr->Branch("is_singleCSC", &is_singleCSC[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality0", &is_singleCSCQuality0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality1", &is_singleCSCQuality1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality2", &is_singleCSCQuality2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCVeto0", &is_singleCSCVeto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCVeto1", &is_singleCSCVeto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCVeto2", &is_singleCSCVeto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCVeto3", &is_singleCSCVeto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality0Veto0", &is_singleCSCQuality0Veto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality0Veto1", &is_singleCSCQuality0Veto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality0Veto2", &is_singleCSCQuality0Veto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality0Veto3", &is_singleCSCQuality0Veto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality1Veto0", &is_singleCSCQuality1Veto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality1Veto1", &is_singleCSCQuality1Veto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality1Veto2", &is_singleCSCQuality1Veto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality1Veto3", &is_singleCSCQuality1Veto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality2Veto0", &is_singleCSCQuality2Veto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality2Veto1", &is_singleCSCQuality2Veto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality2Veto2", &is_singleCSCQuality2Veto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality2Veto3", &is_singleCSCQuality2Veto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_doubleCSC", &is_doubleCSC[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnear", &is_doubleCSCnear[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality0", &is_doubleCSCnearQuality0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality1", &is_doubleCSCnearQuality1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality2", &is_doubleCSCnearQuality2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearVeto0", &is_doubleCSCnearVeto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearVeto1", &is_doubleCSCnearVeto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearVeto2", &is_doubleCSCnearVeto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearVeto3", &is_doubleCSCnearVeto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality0Veto0", &is_doubleCSCnearQuality0Veto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality0Veto1", &is_doubleCSCnearQuality0Veto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality0Veto2", &is_doubleCSCnearQuality0Veto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality0Veto3", &is_doubleCSCnearQuality0Veto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality1Veto0", &is_doubleCSCnearQuality1Veto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality1Veto1", &is_doubleCSCnearQuality1Veto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality1Veto2", &is_doubleCSCnearQuality1Veto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality1Veto3", &is_doubleCSCnearQuality1Veto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality2Veto0", &is_doubleCSCnearQuality2Veto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality2Veto1", &is_doubleCSCnearQuality2Veto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality2Veto2", &is_doubleCSCnearQuality2Veto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality2Veto3", &is_doubleCSCnearQuality2Veto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCclose", &is_doubleCSCclose[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_tripleCSC", &is_tripleCSC[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnear", &is_tripleCSCnear[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality0", &is_tripleCSCnearQuality0[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality1", &is_tripleCSCnearQuality1[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality2", &is_tripleCSCnearQuality2[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearVeto0", &is_tripleCSCnearVeto0[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearVeto1", &is_tripleCSCnearVeto1[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearVeto2", &is_tripleCSCnearVeto2[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearVeto3", &is_tripleCSCnearVeto3[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality0Veto0", &is_tripleCSCnearQuality0Veto0[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality0Veto1", &is_tripleCSCnearQuality0Veto1[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality0Veto2", &is_tripleCSCnearQuality0Veto2[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality0Veto3", &is_tripleCSCnearQuality0Veto3[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality1Veto0", &is_tripleCSCnearQuality1Veto0[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality1Veto1", &is_tripleCSCnearQuality1Veto1[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality1Veto2", &is_tripleCSCnearQuality1Veto2[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality1Veto3", &is_tripleCSCnearQuality1Veto3[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality2Veto0", &is_tripleCSCnearQuality2Veto0[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality2Veto1", &is_tripleCSCnearQuality2Veto1[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality2Veto2", &is_tripleCSCnearQuality2Veto2[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality2Veto3", &is_tripleCSCnearQuality2Veto3[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCclose", &is_tripleCSCclose[0] , tripleStringBool);
+
+   //GEM
+   tr->Branch("is_singleGEM", &is_singleGEM[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality0", &is_singleGEMQuality0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality1", &is_singleGEMQuality1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality2", &is_singleGEMQuality2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMVeto0", &is_singleGEMVeto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMVeto1", &is_singleGEMVeto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMVeto2", &is_singleGEMVeto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMVeto3", &is_singleGEMVeto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality0Veto0", &is_singleGEMQuality0Veto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality0Veto1", &is_singleGEMQuality0Veto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality0Veto2", &is_singleGEMQuality0Veto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality0Veto3", &is_singleGEMQuality0Veto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality1Veto0", &is_singleGEMQuality1Veto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality1Veto1", &is_singleGEMQuality1Veto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality1Veto2", &is_singleGEMQuality1Veto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality1Veto3", &is_singleGEMQuality1Veto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality2Veto0", &is_singleGEMQuality2Veto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality2Veto1", &is_singleGEMQuality2Veto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality2Veto2", &is_singleGEMQuality2Veto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality2Veto3", &is_singleGEMQuality2Veto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_doubleGEM", &is_doubleGEM[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnear", &is_doubleGEMnear[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality0", &is_doubleGEMnearQuality0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality1", &is_doubleGEMnearQuality1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality2", &is_doubleGEMnearQuality2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearVeto0", &is_doubleGEMnearVeto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearVeto1", &is_doubleGEMnearVeto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearVeto2", &is_doubleGEMnearVeto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearVeto3", &is_doubleGEMnearVeto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality0Veto0", &is_doubleGEMnearQuality0Veto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality0Veto1", &is_doubleGEMnearQuality0Veto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality0Veto2", &is_doubleGEMnearQuality0Veto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality0Veto3", &is_doubleGEMnearQuality0Veto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality1Veto0", &is_doubleGEMnearQuality1Veto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality1Veto1", &is_doubleGEMnearQuality1Veto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality1Veto2", &is_doubleGEMnearQuality1Veto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality1Veto3", &is_doubleGEMnearQuality1Veto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality2Veto0", &is_doubleGEMnearQuality2Veto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality2Veto1", &is_doubleGEMnearQuality2Veto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality2Veto2", &is_doubleGEMnearQuality2Veto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality2Veto3", &is_doubleGEMnearQuality2Veto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMclose", &is_doubleGEMclose[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_tripleGEM", &is_tripleGEM[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnear", &is_tripleGEMnear[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality0", &is_tripleGEMnearQuality0[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality1", &is_tripleGEMnearQuality1[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality2", &is_tripleGEMnearQuality2[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearVeto0", &is_tripleGEMnearVeto0[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearVeto1", &is_tripleGEMnearVeto1[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearVeto2", &is_tripleGEMnearVeto2[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearVeto3", &is_tripleGEMnearVeto3[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality0Veto0", &is_tripleGEMnearQuality0Veto0[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality0Veto1", &is_tripleGEMnearQuality0Veto1[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality0Veto2", &is_tripleGEMnearQuality0Veto2[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality0Veto3", &is_tripleGEMnearQuality0Veto3[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality1Veto0", &is_tripleGEMnearQuality1Veto0[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality1Veto1", &is_tripleGEMnearQuality1Veto1[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality1Veto2", &is_tripleGEMnearQuality1Veto2[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality1Veto3", &is_tripleGEMnearQuality1Veto3[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality2Veto0", &is_tripleGEMnearQuality2Veto0[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality2Veto1", &is_tripleGEMnearQuality2Veto1[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality2Veto2", &is_tripleGEMnearQuality2Veto2[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality2Veto3", &is_tripleGEMnearQuality2Veto3[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMclose", &is_tripleGEMclose[0] , tripleStringBool);
 
    tr2 = fs->make<TTree>("Trigger", "");
    //trigger counts
@@ -1596,6 +1901,8 @@ gStyle->SetOptTitle(0);
      nVisibleMuME0 = 0;
      nVisibleMuCSC = 0;
      nVisibleMuGEM = 0;
+     nVisibleMuRPC = 0;
+     nVisibleMuDT = 0;
 
      for (int i=0; i<3; i++)
        {
@@ -1609,6 +1916,8 @@ gStyle->SetOptTitle(0);
        isMuVisibleME0[i]= 0; 
        isMuVisibleCSC[i]= 0; 
        isMuVisibleGEM[i]= 0; 
+       isMuVisibleRPC[i]= 0; 
+       isMuVisibleDT[i]= 0; 
        muVxBirth[i] 	= 0; 
        muVyBirth[i] 	= 0; 
        muVzBirth[i] 	= 0; 
@@ -1980,18 +2289,61 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
          }
        if (nMu==3) break;
       }
-     cout << "Muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
-     cout << "Muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
-	  // sort arrays according to increasing Pt
-	  int imax = distance(muPtlocal, max_element(muPtlocal, muPtlocal + 3));
-	  std::swap(muIdx[2], muIdx[imax]);
-	  std::swap(muPtlocal[2], muPtlocal[imax]);
-	  int imin = distance(muPtlocal, min_element(muPtlocal, muPtlocal + 3));
-	  cout << "imin=" << imin << "  imax=" << imax << endl;
-	  std::swap(muIdx[0], muIdx[imin]);
-	  std::swap(muPtlocal[0], muPtlocal[imin]);
-     //cout << "Ordered muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
-     //cout << "Ordered muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
+      
+      cout << "Muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
+      cout << "Muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
+      // sort arrays according to increasing Pt
+      int imax = distance(muPtlocal, max_element(muPtlocal, muPtlocal + 3));
+      std::swap(muIdx[2], muIdx[imax]);
+      std::swap(muPtlocal[2], muPtlocal[imax]);
+      int imin = distance(muPtlocal, min_element(muPtlocal, muPtlocal + 3));
+      cout << "imin=" << imin << "  imax=" << imax << endl;
+      std::swap(muIdx[0], muIdx[imin]);
+      std::swap(muPtlocal[0], muPtlocal[imin]);
+      //cout << "Ordered muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
+      //cout << "Ordered muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
+        
+      //look to the regions where the three muons are
+      
+      for(size_t i = 0; i < genParticles->size(); ++ i)
+      {
+        const GenParticle & p = (*genParticles)[i];
+        for (int j = 0; j<3; j++ )
+        {
+          int muCandIdx = i;
+          if ( muCandIdx == muIdx[j] )
+          { 
+            if ( fabs(p.pdgId()) != 13 ) { cout << "NOT A MUON" << endl; }
+            if ( fabs(p.eta()) < 0.85  ) 		 	   nBarrel++;
+            if ( fabs(p.eta()) >= 0.85 && fabs(p.eta()) <= 1.25 )  nOverlap++;
+            if ( fabs(p.eta()) > 1.25 && fabs(p.eta()) < 3.0 )     nEndcap++;
+            if ( fabs(p.eta()) > 1.8 && fabs(p.eta()) < 3.0 )      nEndcapME0++;
+          }
+        }
+
+      }
+      
+      if ( nBarrel + nOverlap + nEndcap == 3 )//only for triple mu from tau->3mu
+      {
+	  if      ( nBarrel == 3 )                                       nBBB++;
+	  else if ( nBarrel == 2 && nOverlap == 1 )                      nBBO++;                        
+	  else if ( nBarrel == 2 && nEndcap == 1 )                       nBBE++;
+	  else if ( nBarrel == 1 && nOverlap == 2 )                      nBOO++;
+	  else if ( nBarrel == 1 && nOverlap == 1 && nEndcap == 1 )      nBBE++;
+	  else if ( nBarrel == 1 && nEndcap == 2 )                       nBEE++;
+	  else if ( nOverlap == 3 )                                      nOOO++;
+	  else if ( nOverlap == 2 && nEndcap == 1 )                      nOOE++;
+	  else if ( nOverlap == 1 && nEndcap == 2 )                      nOEE++;
+	  else if ( nEndcap == 3 )                                       nEEE++;
+	  else {cout << "ERROR emtf-bmtf-omtf" << endl;}
+
+      }      
+
+      if ( nEndcapME0 == 3 ) nEEEME0++; 
+      
+
+
+
 
 //h_PtVsEta	->Draw("COLZ");
 //h_Eta2D_max	->Draw("COLZ");
@@ -2228,6 +2580,68 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
      if (isMuVisibleGEM[i])  nVisibleMuGEM++;
    }
 
+
+   //RPC SimHits
+   //in this way I have the counts of every RPC in CMS (both barrel and endcap)
+   Handle<vector<PSimHit>> rpcsimHitH;
+   iEvent.getByToken(RPCSimHitToken_, rpcsimHitH);
+
+   for ( auto itc = rpcsimHitH->begin(); itc != rpcsimHitH->end(); ++itc )
+   { 
+     for ( int i=0; i<3; i++ )
+     {
+       //consider only hits of muons
+       if ( fabs( (*itc).particleType() ) != 13 )	continue; 
+       
+       int idtrack = (*itc).trackId();
+       
+       //verify there is at least one correspondence, 
+       
+       if ( idtrack == muTrackId[i]  )
+       {
+       isMuVisible[i] 	 = 1;
+       isMuVisibleRPC[i] = 1;
+       }
+     }
+   }
+
+   //increment the nVisibleMuRPC counter
+   for (int i=0; i<3; i++)
+   {
+     if (isMuVisibleRPC[i])  nVisibleMuRPC++;
+   }
+
+
+   //DT SimHits
+   Handle<vector<PSimHit>> dtsimHitH;
+   iEvent.getByToken(DTSimHitToken_, dtsimHitH);
+
+   for ( auto itc = dtsimHitH->begin(); itc != dtsimHitH->end(); ++itc )
+   { 
+     for ( int i=0; i<3; i++ )
+     {
+       //consider only hits of muons
+       if ( fabs( (*itc).particleType() ) != 13 )	continue; 
+       
+       int idtrack = (*itc).trackId();
+       
+       //verify there is at least one correspondence, 
+       
+       if ( idtrack == muTrackId[i]  )
+       {
+       isMuVisible[i] 	 = 1;
+       isMuVisibleDT[i] = 1;
+       }
+     }
+   }
+
+   //increment the nVisibleMuDT counter
+   for (int i=0; i<3; i++)
+   {
+     if (isMuVisibleDT[i])  nVisibleMuDT++;
+   }
+
+
    //increment the total nVisibleMu counter
    for (int i=0; i<3; i++)                                                 
    {
@@ -2235,11 +2649,30 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
    }
 
 
-
+   //ME0
    ESHandle<ME0Geometry> me0Geom;
    iSetup.get<MuonGeometryRecord>().get(me0Geom);
    Handle<ME0SegmentCollection> me0segmentH;
    iEvent.getByToken(ME0SegmentToken_, me0segmentH);
+   
+   //GEM
+   ESHandle<GEMGeometry> gemGeom;
+   iSetup.get<MuonGeometryRecord>().get(gemGeom);
+   Handle<GEMSegmentCollection> gemsegmentH;
+   iEvent.getByToken(GEMSegmentToken_, gemsegmentH);
+
+   //CSC
+   ESHandle<CSCGeometry> cscGeom;
+   iSetup.get<MuonGeometryRecord>().get(cscGeom); 
+   Handle<CSCSegmentCollection> cscsegmentH;
+   iEvent.getByToken(CSCSegmentToken_, cscsegmentH);
+
+   //L1T
+   Handle<BXVector<l1t::RegionalMuonCand>> l1tsegmentH;
+   iEvent.getByToken(L1TSegmentToken_, l1tsegmentH);
+
+
+
 
    deltaPhiMap.clear();
    alphaMap.clear();
@@ -2272,10 +2705,18 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 
    nEvent++;
    if ( nVisibleMuME0>0) nEventVis++;
-   if ( nVisibleMuME0>0) nEventSel++;
-   if ( nVisibleMuME0>0) nEventSel1++;
-   if ( nVisibleMuME0>1) nEventSel2++;
-   if ( nVisibleMuME0>2) nEventSel3++;
+   if ( nVisibleMuME0>0) nEventSelME0++;
+   if ( nVisibleMuME0>0) nEventSelME01++;
+   if ( nVisibleMuME0>1) nEventSelME02++;
+   if ( nVisibleMuME0>2) nEventSelME03++;
+   
+   if ( nVisibleMuCSC>0) nEventSelCSC1++; 
+   if ( nVisibleMuCSC>1) nEventSelCSC2++;
+   if ( nVisibleMuCSC>2) nEventSelCSC3++;
+
+   if ( nVisibleMuGEM>0) nEventSelGEM1++;
+   if ( nVisibleMuGEM>1) nEventSelGEM2++;
+   if ( nVisibleMuGEM>2) nEventSelGEM3++;
 
    //bool is_singleME0[5], is_doubleME0[15];
    for ( int i=0; i<5; i++)	
@@ -2300,7 +2741,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
      is_singleME0Quality2Veto1[i] = false;
      is_singleME0Quality2Veto2[i] = false;
      is_singleME0Quality2Veto3[i] = false;
-     multiplicity[i] = 0;
+     multiplicityME0[i] = 0;
      }
    for ( int i=0; i<15; i++)	{
      				is_doubleME0[i] = false;
@@ -2350,6 +2791,154 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
    				is_tripleME0nearQuality2Veto3[i] = false;
    				is_tripleME0close[i] = false;
 				}
+   //CSC
+   for ( int i=0; i<5; i++)	
+     {
+     is_singleCSC[i] = false;
+     is_singleCSCQuality0[i] = false;
+     is_singleCSCQuality1[i] = false;
+     is_singleCSCQuality2[i] = false;
+     is_singleCSCVeto0[i] = false;
+     is_singleCSCVeto1[i] = false;
+     is_singleCSCVeto2[i] = false;
+     is_singleCSCVeto3[i] = false;
+     is_singleCSCQuality0Veto0[i] = false;
+     is_singleCSCQuality0Veto1[i] = false;
+     is_singleCSCQuality0Veto2[i] = false;
+     is_singleCSCQuality0Veto3[i] = false;
+     is_singleCSCQuality1Veto0[i] = false;
+     is_singleCSCQuality1Veto1[i] = false;
+     is_singleCSCQuality1Veto2[i] = false;
+     is_singleCSCQuality1Veto3[i] = false;
+     is_singleCSCQuality2Veto0[i] = false;
+     is_singleCSCQuality2Veto1[i] = false;
+     is_singleCSCQuality2Veto2[i] = false;
+     is_singleCSCQuality2Veto3[i] = false;
+     multiplicityCSC[i] = 0;
+     }
+   for ( int i=0; i<15; i++)	{
+     				is_doubleCSC[i] = false;
+     				is_doubleCSCnear[i] = false;
+     				is_doubleCSCnearQuality0[i] = false;
+     				is_doubleCSCnearQuality1[i] = false;
+     				is_doubleCSCnearQuality2[i] = false;
+     				is_doubleCSCnearVeto0[i] = false;
+     				is_doubleCSCnearVeto1[i] = false;
+     				is_doubleCSCnearVeto2[i] = false;
+     				is_doubleCSCnearVeto3[i] = false;
+     				is_doubleCSCnearQuality0Veto0[i] = false;
+     				is_doubleCSCnearQuality0Veto1[i] = false;
+     				is_doubleCSCnearQuality0Veto2[i] = false;
+     				is_doubleCSCnearQuality0Veto3[i] = false;
+     				is_doubleCSCnearQuality1Veto0[i] = false;
+     				is_doubleCSCnearQuality1Veto1[i] = false;
+     				is_doubleCSCnearQuality1Veto2[i] = false;
+     				is_doubleCSCnearQuality1Veto3[i] = false;
+     				is_doubleCSCnearQuality2Veto0[i] = false;
+     				is_doubleCSCnearQuality2Veto1[i] = false;
+     				is_doubleCSCnearQuality2Veto2[i] = false;
+     				is_doubleCSCnearQuality2Veto3[i] = false;
+     				is_doubleCSCclose[i] = false;
+				}
+   for ( int i=0; i<35; i++)	{
+   				is_tripleCSC[i] = false;
+   				is_tripleCSCnear[i] = false;
+   				is_tripleCSCnearQuality0[i] = false;
+   				is_tripleCSCnearQuality1[i] = false;
+   				is_tripleCSCnearQuality2[i] = false;
+   				is_tripleCSCnearVeto0[i] = false;
+   				is_tripleCSCnearVeto1[i] = false;
+   				is_tripleCSCnearVeto2[i] = false;
+   				is_tripleCSCnearVeto3[i] = false;
+   				is_tripleCSCnearQuality0Veto0[i] = false;
+   				is_tripleCSCnearQuality0Veto1[i] = false;
+   				is_tripleCSCnearQuality0Veto2[i] = false;
+   				is_tripleCSCnearQuality0Veto3[i] = false;
+   				is_tripleCSCnearQuality1Veto0[i] = false;
+   				is_tripleCSCnearQuality1Veto1[i] = false;
+   				is_tripleCSCnearQuality1Veto2[i] = false;
+   				is_tripleCSCnearQuality1Veto3[i] = false;
+   				is_tripleCSCnearQuality2Veto0[i] = false;
+   				is_tripleCSCnearQuality2Veto1[i] = false;
+   				is_tripleCSCnearQuality2Veto2[i] = false;
+   				is_tripleCSCnearQuality2Veto3[i] = false;
+   				is_tripleCSCclose[i] = false;
+				}
+
+   //GEM
+   for ( int i=0; i<5; i++)	
+     {
+     is_singleGEM[i] = false;
+     is_singleGEMQuality0[i] = false;
+     is_singleGEMQuality1[i] = false;
+     is_singleGEMQuality2[i] = false;
+     is_singleGEMVeto0[i] = false;
+     is_singleGEMVeto1[i] = false;
+     is_singleGEMVeto2[i] = false;
+     is_singleGEMVeto3[i] = false;
+     is_singleGEMQuality0Veto0[i] = false;
+     is_singleGEMQuality0Veto1[i] = false;
+     is_singleGEMQuality0Veto2[i] = false;
+     is_singleGEMQuality0Veto3[i] = false;
+     is_singleGEMQuality1Veto0[i] = false;
+     is_singleGEMQuality1Veto1[i] = false;
+     is_singleGEMQuality1Veto2[i] = false;
+     is_singleGEMQuality1Veto3[i] = false;
+     is_singleGEMQuality2Veto0[i] = false;
+     is_singleGEMQuality2Veto1[i] = false;
+     is_singleGEMQuality2Veto2[i] = false;
+     is_singleGEMQuality2Veto3[i] = false;
+     multiplicityGEM[i] = 0;
+     }
+   for ( int i=0; i<15; i++)	{
+     				is_doubleGEM[i] = false;
+     				is_doubleGEMnear[i] = false;
+     				is_doubleGEMnearQuality0[i] = false;
+     				is_doubleGEMnearQuality1[i] = false;
+     				is_doubleGEMnearQuality2[i] = false;
+     				is_doubleGEMnearVeto0[i] = false;
+     				is_doubleGEMnearVeto1[i] = false;
+     				is_doubleGEMnearVeto2[i] = false;
+     				is_doubleGEMnearVeto3[i] = false;
+     				is_doubleGEMnearQuality0Veto0[i] = false;
+     				is_doubleGEMnearQuality0Veto1[i] = false;
+     				is_doubleGEMnearQuality0Veto2[i] = false;
+     				is_doubleGEMnearQuality0Veto3[i] = false;
+     				is_doubleGEMnearQuality1Veto0[i] = false;
+     				is_doubleGEMnearQuality1Veto1[i] = false;
+     				is_doubleGEMnearQuality1Veto2[i] = false;
+     				is_doubleGEMnearQuality1Veto3[i] = false;
+     				is_doubleGEMnearQuality2Veto0[i] = false;
+     				is_doubleGEMnearQuality2Veto1[i] = false;
+     				is_doubleGEMnearQuality2Veto2[i] = false;
+     				is_doubleGEMnearQuality2Veto3[i] = false;
+     				is_doubleGEMclose[i] = false;
+				}
+   for ( int i=0; i<35; i++)	{
+   				is_tripleGEM[i] = false;
+   				is_tripleGEMnear[i] = false;
+   				is_tripleGEMnearQuality0[i] = false;
+   				is_tripleGEMnearQuality1[i] = false;
+   				is_tripleGEMnearQuality2[i] = false;
+   				is_tripleGEMnearVeto0[i] = false;
+   				is_tripleGEMnearVeto1[i] = false;
+   				is_tripleGEMnearVeto2[i] = false;
+   				is_tripleGEMnearVeto3[i] = false;
+   				is_tripleGEMnearQuality0Veto0[i] = false;
+   				is_tripleGEMnearQuality0Veto1[i] = false;
+   				is_tripleGEMnearQuality0Veto2[i] = false;
+   				is_tripleGEMnearQuality0Veto3[i] = false;
+   				is_tripleGEMnearQuality1Veto0[i] = false;
+   				is_tripleGEMnearQuality1Veto1[i] = false;
+   				is_tripleGEMnearQuality1Veto2[i] = false;
+   				is_tripleGEMnearQuality1Veto3[i] = false;
+   				is_tripleGEMnearQuality2Veto0[i] = false;
+   				is_tripleGEMnearQuality2Veto1[i] = false;
+   				is_tripleGEMnearQuality2Veto2[i] = false;
+   				is_tripleGEMnearQuality2Veto3[i] = false;
+   				is_tripleGEMclose[i] = false;
+				}
+
 
    float thr[5]={-1,-1,-1,-1,-1};
    //thresholds
@@ -2556,7 +3145,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    {
             
 	    is_singleME0[pt_ind] = true;
-	    multiplicity[pt_ind]++;
+	    multiplicityME0[pt_ind]++;
 	    if ( qtmp>= 0 )  is_singleME0Quality0[pt_ind] = true; 
 	    if ( qtmp>= 1 )  is_singleME0Quality1[pt_ind] = true; 
 	    if ( qtmp>= 2 )  is_singleME0Quality2[pt_ind] = true; 
@@ -3218,6 +3807,83 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 
 }
 
+//CSC loop on RegionalMuonCand
+/*using namespace l1t;
+BXVector<l1t::RegionalMuonCand>::const_iterator l1t_sg_it;
+
+enum tftype { bmtf, omtf_neg, omtf_pos, emtf_neg, emtf_pos };
+
+for ( l1t_sg_it = l1tsegmentH->begin(); l1t_sg_it !=l1tsegmentH->end(); ++l1t_sg_it )
+{ 
+   if ( (*l1t_sg_it).trackFinderType() == bmtf  )
+   {
+     nBarrel++;
+   }     
+   else if ( (*l1t_sg_it).trackFinderType() == omtf_neg || (*l1t_sg_it).trackFinderType() == omtf_pos )
+   {
+     nOverlap++;
+   }
+   else if ( (*l1t_sg_it).trackFinderType() == emtf_neg || (*l1t_sg_it).trackFinderType() == emtf_pos )
+   {
+     nEndcap++;
+     if ( fabs((*l1t_sg_it).hwEta()*0.010875) < 3.0 && fabs((*l1t_sg_it).hwEta()*0.010875) > 1.8  )
+     {
+       nEndcapME0++;
+     }  
+   }
+   else
+   {
+   cout << "TRACKFINDER ERROR" << endl;
+   } 
+
+if ( nBarrel + nOverlap + nEndcap == 3 )//only for triple mu
+{
+  if      ( nBarrel == 3 )					 nBBB++;
+  else if ( nBarrel == 2 && nOverlap == 1 )	 		 nBBO++;			
+  else if ( nBarrel == 2 && nEndcap == 1 ) 			 nBBE++;
+  else if ( nBarrel == 1 && nOverlap == 2 ) 			 nBOO++;
+  else if ( nBarrel == 1 && nOverlap == 1 && nEndcap == 1 )	 nBBE++;
+  else if ( nBarrel == 1 && nEndcap == 2 ) 			 nBEE++;
+  else if ( nOverlap == 3 )					 nOOO++;
+  else if ( nOverlap == 2 && nEndcap == 1 ) 			 nOOE++;
+  else if ( nOverlap == 1 && nEndcap == 2 ) 			 nOEE++;
+  else if ( nEndcap == 3 )					 nEEE++;
+  else {cout << "ERROR emtf-bmtf-omtf" << endl;}
+
+}      
+
+if ( nEndcapME0 == 3 ) nEEEME0++;
+ 
+    if ( fabs((*l1t_sg_it).hwEta())*0.010875 < ptVal[i] ) //Get compressed pT (returned int * 0.5 = pT (GeV))
+    {
+      /// Get compressed eta (returned int * 0.010875 = eta)
+      //cout << "ptVal:" << ptVal[i] << " l1t_segment_pt:" << (*l1t_sg_it).hwPt()*0.5 << " eta:" << (*l1t_sg_it).hwEta()*0.010875 << endl;
+      if ( fabs((*l1t_sg_it).hwEta())*0.010875 > 0.7 &&  fabs((*l1t_sg_it).hwEta())*0.010875 < 2.6 ) //eta range for csc is 0.9<=eta<=2.4
+      {
+        cout << "ptVal:" << ptVal[i] << " csc_segment_pt:" << (*l1t_sg_it).hwPt()*0.5 << " eta:" << (*l1t_sg_it).hwEta()*0.010875 << endl;
+        cout << "hwQual:" << (*l1t_sg_it).hwQual() << " link:" << (*l1t_sg_it).link() << " processor:" <<  (*l1t_sg_it).processor() << endl;
+      }
+    }
+}//end for segments*/
+
+
+
+//CSCsegments
+/*CSCSegmentCollection::const_iterator csc_sg_it;
+
+if ( ( nVisibleMuCSC>0 && signal ) || !signal )
+{
+  for ( csc_sg_it = cscsegmentH->begin(); csc_sg_it !=cscsegmentH->end(); ++csc_sg_it )
+  {
+    int polenta=1;
+  }
+}*/
+
+
+
+
+
+
 //============= INSERTED TO HERE ========================
  
 
@@ -3271,13 +3937,13 @@ DeltaGlobalPhiAnalyzer::beginJob()
 void 
 DeltaGlobalPhiAnalyzer::endJob() 
 {
- cout << "EndJob started:" << endl;
+ cout << "EGEMob started:" << endl;
  lastEvent=nEvent;
  lastEventVis=nEventVis; //for the rate I have to use the total number of events, also the invisibles
- lastEventSel=nEventSel;
- lastEventSel1=nEventSel1;
- lastEventSel2=nEventSel2;
- lastEventSel3=nEventSel3;
+ lastEventSelME0=nEventSelME0;
+ lastEventSelME01=nEventSelME01;
+ lastEventSelME02=nEventSelME02;
+ lastEventSelME03=nEventSelME03;
 
  Int_t denom=-1;
  Int_t denom1=-1;
@@ -3303,14 +3969,14 @@ DeltaGlobalPhiAnalyzer::endJob()
    denom3   = lastEventVis;*/
    
    //to make efficiencies with single visibles, double visibles, triple visibles
-   denom1 = lastEventSel1;
-   denom2 = lastEventSel2;
-   denom3 = lastEventSel3;
+   denom1 = lastEventSelME01;
+   denom2 = lastEventSelME02;
+   denom3 = lastEventSelME03;
  }
  
  if ( signal ) denom=lastEvent;//run trigger analysis only if there is at least one mu from the tau decay in the eta range 1.8<|eta!|<3
 
- cout << "lastEventSel1=" << lastEventSel1 << " lastEventSel2=" << lastEventSel2 << " lastEventSel3=" << lastEventSel3 << endl;
+ cout << "lastEventSelME01=" << lastEventSelME01 << " lastEventSelME02=" << lastEventSelME02 << " lastEventSelME03=" << lastEventSelME03 << endl;
 
  
  cout << "Calculating rates and efficiencies (triggers without vicinity)" << endl;
