@@ -3937,7 +3937,7 @@ DeltaGlobalPhiAnalyzer::beginJob()
 void 
 DeltaGlobalPhiAnalyzer::endJob() 
 {
- cout << "EGEMob started:" << endl;
+ cout << "EndJob started:" << endl;
  lastEvent=nEvent;
  lastEventVis=nEventVis; //for the rate I have to use the total number of events, also the invisibles
  lastEventSelME0=nEventSelME0;
