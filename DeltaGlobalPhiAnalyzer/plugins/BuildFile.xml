@@ -5,6 +5,12 @@
 <use name="FWCore/Utilities"/>
 <use name="FWCore/MessageLogger"/>
 <use name="Geometry/GEMGeometry"/>
+<use name="Geometry/CSCGeometry"/>
+<use name="Geometry/DTGeometry"/>
+<use name="Geometry/RPCGeometry"/>
 <use name="CommonTools/UtilAlgos"/>
 <use name="Geometry/GEMGeometryBuilder"/>
+<use name="Geometry/CSCGeometryBuilder"/>
+<use name="Geometry/DTGeometryBuilder"/>
+<use name="Geometry/RPCGeometryBuilder"/>
 <flags EDM_PLUGIN="1"/>
