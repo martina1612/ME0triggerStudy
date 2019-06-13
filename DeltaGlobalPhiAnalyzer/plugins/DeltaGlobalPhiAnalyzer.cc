@@ -675,7 +675,8 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       bool isMuVisibleCSC[3]; //whether each muon is visibile by CSC
       bool isMuVisibleGEM[3]; //whether each muon is visibile by GEM 
       bool isMuVisibleRPC[3]; //whether each muon is visibile by RPC 
-      bool isMuVisibleDT[3]; //whether each muon is visibile by DT
+      bool isMuVisibleDT[3];  //whether each muon is visibile by DT
+      bool isMuVisibleNONE[3]; //the muon is seen by neither ME0, CSC, GEM, RPC, DT
       int nVisibleMu;    //number of muons visible by all detectors considered (from 0 to 3)
       int nVisibleMuME0;
       int nVisibleMuCSC;
@@ -723,6 +724,84 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       int nOEE     = 0;
       int nEEE     = 0;
       int nEEEME0  = 0;
+
+      //Detectors combinations
+      Bool_t isMuNNN = 0;       Bool_t isMuDDD = 0;      Bool_t isMuRRR = 0;      Bool_t isMuCCC = 0;       
+      Bool_t isMuNND = 0;       Bool_t isMuDDR = 0;      Bool_t isMuRRC = 0;      Bool_t isMuCCG = 0;
+      Bool_t isMuNNR = 0;       Bool_t isMuDDC = 0;      Bool_t isMuRRG = 0;      Bool_t isMuCCM = 0;
+      Bool_t isMuNNC = 0;       Bool_t isMuDDG = 0;      Bool_t isMuRRM = 0;      Bool_t isMuCGG = 0;
+      Bool_t isMuNNG = 0;       Bool_t isMuDDM = 0;      Bool_t isMuRCC = 0;      Bool_t isMuCGM = 0;
+      Bool_t isMuNNM = 0;       Bool_t isMuDRR = 0;      Bool_t isMuRCG = 0;      Bool_t isMuCMM = 0;
+      Bool_t isMuNDD = 0;       Bool_t isMuDRC = 0;      Bool_t isMuRCM = 0;      
+      Bool_t isMuNDR = 0;       Bool_t isMuDRG = 0;      Bool_t isMuRGG = 0;      Bool_t isMuGGG = 0; 
+      Bool_t isMuNDC = 0;       Bool_t isMuDRM = 0;      Bool_t isMuRGM = 0;      Bool_t isMuGGM = 0;
+      Bool_t isMuNDG = 0;       Bool_t isMuDCC = 0;      Bool_t isMuRMM = 0;      Bool_t isMuGMM = 0;
+      Bool_t isMuNDM = 0;       Bool_t isMuDCG = 0;
+      Bool_t isMuNRR = 0;       Bool_t isMuDCM = 0;                               Bool_t isMuMMM = 0;
+      Bool_t isMuNRC = 0;       Bool_t isMuDGG = 0;
+      Bool_t isMuNRG = 0;       Bool_t isMuDGM = 0;
+      Bool_t isMuNRM = 0;       Bool_t isMuDMM = 0;
+      Bool_t isMuNCC = 0;
+      Bool_t isMuNCG = 0;
+      Bool_t isMuNCM = 0;
+      Bool_t isMuNGG = 0;
+      Bool_t isMuNGM = 0;
+      Bool_t isMuNMM = 0;
+
+      Bool_t isMuNN = 0;	Bool_t isMuDD = 0;   Bool_t isMuRR = 0;   Bool_t isMuCC = 0;    Bool_t isMuGG = 0;
+      Bool_t isMuND = 0;	Bool_t isMuDR = 0;   Bool_t isMuRC = 0;   Bool_t isMuCG = 0;    Bool_t isMuGM = 0;
+      Bool_t isMuNR = 0;	Bool_t isMuDC = 0;   Bool_t isMuRG = 0;   Bool_t isMuCM = 0;   
+      Bool_t isMuNC = 0;	Bool_t isMuDG = 0;   Bool_t isMuRM = 0;                         Bool_t isMuMM = 0;
+      Bool_t isMuNG = 0;	Bool_t isMuDM = 0;
+      Bool_t isMuNM = 0;
+
+      Bool_t isMuN = 0;
+      Bool_t isMuD = 0;
+      Bool_t isMuR = 0;
+      Bool_t isMuC = 0;
+      Bool_t isMuG = 0;
+      Bool_t isMuM = 0;
+
+
+      //Detector combinations summary
+      int nMuNNN = 0;       int nMuDDD = 0;      int nMuRRR = 0;      int nMuCCC = 0;       
+      int nMuNND = 0;       int nMuDDR = 0;      int nMuRRC = 0;      int nMuCCG = 0;
+      int nMuNNR = 0;       int nMuDDC = 0;      int nMuRRG = 0;      int nMuCCM = 0;
+      int nMuNNC = 0;       int nMuDDG = 0;      int nMuRRM = 0;      int nMuCGG = 0;
+      int nMuNNG = 0;       int nMuDDM = 0;      int nMuRCC = 0;      int nMuCGM = 0;
+      int nMuNNM = 0;       int nMuDRR = 0;      int nMuRCG = 0;      int nMuCMM = 0;
+      int nMuNDD = 0;       int nMuDRC = 0;      int nMuRCM = 0;
+      int nMuNDR = 0;       int nMuDRG = 0;      int nMuRGG = 0;      int nMuGGG = 0; 
+      int nMuNDC = 0;       int nMuDRM = 0;      int nMuRGM = 0;      int nMuGGM = 0;
+      int nMuNDG = 0;       int nMuDCC = 0;      int nMuRMM = 0;      int nMuGMM = 0;
+      int nMuNDM = 0;       int nMuDCG = 0;
+      int nMuNRR = 0;       int nMuDCM = 0;                           int nMuMMM = 0;
+      int nMuNRC = 0;       int nMuDGG = 0;
+      int nMuNRG = 0;       int nMuDGM = 0;
+      int nMuNRM = 0;       int nMuDMM = 0;
+      int nMuNCC = 0;
+      int nMuNCG = 0;
+      int nMuNCM = 0;
+      int nMuNGG = 0;
+      int nMuNGM = 0;
+      int nMuNMM = 0;
+
+      int nMuNN = 0;    int nMuDD = 0;   int nMuRR = 0;   int nMuCC = 0;    int nMuGG = 0;
+      int nMuND = 0;    int nMuDR = 0;   int nMuRC = 0;   int nMuCG = 0;    int nMuGM = 0;
+      int nMuNR = 0;    int nMuDC = 0;   int nMuRG = 0;   int nMuCM = 0;   
+      int nMuNC = 0;    int nMuDG = 0;   int nMuRM = 0;                     int nMuMM = 0;
+      int nMuNG = 0;    int nMuDM = 0;
+      int nMuNM = 0;    
+
+      int nMuN = 0;
+      int nMuD = 0;
+      int nMuR = 0;
+      int nMuC = 0;
+      int nMuG = 0;
+      int nMuM = 0;
+
+
+      int nIsMuVisibleMoreThanOneERR =0;
 
       Bool_t mu_isME0[3]		;	//true if mu in 1.8 < |eta| < 3 
       Bool_t mu_isME0pos[3]	;       //true if mu in +1.8 < eta < +3
@@ -1021,6 +1100,7 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    tr->Branch("isMuVisibleGEM"     ,	&isMuVisibleGEM[0]     , 	"mu1_isVisibleGEM/O:mu2_isVisibleGEM/O:mu3_isVisibleGEM/O"     );
    tr->Branch("isMuVisibleRPC"     ,	&isMuVisibleRPC[0]     , 	"mu1_isVisibleRPC/O:mu2_isVisibleRPC/O:mu3_isVisibleRPC/O"     );
    tr->Branch("isMuVisibleDT"     ,	&isMuVisibleDT[0]     , 	"mu1_isVisibleDT/O:mu2_isVisibleDT/O:mu3_isVisibleDT/O"     );
+   tr->Branch("isMuVisibleNONE"     ,	&isMuVisibleNONE[0]     , 	"mu1_isVisibleNONE/O:mu2_isVisibleNONE/O:mu3_isVisibleNONE/O"     );
    tr->Branch("nVisibleMu"  ,	&nVisibleMu,	"nVisibleMu/I" 	);
    tr->Branch("nVisibleMuME0" ,	&nVisibleMuME0,	"nVisibleMuME0/I");
    tr->Branch("nVisibleMuCSC" ,	&nVisibleMuCSC,	"nVisibleMuCSC/I"	);
@@ -1060,17 +1140,131 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    tr->Branch("nBarrel"  ,	&nBarrel,	"nBarrel/I"	);
    tr->Branch("nOverlap"  ,	&nOverlap,	"nOverlap/I"	);
    tr->Branch("nEndcap"  ,	&nEndcap,	"nEndcap/I"	);
-   tr->Branch("nBBB"  ,	&nBBB,	"nBBB/I"	);
-   tr->Branch("nBBO"  ,	&nBBO,	"nBBO/I"	);
-   tr->Branch("nBBE"  ,	&nBBE,	"nBBE/I"	);
-   tr->Branch("nBOO"  ,	&nBOO,	"nBOO/I"	);
-   tr->Branch("nBOE"  ,	&nBOE,	"nBOE/I"	);
-   tr->Branch("nBEE"  ,	&nBEE,	"nBEE/I"	);
-   tr->Branch("nOOO"  ,	&nOOO,	"nOOO/I"	);
-   tr->Branch("nOOE"  ,	&nOOE,	"nOOE/I"	);
-   tr->Branch("nOEE"  ,	&nOEE,	"nOEE/I"	);
-   tr->Branch("nEEE"  ,	&nEEE,	"nEEE/I"	);
-   tr->Branch("nEEEME0"  ,	&nEEEME0,	"nEEEME0/I"	);
+   trSum->Branch("nBBB"  ,	&nBBB,	"nBBB/I"	);
+   trSum->Branch("nBBO"  ,	&nBBO,	"nBBO/I"	);
+   trSum->Branch("nBBE"  ,	&nBBE,	"nBBE/I"	);
+   trSum->Branch("nBOO"  ,	&nBOO,	"nBOO/I"	);
+   trSum->Branch("nBOE"  ,	&nBOE,	"nBOE/I"	);
+   trSum->Branch("nBEE"  ,	&nBEE,	"nBEE/I"	);
+   trSum->Branch("nOOO"  ,	&nOOO,	"nOOO/I"	);
+   trSum->Branch("nOOE"  ,	&nOOE,	"nOOE/I"	);
+   trSum->Branch("nOEE"  ,	&nOEE,	"nOEE/I"	);
+   trSum->Branch("nEEE"  ,	&nEEE,	"nEEE/I"	);
+   trSum->Branch("nEEEME0"  ,	&nEEEME0,	"nEEEME0/I"	);
+
+   trSum->Branch("nIsMuVisibleMoreThanOneERR"  ,	&nIsMuVisibleMoreThanOneERR,	"nIsMuVisibleMoreThanOneERR/I"	);
+
+   
+   tr->Branch("isMuNNN", &isMuNNN, "isMuNNN/O"	);	tr->Branch("isMuDDD", &isMuDDD, "isMuDDD/O"	);
+   tr->Branch("isMuNND", &isMuNND, "isMuNND/O"	); 	tr->Branch("isMuDDR", &isMuDDR, "isMuDDR/O"	);
+   tr->Branch("isMuNNR", &isMuNNR, "isMuNNR/O"	);	tr->Branch("isMuDDC", &isMuDDC, "isMuDDC/O"	);
+   tr->Branch("isMuNNC", &isMuNNC, "isMuNNC/O"	);	tr->Branch("isMuDDG", &isMuDDG, "isMuDDG/O"	);
+   tr->Branch("isMuNNG", &isMuNNG, "isMuNNG/O"	);	tr->Branch("isMuDDM", &isMuDDM, "isMuDDM/O"	);
+   tr->Branch("isMuNNM", &isMuNNM, "isMuNNM/O"	);	tr->Branch("isMuDRR", &isMuDRR, "isMuDRR/O"	);
+   tr->Branch("isMuNDD", &isMuNDD, "isMuNDD/O"	);	tr->Branch("isMuDRC", &isMuDRC, "isMuDRC/O"	);
+   tr->Branch("isMuNDR", &isMuNDR, "isMuNDR/O"	);	tr->Branch("isMuDRG", &isMuDRG, "isMuDRG/O"	);
+   tr->Branch("isMuNDC", &isMuNDC, "isMuNDC/O"	);	tr->Branch("isMuDRM", &isMuDRM, "isMuDRM/O"	);
+   tr->Branch("isMuNDG", &isMuNDG, "isMuNDG/O"	);	tr->Branch("isMuDCC", &isMuDCC, "isMuDCC/O"	);
+   tr->Branch("isMuNDM", &isMuNDM, "isMuNDM/O"	);	tr->Branch("isMuDCG", &isMuDCG, "isMuDCG/O"	);
+   tr->Branch("isMuNRR", &isMuNRR, "isMuNRR/O"	);	tr->Branch("isMuDCM", &isMuDCM, "isMuDCM/O"	);
+   tr->Branch("isMuNRC", &isMuNRC, "isMuNRC/O"	);	tr->Branch("isMuDGG", &isMuDGG, "isMuDGG/O"	);
+   tr->Branch("isMuNRG", &isMuNRG, "isMuNRG/O"	);	tr->Branch("isMuDGM", &isMuDGM, "isMuDGM/O"	);
+   tr->Branch("isMuNRM", &isMuNRM, "isMuNRM/O"	);	tr->Branch("isMuDMM", &isMuDMM, "isMuDMM/O"	);
+   tr->Branch("isMuNCC", &isMuNCC, "isMuNCC/O"	);
+   tr->Branch("isMuNCG", &isMuNCG, "isMuNCG/O"	);
+   tr->Branch("isMuNCM", &isMuNCM, "isMuNCM/O"	);
+   tr->Branch("isMuNGG", &isMuNGG, "isMuNGG/O"	);
+   tr->Branch("isMuNGM", &isMuNGM, "isMuNGM/O"	);
+   tr->Branch("isMuNMM", &isMuNMM, "isMuNMM/O"	);
+
+   tr->Branch("isMuRRR", &isMuRRR, "isMuRRR/O"	);	tr->Branch("isMuCCC", &isMuCCC, "isMuCCC/O"	);
+   tr->Branch("isMuRRC", &isMuRRC, "isMuRRC/O"	);      tr->Branch("isMuCCG", &isMuCCG, "isMuCCG/O"	);
+   tr->Branch("isMuRRG", &isMuRRG, "isMuRRG/O"	);      tr->Branch("isMuCCM", &isMuCCM, "isMuCCM/O"	);
+   tr->Branch("isMuRRM", &isMuRRM, "isMuRRM/O"	);      tr->Branch("isMuCGG", &isMuCGG, "isMuCGG/O"	);
+   tr->Branch("isMuRCC", &isMuRCC, "isMuRCC/O"	);      tr->Branch("isMuCGM", &isMuCGM, "isMuCGM/O"	);
+   tr->Branch("isMuRCG", &isMuRCG, "isMuRCG/O"	);      tr->Branch("isMuCMM", &isMuCMM, "isMuCMM/O"	);
+   tr->Branch("isMuRCM", &isMuRCM, "isMuRCM/O"	);
+   tr->Branch("isMuRGG", &isMuRGG, "isMuRGG/O"	);	tr->Branch("isMuGGG", &isMuGGG, "isMuGGG/O"	);
+   tr->Branch("isMuRGM", &isMuRGM, "isMuRGM/O"	);      tr->Branch("isMuGGM", &isMuGGM, "isMuGGM/O"	);
+   tr->Branch("isMuRMM", &isMuRMM, "isMuRMM/O"	);      tr->Branch("isMuGMM", &isMuGMM, "isMuGMM/O"	);
+                                                                                           
+                                                        tr->Branch("isMuMMM", &isMuMMM, "isMuMMM/O"	);
+
+
+   tr->Branch("isMuDD", &isMuDD, "isMuDD/O"	);	tr->Branch("isMuCC", &isMuCC, "isMuCC/O"	);
+   tr->Branch("isMuDR", &isMuDR, "isMuDR/O"	);      tr->Branch("isMuCG", &isMuCG, "isMuCG/O"	);
+   tr->Branch("isMuDC", &isMuDC, "isMuDC/O"	);      tr->Branch("isMuCM", &isMuCM, "isMuCM/O"	);
+   tr->Branch("isMuDG", &isMuDG, "isMuDG/O"	);                                           
+   tr->Branch("isMuDM", &isMuDM, "isMuDM/O"	);	tr->Branch("isMuGG", &isMuGG, "isMuGG/O"	);
+			              		    	tr->Branch("isMuGM", &isMuGM, "isMuGM/O"	);
+   tr->Branch("isMuRR", &isMuRR, "isMuRR/O"	);                                           
+   tr->Branch("isMuRC", &isMuRC, "isMuRC/O"	);	tr->Branch("isMuMM", &isMuMM, "isMuMM/O"	);
+   tr->Branch("isMuRG", &isMuRG, "isMuRG/O"	);
+   tr->Branch("isMuRM", &isMuRM, "isMuRM/O"	);
+
+   tr->Branch("isMuNN", &isMuNN, "isMuNN/O"	);	tr->Branch("isMuN", &isMuN, "isMuN/O"	);
+   tr->Branch("isMuND", &isMuND, "isMuND/O"	);      tr->Branch("isMuD", &isMuD, "isMuD/O"	);
+   tr->Branch("isMuNR", &isMuNR, "isMuNR/O"	);      tr->Branch("isMuR", &isMuR, "isMuR/O"	);
+   tr->Branch("isMuNC", &isMuNC, "isMuNC/O"	);      tr->Branch("isMuC", &isMuC, "isMuC/O"	);
+   tr->Branch("isMuNG", &isMuNG, "isMuNG/O"	);      tr->Branch("isMuG", &isMuG, "isMuG/O"	);
+   tr->Branch("isMuNM", &isMuNM, "isMuNM/O"	);      tr->Branch("isMuM", &isMuM, "isMuM/O"	);
+
+
+   trSum->Branch("nMuNNN", &nMuNNN, "nMuNNN/I"	);	trSum->Branch("nMuDDD", &nMuDDD, "nMuDDD/I"	);
+   trSum->Branch("nMuNND", &nMuNND, "nMuNND/I"	); 	trSum->Branch("nMuDDR", &nMuDDR, "nMuDDR/I"	);
+   trSum->Branch("nMuNNR", &nMuNNR, "nMuNNR/I"	);	trSum->Branch("nMuDDC", &nMuDDC, "nMuDDC/I"	);
+   trSum->Branch("nMuNNC", &nMuNNC, "nMuNNC/I"	);	trSum->Branch("nMuDDG", &nMuDDG, "nMuDDG/I"	);
+   trSum->Branch("nMuNNG", &nMuNNG, "nMuNNG/I"	);	trSum->Branch("nMuDDM", &nMuDDM, "nMuDDM/I"	);
+   trSum->Branch("nMuNNM", &nMuNNM, "nMuNNM/I"	);	trSum->Branch("nMuDRR", &nMuDRR, "nMuDRR/I"	);
+   trSum->Branch("nMuNDD", &nMuNDD, "nMuNDD/I"	);	trSum->Branch("nMuDRC", &nMuDRC, "nMuDRC/I"	);
+   trSum->Branch("nMuNDR", &nMuNDR, "nMuNDR/I"	);	trSum->Branch("nMuDRG", &nMuDRG, "nMuDRG/I"	);
+   trSum->Branch("nMuNDC", &nMuNDC, "nMuNDC/I"	);	trSum->Branch("nMuDRM", &nMuDRM, "nMuDRM/I"	);
+   trSum->Branch("nMuNDG", &nMuNDG, "nMuNDG/I"	);	trSum->Branch("nMuDCC", &nMuDCC, "nMuDCC/I"	);
+   trSum->Branch("nMuNDM", &nMuNDM, "nMuNDM/I"	);	trSum->Branch("nMuDCG", &nMuDCG, "nMuDCG/I"	);
+   trSum->Branch("nMuNRR", &nMuNRR, "nMuNRR/I"	);	trSum->Branch("nMuDCM", &nMuDCM, "nMuDCM/I"	);
+   trSum->Branch("nMuNRC", &nMuNRC, "nMuNRC/I"	);	trSum->Branch("nMuDGG", &nMuDGG, "nMuDGG/I"	);
+   trSum->Branch("nMuNRG", &nMuNRG, "nMuNRG/I"	);	trSum->Branch("nMuDGM", &nMuDGM, "nMuDGM/I"	);
+   trSum->Branch("nMuNRM", &nMuNRM, "nMuNRM/I"	);	trSum->Branch("nMuDMM", &nMuDMM, "nMuDMM/I"	);
+   trSum->Branch("nMuNCC", &nMuNCC, "nMuNCC/I"	);
+   trSum->Branch("nMuNCG", &nMuNCG, "nMuNCG/I"	);
+   trSum->Branch("nMuNCM", &nMuNCM, "nMuNCM/I"	);
+   trSum->Branch("nMuNGG", &nMuNGG, "nMuNGG/I"	);
+   trSum->Branch("nMuNGM", &nMuNGM, "nMuNGM/I"	);
+   trSum->Branch("nMuNMM", &nMuNMM, "nMuNMM/I"	);
+                                                                                                           
+   trSum->Branch("nMuRRR", &nMuRRR, "nMuRRR/I"	);	trSum->Branch("nMuCCC", &nMuCCC, "nMuCCC/I"	);
+   trSum->Branch("nMuRRC", &nMuRRC, "nMuRRC/I"	);      trSum->Branch("nMuCCG", &nMuCCG, "nMuCCG/I"	);
+   trSum->Branch("nMuRRG", &nMuRRG, "nMuRRG/I"	);      trSum->Branch("nMuCCM", &nMuCCM, "nMuCCM/I"	);
+   trSum->Branch("nMuRRM", &nMuRRM, "nMuRRM/I"	);      trSum->Branch("nMuCGG", &nMuCGG, "nMuCGG/I"	);
+   trSum->Branch("nMuRCC", &nMuRCC, "nMuRCC/I"	);      trSum->Branch("nMuCGM", &nMuCGM, "nMuCGM/I"	);
+   trSum->Branch("nMuRCG", &nMuRCG, "nMuRCG/I"	);      trSum->Branch("nMuCMM", &nMuCMM, "nMuCMM/I"	);
+   trSum->Branch("nMuRCM", &nMuRCM, "nMuRCM/I"	);                                               
+   trSum->Branch("nMuRGG", &nMuRGG, "nMuRGG/I"	);	trSum->Branch("nMuGGG", &nMuGGG, "nMuGGG/I"	);
+   trSum->Branch("nMuRGM", &nMuRGM, "nMuRGM/I"	);      trSum->Branch("nMuGGM", &nMuGGM, "nMuGGM/I"	);
+   trSum->Branch("nMuRMM", &nMuRMM, "nMuRMM/I"	);      trSum->Branch("nMuGMM", &nMuGMM, "nMuGMM/I"	);
+                                                                                           
+                                                        trSum->Branch("nMuMMM", &nMuMMM, "nMuMMM/I"	);
+                                                                                                           
+                                                                                                           
+   trSum->Branch("nMuDD", &nMuDD, "nMuDD/I"	);	trSum->Branch("nMuCC", &nMuCC, "nMuCC/I"	);
+   trSum->Branch("nMuDR", &nMuDR, "nMuDR/I"	);      trSum->Branch("nMuCG", &nMuCG, "nMuCG/I"	);
+   trSum->Branch("nMuDC", &nMuDC, "nMuDC/I"	);      trSum->Branch("nMuCM", &nMuCM, "nMuCM/I"	);
+   trSum->Branch("nMuDG", &nMuDG, "nMuDG/I"	);                                     
+   trSum->Branch("nMuDM", &nMuDM, "nMuDM/I"	);	trSum->Branch("nMuGG", &nMuGG, "nMuGG/I"	);
+        	                      	 	  	trSum->Branch("nMuGM", &nMuGM, "nMuGM/I"	);
+   trSum->Branch("nMuRR", &nMuRR, "nMuRR/I"	);                                     
+   trSum->Branch("nMuRC", &nMuRC, "nMuRC/I"	);	trSum->Branch("nMuMM", &nMuMM, "nMuMM/I"	);
+   trSum->Branch("nMuRG", &nMuRG, "nMuRG/I"	);
+   trSum->Branch("nMuRM", &nMuRM, "nMuRM/I"	);
+
+   trSum->Branch("nMuNN", &nMuNN, "nMuNN/I"	);	trSum->Branch("nMuN", &nMuN, "nMuN/I"	);
+   trSum->Branch("nMuND", &nMuND, "nMuND/I"	);      trSum->Branch("nMuD", &nMuD, "nMuD/I"	);
+   trSum->Branch("nMuNR", &nMuNR, "nMuNR/I"	);      trSum->Branch("nMuR", &nMuR, "nMuR/I"	);
+   trSum->Branch("nMuNC", &nMuNC, "nMuNC/I"	);      trSum->Branch("nMuC", &nMuC, "nMuC/I"	);
+   trSum->Branch("nMuNG", &nMuNG, "nMuNG/I"	);      trSum->Branch("nMuG", &nMuG, "nMuG/I"	);
+   trSum->Branch("nMuNM", &nMuNM, "nMuNM/I"	);      trSum->Branch("nMuM", &nMuM, "nMuM/I"	);
+
+ 
 
    //tr->Branch("deltaPhi"     ,	&deltaPhiMap     , 	"deltaPhiMap"     );
    tr->Branch("ME0RawId"     ,	&me0List      );  //, 	"ME0DetId/i"     );
@@ -1918,6 +2112,7 @@ gStyle->SetOptTitle(0);
        isMuVisibleGEM[i]= 0; 
        isMuVisibleRPC[i]= 0; 
        isMuVisibleDT[i]= 0; 
+       isMuVisibleNONE[i]= 0; 
        muVxBirth[i] 	= 0; 
        muVyBirth[i] 	= 0; 
        muVzBirth[i] 	= 0; 
@@ -2234,7 +2429,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 
      // if ( fabs(p.eta()) < 2.0 || fabs(p.eta()) > 2.8 ) return;
      // if ( fabs(p.pt()) < 0.5 ) return;
-
+     cout << "END LOOP GEN PARTICLES" << endl;
      }
 
 
@@ -2273,7 +2468,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
        }
        else	            //other case: the muon has daughters. Need NONE of them being a muon.
        {
-       cout << "This muon has daugters" << endl;
+       cout << "This muon has daughters" << endl;
        foundlast = 1;
        for(unsigned int j = 0; j < p.numberOfDaughters(); ++j)
          {
@@ -2304,7 +2499,13 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
       //cout << "Ordered muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
         
       //look to the regions where the three muons are
+      //the counters has to be set to 0 befor the loop on each event     
+      nBarrel 	 = 0;
+      nOverlap	 = 0;
+      nEndcap	 = 0;
+      nEndcapME0 = 0;
       
+ 
       for(size_t i = 0; i < genParticles->size(); ++ i)
       {
         const GenParticle & p = (*genParticles)[i];
@@ -2318,10 +2519,13 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
             if ( fabs(p.eta()) >= 0.85 && fabs(p.eta()) <= 1.25 )  nOverlap++;
             if ( fabs(p.eta()) > 1.25 && fabs(p.eta()) < 3.0 )     nEndcap++;
             if ( fabs(p.eta()) > 1.8 && fabs(p.eta()) < 3.0 )      nEndcapME0++;
+	    cout << "muCand Eta:" << p.eta() << endl;
           }
         }
 
       }
+
+      cout << "nBarrel:" << nBarrel << " nOverlap:" << nOverlap << " nEndcap:" << nEndcap << " nEndcapME0:" << nEndcapME0 << endl;
       
       if ( nBarrel + nOverlap + nEndcap == 3 )//only for triple mu from tau->3mu
       {
@@ -2329,7 +2533,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 	  else if ( nBarrel == 2 && nOverlap == 1 )                      nBBO++;                        
 	  else if ( nBarrel == 2 && nEndcap == 1 )                       nBBE++;
 	  else if ( nBarrel == 1 && nOverlap == 2 )                      nBOO++;
-	  else if ( nBarrel == 1 && nOverlap == 1 && nEndcap == 1 )      nBBE++;
+	  else if ( nBarrel == 1 && nOverlap == 1 && nEndcap == 1 )      nBOE++;
 	  else if ( nBarrel == 1 && nEndcap == 2 )                       nBEE++;
 	  else if ( nOverlap == 3 )                                      nOOO++;
 	  else if ( nOverlap == 2 && nEndcap == 1 )                      nOOE++;
@@ -2341,8 +2545,11 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 
       if ( nEndcapME0 == 3 ) nEEEME0++; 
       
+      //check eta particle
+       
 
-
+      cout << "nBBB:" << nBBB << " nBBO:" << nBBO << " nBBE:" << nBBE << " nBOO:" << nBOO << " nBOE:" << nBOE << "nBEE:" << nBEE << endl;
+      cout << "nOOO:" << nOOO << " nOOE:" << nOOE << " nOEE:" << nOEE << " nEEE:" << nEEE << " nEEEME0:" << nEEEME0 << endl;
 
 
 //h_PtVsEta	->Draw("COLZ");
@@ -2458,16 +2665,16 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 	   if ( shMe0id->roll()==8 )			h_xy_strangeEP8->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
 	 }
 
-       cout << "\ni=" << i << "\tcurrent entryPoint z= " << (*it).entryPoint().z() << "\tx= " << (*it).entryPoint().x() << "\ty= " << (*it).entryPoint().y() << endl;
-       cout 	           << "\tcurrent exitPoint z= " << (*it).exitPoint().z()   << "\tx= " << (*it).exitPoint().x()  << "\ty= " << (*it).exitPoint().y()  << endl;
-       cout                << "\tand muMax_z= " << muMax_z[i] << endl; //MR
-       cout << "ME0DetId: endcap= " <<  shMe0id->region()  << " chamber= " << shMe0id->chamber() << " layer= " << shMe0id->layer() << endl;
+       //cout << "\ni=" << i << "\tcurrent entryPoint z= " << (*it).entryPoint().z() << "\tx= " << (*it).entryPoint().x() << "\ty= " << (*it).entryPoint().y() << endl;
+       //cout 	           << "\tcurrent exitPoint z= " << (*it).exitPoint().z()   << "\tx= " << (*it).exitPoint().x()  << "\ty= " << (*it).exitPoint().y()  << endl;
+       //cout                << "\tand muMax_z= " << muMax_z[i] << endl; //MR
+       //cout << "ME0DetId: endcap= " <<  shMe0id->region()  << " chamber= " << shMe0id->chamber() << " layer= " << shMe0id->layer() << endl;
          //atLeastOne = true;
          //identify the farthest hit for the current muon
          if ( muMax_z[i] < (*it).entryPoint().z() )
          {
            muMax_z[i] = (*it).entryPoint().z();  
-           cout << "maxz changed" << muMax_z[i] << " i=" << i << endl;
+           //cout << "maxz changed" << muMax_z[i] << " i=" << i << endl;
          }
        
        }
@@ -2489,6 +2696,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
      cout << "Max_z of " << i << "-th mu in ME0:" << muMax_z[i] << endl;  
      }
      if (isMuVisibleME0[i])  nVisibleMuME0++;
+     cout << "isMuVisibleME0["<< i << "]: " << isMuVisibleME0[i] << endl;
    }
    
    for ( auto it = me0simHitH->begin(); it != me0simHitH->end(); ++it )
@@ -2508,15 +2716,15 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
      {
      ent++;
      av=av+(*chit);
-     cout << "Chamber before shift: " << (*chit) << endl;
+     //cout << "Chamber before shift: " << (*chit) << endl;
      }
    if (ent!=0) av=av/ent;
-   cout << "Average chamber: " << av << endl;
+   //cout << "Average chamber: " << av << endl;
    //shift chambers to be centered in the average
    for ( auto chit=(*deltaChamber).begin() ; chit!=(*deltaChamber).end() ; ++chit)
      {
      (*chit)=(*chit)-av;
-     cout << "Chamber after shift: " << (*chit) << endl;
+     //cout << "Chamber after shift: " << (*chit) << endl;
      }
 
    //CSC SimHits
@@ -2648,6 +2856,215 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
      if (isMuVisible[i])  nVisibleMu++;
    }
 
+   //if muon is not seen by neither ME0, GEM, CSC, RPC, DT increment isMuVisibleNONE
+   for (int i=0; i<3; i++)
+   {
+      if ( isMuVisibleME0[i] + isMuVisibleGEM[i] + isMuVisibleCSC[i] + isMuVisibleRPC[i] + isMuVisibleDT[i] == 0 ) isMuVisibleNONE[i]=1;
+      if ( (isMuVisibleME0[i] + isMuVisibleGEM[i] + isMuVisibleCSC[i] + isMuVisibleRPC[i] + isMuVisibleDT[i] > 0) && isMuVisibleNONE[i]>0 )
+      {
+         cout << "ERROR: isMuVisibleME0["<<i<<"] + isMuVisibleGEM["<<i<<"] + isMuVisibleCSC["<<i<<"] + isMuVisibleRPC["<<i<<"] + isMuVisibleDT["<<i<<"] > 0: "<< isMuVisibleME0[i] + isMuVisibleGEM[i] + isMuVisibleCSC[i] + isMuVisibleRPC[i] + isMuVisibleDT[i] << "and isMuVisibleNONE["<<i<<"] > 0: " << isMuVisibleNONE[i] << endl;
+         nIsMuVisibleMoreThanOneERR++;
+      }
+
+   }
+   
+   //a muon can release energy in more than one detector, so one event can be classified in different ways (ex: RGG or RRG)
+   //to summarize the situation I can do a matrix
+   //isMuVisibleNONE[0] isMuVisibleDT[0] isMuVisibleRPC[0] isMuVisibleCSC[0] isMuVisibleGEM[0] isMuVisibleME0[0]
+   //isMuVisibleNONE[1] isMuVisibleDT[1] isMuVisibleRPC[1] isMuVisibleCSC[1] isMuVisibleGEM[1] isMuVisibleME0[1]
+   //isMuVisibleNONE[2] isMuVisibleDT[2] isMuVisibleRPC[2] isMuVisibleCSC[2] isMuVisibleGEM[2] isMuVisibleME0[2]
+
+   //3 numbers for each detector, 5 detectors + NONE
+   std::vector<int> matrixIsMuVisible;
+
+   for ( int i=0; i<3; i++ )
+   {
+      matrixIsMuVisible.push_back( isMuVisibleNONE[i] );
+      matrixIsMuVisible.push_back( isMuVisibleDT[i] );
+      matrixIsMuVisible.push_back( isMuVisibleRPC[i] );
+      matrixIsMuVisible.push_back( isMuVisibleCSC[i] );
+      matrixIsMuVisible.push_back( isMuVisibleGEM[i] );
+      matrixIsMuVisible.push_back( isMuVisibleME0[i] );
+   }
+   
+   cout << "matrixIsMuVisible" << endl;
+   for ( int i=0; i<3; i++ )
+   {
+      cout << matrixIsMuVisible[i*6] << matrixIsMuVisible[i*6+1] << matrixIsMuVisible[i*6+2] << matrixIsMuVisible[i*6+3] << matrixIsMuVisible[i*6+4] << matrixIsMuVisible[i*6+5] << endl;
+   }
+
+   //loop on first six elements of matrixIsMuVisible
+   for ( int i=0; i<6; i++ )
+   {
+      int contNONE = 0; 
+      int contDT = 0; 
+      int contRPC = 0; 
+      int contCSC = 0; 
+      int contGEM = 0; 
+      int contME0 = 0; 
+      
+      for ( int j=6; j<12; j++ )
+      {
+         for ( int k=12; k<18; k++ )
+         {
+
+	    if ( i==0 ) contNONE = contNONE + matrixIsMuVisible[0];
+            if ( i==1 ) contDT	  = contDT  + matrixIsMuVisible[1];
+            if ( i==2 ) contRPC  = contRPC  + matrixIsMuVisible[2];
+            if ( i==3 ) contCSC  = contCSC  + matrixIsMuVisible[3];
+            if ( i==4 ) contGEM  = contGEM  + matrixIsMuVisible[4];
+            if ( i==5 ) contME0  = contME0  + matrixIsMuVisible[5];
+
+	    if ( j==6  ) contNONE = contNONE + matrixIsMuVisible[6];
+            if ( j==7  ) contDT	  = contDT   + matrixIsMuVisible[7];
+            if ( j==8  ) contRPC  = contRPC  + matrixIsMuVisible[8];
+            if ( j==9  ) contCSC  = contCSC  + matrixIsMuVisible[9];
+            if ( j==10 ) contGEM  = contGEM  + matrixIsMuVisible[10];
+            if ( j==11 ) contME0  = contME0  + matrixIsMuVisible[11];
+
+            if ( k==12 ) contNONE = contNONE + matrixIsMuVisible[12];
+            if ( k==13 ) contDT	  = contDT   + matrixIsMuVisible[13];
+            if ( k==14 ) contRPC  = contRPC  + matrixIsMuVisible[14];
+            if ( k==15 ) contCSC  = contCSC  + matrixIsMuVisible[15];
+            if ( k==16 ) contGEM  = contGEM  + matrixIsMuVisible[16];
+            if ( k==17 ) contME0  = contME0  + matrixIsMuVisible[17];
+            
+            //fill counters for stubs in detectors
+            if ( contNONE == 3 ) 		 nMuNNN++;
+	    if ( contNONE == 2 && contDT  == 1 ) nMuNND++;
+	    if ( contNONE == 2 && contRPC == 1 ) nMuNNR++;
+	    if ( contNONE == 2 && contCSC == 1 ) nMuNNC++;
+	    if ( contNONE == 2 && contGEM == 1 ) nMuNNG++;
+	    if ( contNONE == 2 && contME0 == 1 ) nMuNNM++;
+
+	    if ( contNONE == 1 && contDT == 2 ) 		nMuNDD++;
+            if ( contNONE == 1 && contDT == 1 && contRPC == 1 ) nMuNDR++;
+            if ( contNONE == 1 && contDT == 1 && contCSC == 1 ) nMuNDC++;
+            if ( contNONE == 1 && contDT == 1 && contGEM == 1 ) nMuNDG++;
+            if ( contNONE == 1 && contDT == 1 && contME0 == 1 ) nMuNDM++;
+
+	    if ( contNONE == 1 && contRPC == 2 ) 		 nMuNRR++;
+	    if ( contNONE == 1 && contRPC == 1 && contCSC == 1 ) nMuNRC++;
+	    if ( contNONE == 1 && contRPC == 1 && contGEM == 1 ) nMuNRG++;
+	    if ( contNONE == 1 && contRPC == 1 && contME0 == 1 ) nMuNRM++;
+
+	    if ( contNONE == 1 && contCSC == 2 ) 		 nMuNCC++;
+	    if ( contNONE == 1 && contCSC == 1 && contGEM == 1 ) nMuNCG++;
+	    if ( contNONE == 1 && contCSC == 1 && contME0 == 1 ) nMuNCM++;
+	    
+	    if ( contNONE == 1 && contGEM == 2 ) 		 nMuNGG++; 
+            if ( contNONE == 1 && contGEM == 1 && contME0 == 1 ) nMuNGM++;
+
+	    if ( contNONE == 1 && contME0 == 2 ) 		 nMuNMM++; 
+
+	    if ( contDT == 3 ) 	 	       nMuDDD++;
+            if ( contDT == 2 && contRPC == 1 ) nMuDDR++;
+            if ( contDT == 2 && contCSC == 1 ) nMuDDC++;
+            if ( contDT == 2 && contGEM == 1 ) nMuDDG++;
+            if ( contDT == 2 && contME0 == 1 ) nMuDDM++;
+
+	    if ( contDT == 1 && contRPC == 2 ) nMuDRR++;
+	    if ( contDT == 1 && contRPC == 1 && contCSC == 1 ) nMuDRC++;
+	    if ( contDT == 1 && contRPC == 1 && contGEM == 1 ) nMuDRG++;
+	    if ( contDT == 1 && contRPC == 1 && contME0 == 1 ) nMuDRM++;
+
+	    if ( contDT == 1 && contCSC == 2 ) 		       nMuDCC++;
+	    if ( contDT == 1 && contCSC == 1 && contGEM == 1 ) nMuDCG++;
+	    if ( contDT == 1 && contCSC == 1 && contME0 == 1 ) nMuDCM++;
+
+	    if ( contDT == 1 && contGEM == 2 ) 		       nMuDGG++;
+	    if ( contDT == 1 && contGEM == 1 && contME0 == 1 ) nMuDGM++;
+
+	    if ( contDT == 1 && contME0 == 2 ) 		       nMuDMM++;
+
+	    if ( contRPC == 3 ) 	        nMuRRR++; 
+            if ( contRPC == 2 && contCSC == 1 ) nMuRRC++;
+            if ( contRPC == 2 && contGEM == 1 ) nMuRRG++;
+            if ( contRPC == 2 && contME0 == 1 ) nMuRRM++;
+
+	    if ( contRPC == 1 && contCSC == 2 ) 		nMuRCC++;                 
+            if ( contRPC == 1 && contCSC == 1 && contGEM == 1 ) nMuRCG++;
+            if ( contRPC == 1 && contCSC == 1 && contME0 == 1 ) nMuRCM++;
+
+	    if ( contRPC == 1 && contGEM == 2 ) 		nMuRGG++;                  
+            if ( contRPC == 1 && contGEM == 1 && contME0 == 1 ) nMuRGM++;
+
+	    if ( contRPC == 1 && contME0 == 2 ) nMuRMM++;                  
+
+	    if ( contCSC == 3 ) 	        nMuCCC++; 
+            if ( contCSC == 2 && contGEM == 1 ) nMuCCG++;
+            if ( contCSC == 2 && contME0 == 1 ) nMuCCM++;
+
+	    if ( contCSC == 1 && contGEM == 2 ) 		nMuCGG++;                 
+            if ( contCSC == 1 && contGEM == 1 && contME0 == 1 ) nMuCGM++;
+
+	    if ( contCSC == 1 && contME0 == 2 ) 		nMuCMM++;                 
+
+	    if ( contGEM == 3 ) 		nMuGGG++;                 
+            if ( contGEM == 2 && contME0 == 1 ) nMuGGM++;
+
+            if ( contGEM == 1 && contME0 == 2 ) nMuGMM++;
+
+            if ( contME0 == 3 ) nMuMMM++;
+
+	    //cout << "contNONE:" << contNONE << " contDT:" << contDT << " contRPC:" << contRPC << " contCSC:" << contCSC << " contGEM:" << contGEM << " contME0:" << contME0 << endl;
+
+
+
+
+
+	    contNONE = 0;
+            contDT = 0; 
+            contRPC = 0; 
+            contCSC = 0; 
+            contGEM = 0; 
+            contME0 = 0; 
+
+         }
+      
+
+      }
+   }
+
+   //write a print for all the 56 nMuXXX variables
+   cout << "nMuNNN:" << nMuNNN << " nMuNND:" << nMuNND << " nMuNNR:" << nMuNNR << " nMuNNC:" << nMuNNC << " nMuNNG:" << nMuNNG << " nMuNNM:" << nMuNNM << endl;
+   cout << "nMuNDD:" << nMuNDD << " nMuNDR:" << nMuNDR << " nMuNDC:" << nMuNDC << " nMuNDG:" << nMuNDG << " nMuNDM:" << nMuNDM << endl;
+   cout << "nMuNRR:" << nMuNRR << " nMuNRC:" << nMuNRC << " nMuNRG:" << nMuNRG << " nMuNRM:" << nMuNRM << endl;
+   cout << "nMuNCC:" << nMuNCC << " nMuNCG:" << nMuNCG << " nMuNCM:" << nMuNCM << endl;
+   cout << "nMuNGG:" << nMuNGG << " nMuNGM:" << nMuNGM << endl;
+   cout << "nMuNMM:" << nMuNMM << endl;
+
+   cout << endl;
+
+   cout << "nMuDDD:" << nMuDDD << " nMuDDR:" << nMuDDR << " nMuDDC:" << nMuDDC << " nMuDDG:" << nMuDDG << " nMuDDM:" << nMuDDM << endl;
+   cout << "nMuDRR:" << nMuDRR << " nMuDRC:" << nMuDRC << " nMuDRG:" << nMuDRG << " nMuDRM:" << nMuDRM << endl;
+   cout << "nMuDCC:" << nMuDCC << " nMuDCG:" << nMuDCG << " nMuDCM:" << nMuDCM << endl;
+   cout << "nMuDGG:" << nMuDGG << " nMuDGM:" << nMuDGM << endl;
+   cout << "nMuDMM:" << nMuDMM << endl;
+
+   cout << endl;
+
+   cout << "nMuRRR:" << nMuRRR << " nMuRRC:" << nMuRRC << " nMuRRG:" << nMuRRG << " nMuRRM:" << nMuRRM << endl;
+   cout << "nMuRCC:" << nMuRCC << " nMuRCG:" << nMuRCG << " nMuRCM:" << nMuRCM << endl;
+   cout << "nMuRGG:" << nMuRGG << " nMuRGM:" << nMuRGM << endl;
+   cout << "nMuRMM:" << nMuRMM << endl;
+   
+   cout << endl;
+
+   cout << "nMuCCC:" << nMuCCC << " nMuCCG:" << nMuCCG << " nMuCCM:" << nMuCCM << endl;
+   cout << "nMuCGG:" << nMuCGG << " nMuCGM:" << nMuCGM << endl;
+   cout << "nMuCMM:" << nMuCMM << endl;
+
+   cout << endl;
+
+   cout << "nMuGGG:" << nMuGGG << " nMuGGM:" << nMuGGM << endl;
+   cout << "nMuGMM:" << nMuGMM << endl;
+   
+   cout << endl;
+
+   cout << "nMuMMM:" << nMuMMM << endl;
+
+   
 
    //ME0
    ESHandle<ME0Geometry> me0Geom;
@@ -2988,6 +3405,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 
      for ( sg_it = me0segmentH->begin(); sg_it !=me0segmentH->end(); ++sg_it)
         {
+        cout << "\nLooking to new me0segmentH " << endl;
 	ME0DetId segmMe0Id = (*sg_it).me0DetId();
 	int endcap = segmMe0Id.region();
         int segm_chamber = segmMe0Id.chamber();
@@ -3260,7 +3678,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
       cout << "Starting to evaluate double triggers with vicinity request" << endl;
 
       cout << "deltaGlobalPhiLayer21List size = " << (*deltaGlobalPhiLayer21List).size() << endl;
-      cout << "me0List size = " << (*me0List).size() << endl;
+      cout << "me0List size = " << (*me0List).size() << " nME0:" << nME0 << " nSegments:" << nSegments << endl;
 
       //Trigger WITH chamber vicinity request (doubles)
       
@@ -3949,6 +4367,48 @@ DeltaGlobalPhiAnalyzer::endJob()
  Int_t denom1=-1;
  Int_t denom2=-1;
  Int_t denom3=-1;
+
+ //count the couples of detector that aare activated by the three canditdate muons
+ //sum the triplets
+ nMuNN = nMuNNN + nMuNND + nMuNNR + nMuNNC + nMuNNG + nMuNNM;
+ nMuND = nMuNND + nMuNDD + nMuNDR + nMuNDC + nMuNDG + nMuNDM;
+ nMuNR = nMuNNR + nMuNDR + nMuNRR + nMuNRC + nMuNRG + nMuNRM;
+ nMuNC = nMuNNC + nMuNDC + nMuNRC + nMuNCC + nMuNCG + nMuNCM;
+ nMuNG = nMuNNG + nMuNDG + nMuNRG + nMuNCG + nMuNGG + nMuNGM;
+ nMuNM = nMuNNM + nMuNDM + nMuNRM + nMuNCM + nMuNGM + nMuNMM;
+
+ nMuDD = nMuDDD + nMuDDR + nMuDDC + nMuDDG + nMuDDM + nMuNDD;
+ nMuDR = nMuDDR + nMuDRR + nMuDRC + nMuDRG + nMuDRM + nMuNDR;
+ nMuDC = nMuDDC + nMuDRC + nMuDCC + nMuDCG + nMuDCM + nMuNDC;
+ nMuDG = nMuDDG + nMuDRG + nMuDCG + nMuDGG + nMuDGM + nMuNDG;
+ nMuDM = nMuDDM + nMuDRM + nMuDCM + nMuDGM + nMuDMM + nMuNDM;
+ nMuRR = nMuDRR + nMuRRR + nMuRRC + nMuRRG + nMuRRM + nMuNRR;
+ nMuRC = nMuDRC + nMuRRC + nMuRCC + nMuRCG + nMuRCM + nMuNRC;
+ nMuRG = nMuDRG + nMuRRG + nMuRCG + nMuRGG + nMuRGM + nMuNRG;
+ nMuRM = nMuDRM + nMuRRM + nMuRCM + nMuRGM + nMuRMM + nMuNRM;
+ nMuCC = nMuDCC + nMuRCC + nMuCCC + nMuCCG + nMuCCM + nMuNCC;
+ nMuCG = nMuDCG + nMuRCG + nMuCCG + nMuCGG + nMuCGM + nMuNCG;
+ nMuCM = nMuDCM + nMuRCM + nMuCCM + nMuCGM + nMuCMM + nMuNCM;
+ nMuGG = nMuDGG + nMuRGG + nMuCGG + nMuGGG + nMuGGM + nMuNGG;
+ nMuGM = nMuDGM + nMuRGM + nMuCGM + nMuGGM + nMuGMM + nMuNGM;
+ nMuMM = nMuDMM + nMuRMM + nMuCMM + nMuGMM + nMuMMM + nMuNMM;
+
+ cout << "nMuNN:" << nMuNN << " nMuND:" << nMuND << " nMuNR:" << nMuNR << " nMuNC:" << nMuNC << " nMuNG:" << nMuNG << " nMuNM:" << nMuNM << endl;
+ cout << "nMuDD:" << nMuDD << " nMuDR:" << nMuDR << " nMuDC:" << nMuDC << " nMuDG:" << nMuDG << " nMuDM:" << nMuDM << endl;
+ cout << "nMuRR:" << nMuRR << " nMuRC:" << nMuRC << " nMuRG:" << nMuRG << " nMuRM:" << nMuRM << endl;
+ cout << "nMuCC:" << nMuCC << " nMuCG:" << nMuCG << " nMuCM:" << nMuCM << endl;
+ cout << "nMuGG:" << nMuGG << " nMuGM:" << nMuGM << endl;
+ cout << "nMuMM:" << nMuMM << endl;
+
+ nMuN = nMuNN + nMuND + nMuNR + nMuNC + nMuNG + nMuNM; 
+ nMuD = nMuND + nMuDD + nMuDR + nMuDC + nMuDG + nMuDM; 
+ nMuR = nMuNR + nMuDR + nMuRR + nMuRC + nMuRG + nMuRM; 
+ nMuC = nMuNC + nMuDC + nMuRC + nMuCC + nMuCG + nMuCM; 
+ nMuG = nMuNG + nMuDG + nMuRG + nMuCG + nMuGG + nMuGM; 
+ nMuM = nMuNM + nMuDM + nMuRM + nMuCM + nMuGM + nMuMM; 
+
+ cout << "nMuN:" << nMuN << " nMuD:" << nMuD << " nMuR:" << nMuR << " nMuC:" << nMuC << " nMuG:" << nMuG << " nMuM:" << nMuM << endl;
+
  
  //mME0 is only the number of muons that are generate din eta region of ME0
  //but they have to be visible: this is controlled by nVisibleMuME0
