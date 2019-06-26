@@ -5020,77 +5020,77 @@ DeltaGlobalPhiAnalyzer::endJob()
 
  for ( int i=0; i<56; i++)
  {
-    cout << "isMuNNNpt[" << i << "]: " << isMuNNNpt[i] << endl;
-    cout << "isMuNNDpt[" << i << "]: " << isMuNNDpt[i] << endl;
-    cout << "isMuNNRpt[" << i << "]: " << isMuNNRpt[i] << endl;
-    cout << "isMuNNCpt[" << i << "]: " << isMuNNCpt[i] << endl;
-    cout << "isMuNNGpt[" << i << "]: " << isMuNNGpt[i] << endl;
-    cout << "isMuNNMpt[" << i << "]: " << isMuNNMpt[i] << endl;
-    cout << "isMuNDDpt[" << i << "]: " << isMuNDDpt[i] << endl;
-    cout << "isMuNDRpt[" << i << "]: " << isMuNDRpt[i] << endl;
-    cout << "isMuNDCpt[" << i << "]: " << isMuNDCpt[i] << endl;
-    cout << "isMuNDGpt[" << i << "]: " << isMuNDGpt[i] << endl;
-    cout << "isMuNDMpt[" << i << "]: " << isMuNDMpt[i] << endl;
-    cout << "isMuNRRpt[" << i << "]: " << isMuNRRpt[i] << endl;
-    cout << "isMuNRCpt[" << i << "]: " << isMuNRCpt[i] << endl;
-    cout << "isMuNRGpt[" << i << "]: " << isMuNRGpt[i] << endl;
-    cout << "isMuNRMpt[" << i << "]: " << isMuNRMpt[i] << endl;
-    cout << "isMuNCCpt[" << i << "]: " << isMuNCCpt[i] << endl;
-    cout << "isMuNCGpt[" << i << "]: " << isMuNCGpt[i] << endl;
-    cout << "isMuNCMpt[" << i << "]: " << isMuNCMpt[i] << endl;
-    cout << "isMuNGGpt[" << i << "]: " << isMuNGGpt[i] << endl;
-    cout << "isMuNGMpt[" << i << "]: " << isMuNGMpt[i] << endl;
-    cout << "isMuNMMpt[" << i << "]: " << isMuNMMpt[i] << endl;
+    cout << "nMuNNNpt[" << i << "]: " << nMuNNNpt[i] << endl;
+    cout << "nMuNNDpt[" << i << "]: " << nMuNNDpt[i] << endl;
+    cout << "nMuNNRpt[" << i << "]: " << nMuNNRpt[i] << endl;
+    cout << "nMuNNCpt[" << i << "]: " << nMuNNCpt[i] << endl;
+    cout << "nMuNNGpt[" << i << "]: " << nMuNNGpt[i] << endl;
+    cout << "nMuNNMpt[" << i << "]: " << nMuNNMpt[i] << endl;
+    cout << "nMuNDDpt[" << i << "]: " << nMuNDDpt[i] << endl;
+    cout << "nMuNDRpt[" << i << "]: " << nMuNDRpt[i] << endl;
+    cout << "nMuNDCpt[" << i << "]: " << nMuNDCpt[i] << endl;
+    cout << "nMuNDGpt[" << i << "]: " << nMuNDGpt[i] << endl;
+    cout << "nMuNDMpt[" << i << "]: " << nMuNDMpt[i] << endl;
+    cout << "nMuNRRpt[" << i << "]: " << nMuNRRpt[i] << endl;
+    cout << "nMuNRCpt[" << i << "]: " << nMuNRCpt[i] << endl;
+    cout << "nMuNRGpt[" << i << "]: " << nMuNRGpt[i] << endl;
+    cout << "nMuNRMpt[" << i << "]: " << nMuNRMpt[i] << endl;
+    cout << "nMuNCCpt[" << i << "]: " << nMuNCCpt[i] << endl;
+    cout << "nMuNCGpt[" << i << "]: " << nMuNCGpt[i] << endl;
+    cout << "nMuNCMpt[" << i << "]: " << nMuNCMpt[i] << endl;
+    cout << "nMuNGGpt[" << i << "]: " << nMuNGGpt[i] << endl;
+    cout << "nMuNGMpt[" << i << "]: " << nMuNGMpt[i] << endl;
+    cout << "nMuNMMpt[" << i << "]: " << nMuNMMpt[i] << endl;
     
     cout << endl;
 
-    cout << "isMuDDDpt[" << i << "]: " << isMuDDDpt[i] << endl;
-    cout << "isMuDDRpt[" << i << "]: " << isMuDDRpt[i] << endl;
-    cout << "isMuDDCpt[" << i << "]: " << isMuDDCpt[i] << endl;
-    cout << "isMuDDGpt[" << i << "]: " << isMuDDGpt[i] << endl;
-    cout << "isMuDDMpt[" << i << "]: " << isMuDDMpt[i] << endl;
-    cout << "isMuDRRpt[" << i << "]: " << isMuDRRpt[i] << endl;
-    cout << "isMuDRCpt[" << i << "]: " << isMuDRCpt[i] << endl;
-    cout << "isMuDRGpt[" << i << "]: " << isMuDRGpt[i] << endl;
-    cout << "isMuDRMpt[" << i << "]: " << isMuDRMpt[i] << endl;
-    cout << "isMuDCCpt[" << i << "]: " << isMuDCCpt[i] << endl;
-    cout << "isMuDCGpt[" << i << "]: " << isMuDCGpt[i] << endl;
-    cout << "isMuDCMpt[" << i << "]: " << isMuDCMpt[i] << endl;
-    cout << "isMuDGGpt[" << i << "]: " << isMuDGGpt[i] << endl;
-    cout << "isMuDGMpt[" << i << "]: " << isMuDGMpt[i] << endl;
-    cout << "isMuDMMpt[" << i << "]: " << isMuDMMpt[i] << endl;
+    cout << "nMuDDDpt[" << i << "]: " << nMuDDDpt[i] << endl;
+    cout << "nMuDDRpt[" << i << "]: " << nMuDDRpt[i] << endl;
+    cout << "nMuDDCpt[" << i << "]: " << nMuDDCpt[i] << endl;
+    cout << "nMuDDGpt[" << i << "]: " << nMuDDGpt[i] << endl;
+    cout << "nMuDDMpt[" << i << "]: " << nMuDDMpt[i] << endl;
+    cout << "nMuDRRpt[" << i << "]: " << nMuDRRpt[i] << endl;
+    cout << "nMuDRCpt[" << i << "]: " << nMuDRCpt[i] << endl;
+    cout << "nMuDRGpt[" << i << "]: " << nMuDRGpt[i] << endl;
+    cout << "nMuDRMpt[" << i << "]: " << nMuDRMpt[i] << endl;
+    cout << "nMuDCCpt[" << i << "]: " << nMuDCCpt[i] << endl;
+    cout << "nMuDCGpt[" << i << "]: " << nMuDCGpt[i] << endl;
+    cout << "nMuDCMpt[" << i << "]: " << nMuDCMpt[i] << endl;
+    cout << "nMuDGGpt[" << i << "]: " << nMuDGGpt[i] << endl;
+    cout << "nMuDGMpt[" << i << "]: " << nMuDGMpt[i] << endl;
+    cout << "nMuDMMpt[" << i << "]: " << nMuDMMpt[i] << endl;
 
     cout << endl;
 
-    cout << "isMuRRRpt[" << i << "]: " << isMuRRRpt[i] << endl;
-    cout << "isMuRRCpt[" << i << "]: " << isMuRRCpt[i] << endl;
-    cout << "isMuRRGpt[" << i << "]: " << isMuRRGpt[i] << endl;
-    cout << "isMuRRMpt[" << i << "]: " << isMuRRMpt[i] << endl;
-    cout << "isMuRCCpt[" << i << "]: " << isMuRCCpt[i] << endl;
-    cout << "isMuRCGpt[" << i << "]: " << isMuRCGpt[i] << endl;
-    cout << "isMuRCMpt[" << i << "]: " << isMuRCMpt[i] << endl;
-    cout << "isMuRGGpt[" << i << "]: " << isMuRGGpt[i] << endl;
-    cout << "isMuRGMpt[" << i << "]: " << isMuRGMpt[i] << endl;
-    cout << "isMuRMMpt[" << i << "]: " << isMuRMMpt[i] << endl;
+    cout << "nMuRRRpt[" << i << "]: " << nMuRRRpt[i] << endl;
+    cout << "nMuRRCpt[" << i << "]: " << nMuRRCpt[i] << endl;
+    cout << "nMuRRGpt[" << i << "]: " << nMuRRGpt[i] << endl;
+    cout << "nMuRRMpt[" << i << "]: " << nMuRRMpt[i] << endl;
+    cout << "nMuRCCpt[" << i << "]: " << nMuRCCpt[i] << endl;
+    cout << "nMuRCGpt[" << i << "]: " << nMuRCGpt[i] << endl;
+    cout << "nMuRCMpt[" << i << "]: " << nMuRCMpt[i] << endl;
+    cout << "nMuRGGpt[" << i << "]: " << nMuRGGpt[i] << endl;
+    cout << "nMuRGMpt[" << i << "]: " << nMuRGMpt[i] << endl;
+    cout << "nMuRMMpt[" << i << "]: " << nMuRMMpt[i] << endl;
 
     cout << endl;
 
-    cout << "isMuCCCpt[" << i << "]: " << isMuCCCpt[i] << endl;
-    cout << "isMuCCGpt[" << i << "]: " << isMuCCGpt[i] << endl;
-    cout << "isMuCCMpt[" << i << "]: " << isMuCCMpt[i] << endl;
-    cout << "isMuCGGpt[" << i << "]: " << isMuCGGpt[i] << endl;
-    cout << "isMuCGMpt[" << i << "]: " << isMuCGMpt[i] << endl;
-    cout << "isMuCMMpt[" << i << "]: " << isMuCMMpt[i] << endl;
+    cout << "nMuCCCpt[" << i << "]: " << nMuCCCpt[i] << endl;
+    cout << "nMuCCGpt[" << i << "]: " << nMuCCGpt[i] << endl;
+    cout << "nMuCCMpt[" << i << "]: " << nMuCCMpt[i] << endl;
+    cout << "nMuCGGpt[" << i << "]: " << nMuCGGpt[i] << endl;
+    cout << "nMuCGMpt[" << i << "]: " << nMuCGMpt[i] << endl;
+    cout << "nMuCMMpt[" << i << "]: " << nMuCMMpt[i] << endl;
 
     cout << endl;
 
-    cout << "isMuGGGpt[" << i << "]: " << isMuGGGpt[i] << endl;
-    cout << "isMuGGMpt[" << i << "]: " << isMuGGMpt[i] << endl;
-    cout << "isMuGMMpt[" << i << "]: " << isMuGMMpt[i] << endl;
+    cout << "nMuGGGpt[" << i << "]: " << nMuGGGpt[i] << endl;
+    cout << "nMuGGMpt[" << i << "]: " << nMuGGMpt[i] << endl;
+    cout << "nMuGMMpt[" << i << "]: " << nMuGMMpt[i] << endl;
 
     cout << endl;
 
-    cout << "isMuMMMpt[" << i << "]: " << isMuMMMpt[i] << endl;
+    cout << "nMuMMMpt[" << i << "]: " << nMuMMMpt[i] << endl;
 
     cout << endl;
  }
