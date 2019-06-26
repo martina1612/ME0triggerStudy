@@ -713,16 +713,31 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       int nOverlap = 0;
       int nEndcap  = 0;
       int nEndcapME0  = 0;
+      int nForward   = 0;
       int nBBB     = 0; // ten combiantions
       int nBBO     = 0;                        
       int nBBE     = 0;
+      int nBBF     = 0;
       int nBOO     = 0;
       int nBOE     = 0;
+      int nBOF     = 0;
       int nBEE     = 0;
+      int nBEF     = 0;
+      int nBFF     = 0;
+
       int nOOO     = 0;
       int nOOE     = 0;
+      int nOOF     = 0;
       int nOEE     = 0;
+      int nOEF     = 0;
+      int nOFF     = 0;
+      
       int nEEE     = 0;
+      int nEEF     = 0;
+      int nEFF     = 0;
+      
+      int nFFF     = 0;
+
       int nEEEME0  = 0;
 
       //Detectors combinations
@@ -802,6 +817,51 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
 
 
       int nIsMuVisibleMoreThanOneERR =0;
+
+      Bool_t isMuNNNpt[56];       Bool_t isMuDDDpt[56];      Bool_t isMuRRRpt[56];      Bool_t isMuCCCpt[56];       
+      Bool_t isMuNNDpt[56];       Bool_t isMuDDRpt[56];      Bool_t isMuRRCpt[56];      Bool_t isMuCCGpt[56];
+      Bool_t isMuNNRpt[56];       Bool_t isMuDDCpt[56];      Bool_t isMuRRGpt[56];      Bool_t isMuCCMpt[56];
+      Bool_t isMuNNCpt[56];       Bool_t isMuDDGpt[56];      Bool_t isMuRRMpt[56];      Bool_t isMuCGGpt[56];
+      Bool_t isMuNNGpt[56];       Bool_t isMuDDMpt[56];      Bool_t isMuRCCpt[56];      Bool_t isMuCGMpt[56];
+      Bool_t isMuNNMpt[56];       Bool_t isMuDRRpt[56];      Bool_t isMuRCGpt[56];      Bool_t isMuCMMpt[56];
+      Bool_t isMuNDDpt[56];       Bool_t isMuDRCpt[56];      Bool_t isMuRCMpt[56];      
+      Bool_t isMuNDRpt[56];       Bool_t isMuDRGpt[56];      Bool_t isMuRGGpt[56];      Bool_t isMuGGGpt[56]; 
+      Bool_t isMuNDCpt[56];       Bool_t isMuDRMpt[56];      Bool_t isMuRGMpt[56];      Bool_t isMuGGMpt[56];
+      Bool_t isMuNDGpt[56];       Bool_t isMuDCCpt[56];      Bool_t isMuRMMpt[56];      Bool_t isMuGMMpt[56];
+      Bool_t isMuNDMpt[56];       Bool_t isMuDCGpt[56];
+      Bool_t isMuNRRpt[56];       Bool_t isMuDCMpt[56];                          	Bool_t isMuMMMpt[56];
+      Bool_t isMuNRCpt[56];       Bool_t isMuDGGpt[56];
+      Bool_t isMuNRGpt[56];       Bool_t isMuDGMpt[56];
+      Bool_t isMuNRMpt[56];       Bool_t isMuDMMpt[56];
+      Bool_t isMuNCCpt[56];
+      Bool_t isMuNCGpt[56];
+      Bool_t isMuNCMpt[56];
+      Bool_t isMuNGGpt[56];
+      Bool_t isMuNGMpt[56];
+      Bool_t isMuNMMpt[56];
+                                                                                                                   
+      int nMuNNNpt[56];       int nMuDDDpt[56];      int nMuRRRpt[56];      int nMuCCCpt[56];       
+      int nMuNNDpt[56];       int nMuDDRpt[56];      int nMuRRCpt[56];      int nMuCCGpt[56];
+      int nMuNNRpt[56];       int nMuDDCpt[56];      int nMuRRGpt[56];      int nMuCCMpt[56];
+      int nMuNNCpt[56];       int nMuDDGpt[56];      int nMuRRMpt[56];      int nMuCGGpt[56];
+      int nMuNNGpt[56];       int nMuDDMpt[56];      int nMuRCCpt[56];      int nMuCGMpt[56];
+      int nMuNNMpt[56];       int nMuDRRpt[56];      int nMuRCGpt[56];      int nMuCMMpt[56];
+      int nMuNDDpt[56];       int nMuDRCpt[56];      int nMuRCMpt[56];      
+      int nMuNDRpt[56];       int nMuDRGpt[56];      int nMuRGGpt[56];      int nMuGGGpt[56]; 
+      int nMuNDCpt[56];       int nMuDRMpt[56];      int nMuRGMpt[56];      int nMuGGMpt[56];
+      int nMuNDGpt[56];       int nMuDCCpt[56];      int nMuRMMpt[56];      int nMuGMMpt[56];
+      int nMuNDMpt[56];       int nMuDCGpt[56];
+      int nMuNRRpt[56];       int nMuDCMpt[56];                             int nMuMMMpt[56];
+      int nMuNRCpt[56];       int nMuDGGpt[56];
+      int nMuNRGpt[56];       int nMuDGMpt[56];
+      int nMuNRMpt[56];       int nMuDMMpt[56];
+      int nMuNCCpt[56];
+      int nMuNCGpt[56];
+      int nMuNCMpt[56];
+      int nMuNGGpt[56];
+      int nMuNGMpt[56];
+      int nMuNMMpt[56];
+
 
       Bool_t mu_isME0[3]		;	//true if mu in 1.8 < |eta| < 3 
       Bool_t mu_isME0pos[3]	;       //true if mu in +1.8 < eta < +3
@@ -1032,6 +1092,54 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
 
 				}
 
+   for ( int i=0; i<56; i++ )
+   {
+      isMuNNNpt[i]=0;       isMuDDDpt[i]=0;      isMuRRRpt[i]=0;      isMuCCCpt[i]=0;       
+      isMuNNDpt[i]=0;       isMuDDRpt[i]=0;      isMuRRCpt[i]=0;      isMuCCGpt[i]=0;             
+      isMuNNRpt[i]=0;       isMuDDCpt[i]=0;      isMuRRGpt[i]=0;      isMuCCMpt[i]=0;
+      isMuNNCpt[i]=0;       isMuDDGpt[i]=0;      isMuRRMpt[i]=0;      isMuCGGpt[i]=0;
+      isMuNNGpt[i]=0;       isMuDDMpt[i]=0;      isMuRCCpt[i]=0;      isMuCGMpt[i]=0;
+      isMuNNMpt[i]=0;       isMuDRRpt[i]=0;      isMuRCGpt[i]=0;      isMuCMMpt[i]=0;
+      isMuNDDpt[i]=0;       isMuDRCpt[i]=0;      isMuRCMpt[i]=0;      
+      isMuNDRpt[i]=0;       isMuDRGpt[i]=0;      isMuRGGpt[i]=0;      isMuGGGpt[i]=0; 
+      isMuNDCpt[i]=0;       isMuDRMpt[i]=0;      isMuRGMpt[i]=0;      isMuGGMpt[i]=0;
+      isMuNDGpt[i]=0;       isMuDCCpt[i]=0;      isMuRMMpt[i]=0;      isMuGMMpt[i]=0;
+      isMuNDMpt[i]=0;       isMuDCGpt[i]=0;
+      isMuNRRpt[i]=0;       isMuDCMpt[i]=0;                           isMuMMMpt[i]=0;
+      isMuNRCpt[i]=0;       isMuDGGpt[i]=0;
+      isMuNRGpt[i]=0;       isMuDGMpt[i]=0;
+      isMuNRMpt[i]=0;       isMuDMMpt[i]=0;
+      isMuNCCpt[i]=0;
+      isMuNCGpt[i]=0;
+      isMuNCMpt[i]=0;
+      isMuNGGpt[i]=0;
+      isMuNGMpt[i]=0;
+      isMuNMMpt[i]=0;
+
+      nMuNNNpt[i]=0;       nMuDDDpt[i]=0;      nMuRRRpt[i]=0;      nMuCCCpt[i]=0;       
+      nMuNNDpt[i]=0;       nMuDDRpt[i]=0;      nMuRRCpt[i]=0;      nMuCCGpt[i]=0;             
+      nMuNNRpt[i]=0;       nMuDDCpt[i]=0;      nMuRRGpt[i]=0;      nMuCCMpt[i]=0;
+      nMuNNCpt[i]=0;       nMuDDGpt[i]=0;      nMuRRMpt[i]=0;      nMuCGGpt[i]=0;
+      nMuNNGpt[i]=0;       nMuDDMpt[i]=0;      nMuRCCpt[i]=0;      nMuCGMpt[i]=0;
+      nMuNNMpt[i]=0;       nMuDRRpt[i]=0;      nMuRCGpt[i]=0;      nMuCMMpt[i]=0;
+      nMuNDDpt[i]=0;       nMuDRCpt[i]=0;      nMuRCMpt[i]=0;      
+      nMuNDRpt[i]=0;       nMuDRGpt[i]=0;      nMuRGGpt[i]=0;      nMuGGGpt[i]=0; 
+      nMuNDCpt[i]=0;       nMuDRMpt[i]=0;      nMuRGMpt[i]=0;      nMuGGMpt[i]=0;
+      nMuNDGpt[i]=0;       nMuDCCpt[i]=0;      nMuRMMpt[i]=0;      nMuGMMpt[i]=0;
+      nMuNDMpt[i]=0;       nMuDCGpt[i]=0;
+      nMuNRRpt[i]=0;       nMuDCMpt[i]=0;                          nMuMMMpt[i]=0;
+      nMuNRCpt[i]=0;       nMuDGGpt[i]=0;
+      nMuNRGpt[i]=0;       nMuDGMpt[i]=0;
+      nMuNRMpt[i]=0;       nMuDMMpt[i]=0;
+      nMuNCCpt[i]=0;
+      nMuNCGpt[i]=0;
+      nMuNCMpt[i]=0;
+      nMuNGGpt[i]=0;
+      nMuNGMpt[i]=0;
+      nMuNMMpt[i]=0;
+   }
+
+
    TString tripleStringInt = "";
    TString tripleStringBool = "";
    TString tripleStringFloat = "";
@@ -1050,6 +1158,25 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
 	   tripleStringFloat =tripleStringFloat +":";
 	   }
 	 }
+
+   TString tripleStringIntLow = "";
+   TString tripleStringBoolLow = "";
+   TString tripleStringFloatLow = "";
+   TString ptLow[6] = {"0","3","5","10","20","50"};
+   for (int i1=0 ; i1<6 ; i1++)
+     for (int i2=i1 ; i2<6; i2++)
+       for (int i3=i2 ; i3<6; i3++)
+         {
+         tripleStringIntLow   = tripleStringIntLow   +ptLow[i1]+"_"+ptLow[i2]+"_"+ptLow[i3]+"GeV/I";
+         tripleStringBoolLow  = tripleStringBoolLow  +ptLow[i1]+"_"+ptLow[i2]+"_"+ptLow[i3]+"GeV/O";
+         tripleStringFloatLow = tripleStringFloatLow +ptLow[i1]+"_"+ptLow[i2]+"_"+ptLow[i3]+"GeV/F";
+         if ( !(i1==5 && i2==5 && i3==5) ) 
+           {
+           tripleStringIntLow   =tripleStringIntLow   +":";
+           tripleStringBoolLow  =tripleStringBoolLow  +":";
+           tripleStringFloatLow =tripleStringFloatLow +":";
+           }
+         }
 
 
    //tr->Branch("nEvent"     ,	&nEvent	  , 	"nEvent/I"     	);
@@ -1140,16 +1267,30 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    tr->Branch("nBarrel"  ,	&nBarrel,	"nBarrel/I"	);
    tr->Branch("nOverlap"  ,	&nOverlap,	"nOverlap/I"	);
    tr->Branch("nEndcap"  ,	&nEndcap,	"nEndcap/I"	);
+   tr->Branch("nForward"  ,	&nForward,	"nForward/I"	);
    trSum->Branch("nBBB"  ,	&nBBB,	"nBBB/I"	);
    trSum->Branch("nBBO"  ,	&nBBO,	"nBBO/I"	);
    trSum->Branch("nBBE"  ,	&nBBE,	"nBBE/I"	);
+   trSum->Branch("nBBF"  ,	&nBBF,	"nBBF/I"	);
    trSum->Branch("nBOO"  ,	&nBOO,	"nBOO/I"	);
    trSum->Branch("nBOE"  ,	&nBOE,	"nBOE/I"	);
+   trSum->Branch("nBOF"  ,	&nBOF,	"nBOF/I"	);
    trSum->Branch("nBEE"  ,	&nBEE,	"nBEE/I"	);
+   trSum->Branch("nBEF"  ,	&nBEF,	"nBEF/I"	);
+   trSum->Branch("nBFF"  ,	&nBFF,	"nBFF/I"	);
+
    trSum->Branch("nOOO"  ,	&nOOO,	"nOOO/I"	);
    trSum->Branch("nOOE"  ,	&nOOE,	"nOOE/I"	);
+   trSum->Branch("nOOF"  ,	&nOOF,	"nOOF/I"	);
    trSum->Branch("nOEE"  ,	&nOEE,	"nOEE/I"	);
+   trSum->Branch("nOEF"  ,	&nOEF,	"nOEF/I"	);
+   trSum->Branch("nOFF"  ,	&nOFF,	"nOFF/I"	);
+
    trSum->Branch("nEEE"  ,	&nEEE,	"nEEE/I"	);
+   trSum->Branch("nEEF"  ,	&nEEF,	"nEEF/I"	);
+   trSum->Branch("nEFF"  ,	&nEFF,	"nEFF/I"	);
+
+   trSum->Branch("nFFF"  ,	&nFFF,	"nFFF/I"	);
    trSum->Branch("nEEEME0"  ,	&nEEEME0,	"nEEEME0/I"	);
 
    trSum->Branch("nIsMuVisibleMoreThanOneERR"  ,	&nIsMuVisibleMoreThanOneERR,	"nIsMuVisibleMoreThanOneERR/I"	);
@@ -1264,7 +1405,83 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    trSum->Branch("nMuNG", &nMuNG, "nMuNG/I"	);      trSum->Branch("nMuG", &nMuG, "nMuG/I"	);
    trSum->Branch("nMuNM", &nMuNM, "nMuNM/I"	);      trSum->Branch("nMuM", &nMuM, "nMuM/I"	);
 
- 
+
+
+   //Branch for pt cut on topology of muons in CMS
+   tr->Branch("isMuNNNpt", &isMuNNNpt[0], tripleStringBoolLow	);	tr->Branch("isMuDDDpt", &isMuDDDpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNNDpt", &isMuNNDpt[0], tripleStringBoolLow  	); 	tr->Branch("isMuDDRpt", &isMuDDRpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNNRpt", &isMuNNRpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDDCpt", &isMuDDCpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNNCpt", &isMuNNCpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDDGpt", &isMuDDGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNNGpt", &isMuNNGpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDDMpt", &isMuDDMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNNMpt", &isMuNNMpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDRRpt", &isMuDRRpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNDDpt", &isMuNDDpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDRCpt", &isMuDRCpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNDRpt", &isMuNDRpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDRGpt", &isMuDRGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNDCpt", &isMuNDCpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDRMpt", &isMuDRMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNDGpt", &isMuNDGpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDCCpt", &isMuDCCpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNDMpt", &isMuNDMpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDCGpt", &isMuDCGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNRRpt", &isMuNRRpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDCMpt", &isMuDCMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNRCpt", &isMuNRCpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDGGpt", &isMuDGGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNRGpt", &isMuNRGpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDGMpt", &isMuDGMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNRMpt", &isMuNRMpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDMMpt", &isMuDMMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNCCpt", &isMuNCCpt[0], tripleStringBoolLow  	);
+   tr->Branch("isMuNCGpt", &isMuNCGpt[0], tripleStringBoolLow  	);
+   tr->Branch("isMuNCMpt", &isMuNCMpt[0], tripleStringBoolLow  	);
+   tr->Branch("isMuNGGpt", &isMuNGGpt[0], tripleStringBoolLow  	);
+   tr->Branch("isMuNGMpt", &isMuNGMpt[0], tripleStringBoolLow  	);
+   tr->Branch("isMuNMMpt", &isMuNMMpt[0], tripleStringBoolLow  	);
+                                                                                                
+   tr->Branch("isMuRRRpt", &isMuRRRpt[0], tripleStringBoolLow  	);	tr->Branch("isMuCCCpt", &isMuCCCpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRRCpt", &isMuRRCpt[0], tripleStringBoolLow  	);      tr->Branch("isMuCCGpt", &isMuCCGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRRGpt", &isMuRRGpt[0], tripleStringBoolLow  	);      tr->Branch("isMuCCMpt", &isMuCCMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRRMpt", &isMuRRMpt[0], tripleStringBoolLow  	);      tr->Branch("isMuCGGpt", &isMuCGGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRCCpt", &isMuRCCpt[0], tripleStringBoolLow  	);      tr->Branch("isMuCGMpt", &isMuCGMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRCGpt", &isMuRCGpt[0], tripleStringBoolLow  	);      tr->Branch("isMuCMMpt", &isMuCMMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRCMpt", &isMuRCMpt[0], tripleStringBoolLow  	);
+   tr->Branch("isMuRGGpt", &isMuRGGpt[0], tripleStringBoolLow  	);	tr->Branch("isMuGGGpt", &isMuGGGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRGMpt", &isMuRGMpt[0], tripleStringBoolLow  	);      tr->Branch("isMuGGMpt", &isMuGGMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRMMpt", &isMuRMMpt[0], tripleStringBoolLow  	);      tr->Branch("isMuGMMpt", &isMuGMMpt[0], tripleStringBoolLow	);
+                                                                                           
+                                                        		tr->Branch("isMuMMMpt", &isMuMMMpt[0], tripleStringBoolLow	);
+
+   //Branch for pt cut on topology of muons in CMS
+   trSum->Branch("nMuNNNpt", &nMuNNNpt[0], tripleStringIntLow	);	trSum->Branch("nMuDDDpt", &nMuDDDpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNNDpt", &nMuNNDpt[0], tripleStringIntLow  	); 	trSum->Branch("nMuDDRpt", &nMuDDRpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNNRpt", &nMuNNRpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDDCpt", &nMuDDCpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNNCpt", &nMuNNCpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDDGpt", &nMuDDGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNNGpt", &nMuNNGpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDDMpt", &nMuDDMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNNMpt", &nMuNNMpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDRRpt", &nMuDRRpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNDDpt", &nMuNDDpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDRCpt", &nMuDRCpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNDRpt", &nMuNDRpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDRGpt", &nMuDRGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNDCpt", &nMuNDCpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDRMpt", &nMuDRMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNDGpt", &nMuNDGpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDCCpt", &nMuDCCpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNDMpt", &nMuNDMpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDCGpt", &nMuDCGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNRRpt", &nMuNRRpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDCMpt", &nMuDCMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNRCpt", &nMuNRCpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDGGpt", &nMuDGGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNRGpt", &nMuNRGpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDGMpt", &nMuDGMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNRMpt", &nMuNRMpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDMMpt", &nMuDMMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNCCpt", &nMuNCCpt[0], tripleStringIntLow  	);
+   trSum->Branch("nMuNCGpt", &nMuNCGpt[0], tripleStringIntLow  	);
+   trSum->Branch("nMuNCMpt", &nMuNCMpt[0], tripleStringIntLow  	);
+   trSum->Branch("nMuNGGpt", &nMuNGGpt[0], tripleStringIntLow  	);
+   trSum->Branch("nMuNGMpt", &nMuNGMpt[0], tripleStringIntLow  	);
+   trSum->Branch("nMuNMMpt", &nMuNMMpt[0], tripleStringIntLow  	);
+                                                                                              
+   trSum->Branch("nMuRRRpt", &nMuRRRpt[0], tripleStringIntLow  	);	trSum->Branch("nMuCCCpt", &nMuCCCpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRRCpt", &nMuRRCpt[0], tripleStringIntLow  	);      trSum->Branch("nMuCCGpt", &nMuCCGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRRGpt", &nMuRRGpt[0], tripleStringIntLow  	);      trSum->Branch("nMuCCMpt", &nMuCCMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRRMpt", &nMuRRMpt[0], tripleStringIntLow  	);      trSum->Branch("nMuCGGpt", &nMuCGGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRCCpt", &nMuRCCpt[0], tripleStringIntLow  	);      trSum->Branch("nMuCGMpt", &nMuCGMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRCGpt", &nMuRCGpt[0], tripleStringIntLow  	);      trSum->Branch("nMuCMMpt", &nMuCMMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRCMpt", &nMuRCMpt[0], tripleStringIntLow  	);
+   trSum->Branch("nMuRGGpt", &nMuRGGpt[0], tripleStringIntLow  	);	trSum->Branch("nMuGGGpt", &nMuGGGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRGMpt", &nMuRGMpt[0], tripleStringIntLow  	);      trSum->Branch("nMuGGMpt", &nMuGGMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRMMpt", &nMuRMMpt[0], tripleStringIntLow  	);      trSum->Branch("nMuGMMpt", &nMuGMMpt[0], tripleStringIntLow	);
+                                                                                           
+                                                        		trSum->Branch("nMuMMMpt", &nMuMMMpt[0], tripleStringIntLow	);
+
+
+
+
 
    //tr->Branch("deltaPhi"     ,	&deltaPhiMap     , 	"deltaPhiMap"     );
    tr->Branch("ME0RawId"     ,	&me0List      );  //, 	"ME0DetId/i"     );
@@ -2497,12 +2714,14 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
       std::swap(muPtlocal[0], muPtlocal[imin]);
       //cout << "Ordered muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
       //cout << "Ordered muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
-        
+      // 0th is the least energetic, 2nd is the most energetic        
+
       //look to the regions where the three muons are
       //the counters has to be set to 0 befor the loop on each event     
       nBarrel 	 = 0;
       nOverlap	 = 0;
       nEndcap	 = 0;
+      nForward	 = 0;
       nEndcapME0 = 0;
       
  
@@ -2518,6 +2737,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
             if ( fabs(p.eta()) < 0.85  ) 		 	   nBarrel++;
             if ( fabs(p.eta()) >= 0.85 && fabs(p.eta()) <= 1.25 )  nOverlap++;
             if ( fabs(p.eta()) > 1.25 && fabs(p.eta()) < 3.0 )     nEndcap++;
+            if ( fabs(p.eta()) >= 3.0 ) 			   nForward++;
             if ( fabs(p.eta()) > 1.8 && fabs(p.eta()) < 3.0 )      nEndcapME0++;
 	    cout << "muCand Eta:" << p.eta() << endl;
           }
@@ -2525,21 +2745,34 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 
       }
 
-      cout << "nBarrel:" << nBarrel << " nOverlap:" << nOverlap << " nEndcap:" << nEndcap << " nEndcapME0:" << nEndcapME0 << endl;
+      cout << "nBarrel:" << nBarrel << " nOverlap:" << nOverlap << " nEndcap:" << nEndcap << " nEndcapME0:" << nEndcapME0 << " nForward:" << nForward << endl;
       
-      if ( nBarrel + nOverlap + nEndcap == 3 )//only for triple mu from tau->3mu
+      if ( nBarrel + nOverlap + nEndcap + nForward == 3 )//only for triple mu from tau->3mu
       {
 	  if      ( nBarrel == 3 )                                       nBBB++;
 	  else if ( nBarrel == 2 && nOverlap == 1 )                      nBBO++;                        
 	  else if ( nBarrel == 2 && nEndcap == 1 )                       nBBE++;
+	  else if ( nBarrel == 2 && nForward == 1 )                      nBBF++;
 	  else if ( nBarrel == 1 && nOverlap == 2 )                      nBOO++;
 	  else if ( nBarrel == 1 && nOverlap == 1 && nEndcap == 1 )      nBOE++;
+	  else if ( nBarrel == 1 && nOverlap == 1 && nForward == 1 )     nBOF++;
 	  else if ( nBarrel == 1 && nEndcap == 2 )                       nBEE++;
+	  else if ( nBarrel == 1 && nEndcap == 1 && nForward == 1 )      nBEF++;
+	  else if ( nBarrel == 1 && nForward == 2 )                      nBFF++;
+
 	  else if ( nOverlap == 3 )                                      nOOO++;
 	  else if ( nOverlap == 2 && nEndcap == 1 )                      nOOE++;
+	  else if ( nOverlap == 2 && nForward == 1 )                     nOOF++;
 	  else if ( nOverlap == 1 && nEndcap == 2 )                      nOEE++;
+	  else if ( nOverlap == 1 && nEndcap == 1 && nForward == 1 )     nOEF++;
+	  else if ( nOverlap == 1 && nForward == 2 )                     nOFF++;
+
 	  else if ( nEndcap == 3 )                                       nEEE++;
-	  else {cout << "ERROR emtf-bmtf-omtf" << endl;}
+	  else if ( nEndcap == 2 && nForward == 1 )                      nEEF++;
+	  else if ( nEndcap == 1 && nForward == 2 )                      nEFF++;
+
+	  else if ( nForward == 3 )                                      nFFF++;
+	  else {cout << "ERROR emtf-bmtf-omtf-forward" << endl;}
 
       }      
 
@@ -2548,8 +2781,21 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
       //check eta particle
        
 
-      cout << "nBBB:" << nBBB << " nBBO:" << nBBO << " nBBE:" << nBBE << " nBOO:" << nBOO << " nBOE:" << nBOE << "nBEE:" << nBEE << endl;
-      cout << "nOOO:" << nOOO << " nOOE:" << nOOE << " nOEE:" << nOEE << " nEEE:" << nEEE << " nEEEME0:" << nEEEME0 << endl;
+      cout << "nBBB:" << nBBB << " nBBO:" << nBBO << " nBBE:" << nBBE << " nBBF:" << nBBF << endl;
+      cout << "nBOO:" << nBOO << " nBOE:" << nBOE << " nBOF:" << nBOF << endl;
+      cout << "nBEE:" << nBEE << " nBEF:" << nBEF << endl;
+      cout << "nBFF:" << nBFF << endl;
+      
+      cout << "nOOO:" << nOOO << " nOOE:" << nOOE << " nOOF:" << nOOF << endl;
+      cout << "nOEE:" << nOEE << " nOEF:" << nOEF << endl;
+      cout << "nOFF:" << nOFF << endl;
+      
+      cout << "nEEE:" << nEEE << " nEEF:" << nEEF << endl;
+      cout << "nEFF:" << nEFF << endl;
+      
+      cout << "nFFF:" << nFFF << endl;
+
+      cout << "nEEEME0:" << nEEEME0 << endl;
 
 
 //h_PtVsEta	->Draw("COLZ");
@@ -2893,6 +3139,72 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
       cout << matrixIsMuVisible[i*6] << matrixIsMuVisible[i*6+1] << matrixIsMuVisible[i*6+2] << matrixIsMuVisible[i*6+3] << matrixIsMuVisible[i*6+4] << matrixIsMuVisible[i*6+5] << endl;
    }
 
+   //turn to zero all isMuXXX isMuXX isMuX variables
+   isMuNNN = 0; isMuNND = 0; isMuNNR = 0; isMuNNC = 0; isMuNNG = 0; isMuNNM = 0; 
+   isMuNDD = 0; isMuNDR = 0; isMuNDC = 0; isMuNDG = 0; isMuNDM = 0; 
+   isMuNRR = 0; isMuNRC = 0; isMuNRG = 0; isMuNRM = 0; 
+   isMuNCC = 0; isMuNCG = 0; isMuNCM = 0;
+   isMuNGG = 0; isMuNGM = 0; 
+   isMuNMM = 0; 
+
+   isMuDDD = 0; isMuDDR = 0; isMuDDC = 0; isMuDDG = 0; isMuDDM = 0; 
+   isMuDRR = 0; isMuDRC = 0; isMuDRG = 0; isMuDRM = 0;
+   isMuDCC = 0; isMuDCG = 0; isMuDCM = 0;
+   isMuDGG = 0; isMuDGM = 0; 
+   isMuDMM = 0; 
+
+   isMuRRR = 0; isMuRRC = 0; isMuRRG = 0; isMuRRM = 0; 
+   isMuRCC = 0; isMuRCG = 0; isMuRCM = 0; 
+   isMuRGG = 0; isMuRGM = 0; 
+   isMuRMM = 0;
+
+   isMuCCC = 0; isMuCCG = 0; isMuCCM = 0; 
+   isMuCGG = 0; isMuCGM = 0; 
+   isMuCMM = 0;
+   
+   isMuGGG = 0; isMuGGM = 0; 
+   isMuGMM = 0;
+
+   isMuMMM = 0; 
+
+   //trun to zero all isMuXX variables
+   isMuNN = 0; isMuND = 0; isMuNR = 0; isMuNC = 0; isMuNG = 0; isMuNM = 0;
+   isMuDD = 0; isMuDR = 0; isMuDC = 0; isMuDG = 0; isMuDM = 0;
+   isMuRR = 0; isMuRC = 0; isMuRG = 0; isMuRM = 0; 
+   isMuCC = 0; isMuCG = 0; isMuCM = 0;
+   isMuGG = 0; isMuGM = 0;
+   isMuMM = 0; 
+
+   //turn to zero all isMuX variables
+   isMuN = 0; isMuD = 0; isMuR = 0; isMuC = 0; isMuG = 0; isMuM = 0; 
+
+   //turn to zero all pt cuts triplets
+   for ( int i=0; i<56; i++)
+   {
+      isMuNNNpt[i]=0;       isMuDDDpt[i]=0;      isMuRRRpt[i]=0;      isMuCCCpt[i]=0;       
+      isMuNNDpt[i]=0;       isMuDDRpt[i]=0;      isMuRRCpt[i]=0;      isMuCCGpt[i]=0;             
+      isMuNNRpt[i]=0;       isMuDDCpt[i]=0;      isMuRRGpt[i]=0;      isMuCCMpt[i]=0;
+      isMuNNCpt[i]=0;       isMuDDGpt[i]=0;      isMuRRMpt[i]=0;      isMuCGGpt[i]=0;
+      isMuNNGpt[i]=0;       isMuDDMpt[i]=0;      isMuRCCpt[i]=0;      isMuCGMpt[i]=0;
+      isMuNNMpt[i]=0;       isMuDRRpt[i]=0;      isMuRCGpt[i]=0;      isMuCMMpt[i]=0;
+      isMuNDDpt[i]=0;       isMuDRCpt[i]=0;      isMuRCMpt[i]=0;      
+      isMuNDRpt[i]=0;       isMuDRGpt[i]=0;      isMuRGGpt[i]=0;      isMuGGGpt[i]=0; 
+      isMuNDCpt[i]=0;       isMuDRMpt[i]=0;      isMuRGMpt[i]=0;      isMuGGMpt[i]=0;
+      isMuNDGpt[i]=0;       isMuDCCpt[i]=0;      isMuRMMpt[i]=0;      isMuGMMpt[i]=0;
+      isMuNDMpt[i]=0;       isMuDCGpt[i]=0;
+      isMuNRRpt[i]=0;       isMuDCMpt[i]=0;                           isMuMMMpt[i]=0;
+      isMuNRCpt[i]=0;       isMuDGGpt[i]=0;
+      isMuNRGpt[i]=0;       isMuDGMpt[i]=0;
+      isMuNRMpt[i]=0;       isMuDMMpt[i]=0;
+      isMuNCCpt[i]=0;
+      isMuNCGpt[i]=0;
+      isMuNCMpt[i]=0;
+      isMuNGGpt[i]=0;
+      isMuNGMpt[i]=0;
+      isMuNMMpt[i]=0;
+   }
+
+
    //loop on first six elements of matrixIsMuVisible
    for ( int i=0; i<6; i++ )
    {
@@ -2930,101 +3242,210 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
             if ( k==17 ) contME0  = contME0  + matrixIsMuVisible[17];
             
             //fill counters for stubs in detectors
-            if ( contNONE == 3 ) 		 nMuNNN++;
-	    if ( contNONE == 2 && contDT  == 1 ) nMuNND++;
-	    if ( contNONE == 2 && contRPC == 1 ) nMuNNR++;
-	    if ( contNONE == 2 && contCSC == 1 ) nMuNNC++;
-	    if ( contNONE == 2 && contGEM == 1 ) nMuNNG++;
-	    if ( contNONE == 2 && contME0 == 1 ) nMuNNM++;
+            if ( contNONE == 3 ) 		 { isMuNNN = 1; isMuNN = 1; isMuN = 1; }
+	    if ( contNONE == 2 && contDT  == 1 ) { isMuNND = 1; isMuNN = 1; isMuND = 1; isMuN = 1; isMuD = 1; }
+	    if ( contNONE == 2 && contRPC == 1 ) { isMuNNR = 1; isMuNN = 1; isMuNR = 1; isMuN = 1; isMuR = 1; }
+	    if ( contNONE == 2 && contCSC == 1 ) { isMuNNC = 1; isMuNN = 1; isMuNC = 1; isMuN = 1; isMuC = 1; }
+	    if ( contNONE == 2 && contGEM == 1 ) { isMuNNG = 1; isMuNN = 1; isMuNG = 1; isMuN = 1; isMuG = 1; }
+	    if ( contNONE == 2 && contME0 == 1 ) { isMuNNM = 1; isMuNN = 1; isMuNM = 1; isMuN = 1; isMuM = 1; }
 
-	    if ( contNONE == 1 && contDT == 2 ) 		nMuNDD++;
-            if ( contNONE == 1 && contDT == 1 && contRPC == 1 ) nMuNDR++;
-            if ( contNONE == 1 && contDT == 1 && contCSC == 1 ) nMuNDC++;
-            if ( contNONE == 1 && contDT == 1 && contGEM == 1 ) nMuNDG++;
-            if ( contNONE == 1 && contDT == 1 && contME0 == 1 ) nMuNDM++;
+	    if ( contNONE == 1 && contDT == 2 ) 		{ isMuNDD = 1; isMuND = 1; isMuDD = 1; isMuN = 1; isMuD = 1; }
+            if ( contNONE == 1 && contDT == 1 && contRPC == 1 ) { isMuNDR = 1; isMuND = 1; isMuNR = 1; isMuDR = 1; isMuN = 1; isMuD = 1; isMuR = 1; }
+            if ( contNONE == 1 && contDT == 1 && contCSC == 1 ) { isMuNDC = 1; isMuND = 1; isMuNC = 1; isMuDC = 1; isMuN = 1; isMuD = 1; isMuC = 1; }
+            if ( contNONE == 1 && contDT == 1 && contGEM == 1 ) { isMuNDG = 1; isMuND = 1; isMuNG = 1; isMuDG = 1; isMuN = 1; isMuD = 1; isMuG = 1; }
+            if ( contNONE == 1 && contDT == 1 && contME0 == 1 ) { isMuNDM = 1; isMuND = 1; isMuNM = 1; isMuDM = 1; isMuN = 1; isMuD = 1; isMuM = 1; }
 
-	    if ( contNONE == 1 && contRPC == 2 ) 		 nMuNRR++;
-	    if ( contNONE == 1 && contRPC == 1 && contCSC == 1 ) nMuNRC++;
-	    if ( contNONE == 1 && contRPC == 1 && contGEM == 1 ) nMuNRG++;
-	    if ( contNONE == 1 && contRPC == 1 && contME0 == 1 ) nMuNRM++;
+	    if ( contNONE == 1 && contRPC == 2 ) 		 { isMuNRR = 1; isMuNR = 1; isMuRR = 1; isMuN = 1; isMuR = 1; }
+	    if ( contNONE == 1 && contRPC == 1 && contCSC == 1 ) { isMuNRC = 1; isMuNR = 1; isMuNC = 1; isMuRC = 1; isMuN = 1; isMuR = 1; isMuC = 1; }
+	    if ( contNONE == 1 && contRPC == 1 && contGEM == 1 ) { isMuNRG = 1; isMuNR = 1; isMuNG = 1; isMuRG = 1; isMuN = 1; isMuR = 1; isMuG = 1; }
+	    if ( contNONE == 1 && contRPC == 1 && contME0 == 1 ) { isMuNRM = 1; isMuNR = 1; isMuNM = 1; isMuRM = 1; isMuN = 1; isMuR = 1; isMuM = 1; }
 
-	    if ( contNONE == 1 && contCSC == 2 ) 		 nMuNCC++;
-	    if ( contNONE == 1 && contCSC == 1 && contGEM == 1 ) nMuNCG++;
-	    if ( contNONE == 1 && contCSC == 1 && contME0 == 1 ) nMuNCM++;
+	    if ( contNONE == 1 && contCSC == 2 ) 		 { isMuNCC = 1; isMuNC = 1; isMuCC = 1; isMuN = 1; isMuC = 1; }
+	    if ( contNONE == 1 && contCSC == 1 && contGEM == 1 ) { isMuNCG = 1; isMuNC = 1; isMuNG = 1; isMuCG = 1; isMuN = 1; isMuC = 1; isMuG = 1; }
+	    if ( contNONE == 1 && contCSC == 1 && contME0 == 1 ) { isMuNCM = 1; isMuNC = 1; isMuNM = 1; isMuCM = 1; isMuN = 1; isMuC = 1; isMuM = 1; }
 	    
-	    if ( contNONE == 1 && contGEM == 2 ) 		 nMuNGG++; 
-            if ( contNONE == 1 && contGEM == 1 && contME0 == 1 ) nMuNGM++;
+	    if ( contNONE == 1 && contGEM == 2 ) 		 { isMuNGG = 1; isMuNG = 1; isMuGG = 1; isMuN = 1; isMuG = 1; }
+            if ( contNONE == 1 && contGEM == 1 && contME0 == 1 ) { isMuNGM = 1; isMuNG = 1; isMuNM = 1; isMuGM = 1; isMuN = 1; isMuG = 1; isMuM = 1; }
 
-	    if ( contNONE == 1 && contME0 == 2 ) 		 nMuNMM++; 
+	    if ( contNONE == 1 && contME0 == 2 ) 		 { isMuNMM = 1; isMuNM = 1; isMuMM = 1; isMuN = 1; isMuM = 1; }
 
-	    if ( contDT == 3 ) 	 	       nMuDDD++;
-            if ( contDT == 2 && contRPC == 1 ) nMuDDR++;
-            if ( contDT == 2 && contCSC == 1 ) nMuDDC++;
-            if ( contDT == 2 && contGEM == 1 ) nMuDDG++;
-            if ( contDT == 2 && contME0 == 1 ) nMuDDM++;
+	    if ( contDT == 3 ) 	 	       { isMuDDD = 1; isMuDD = 1; isMuD = 1; }
+            if ( contDT == 2 && contRPC == 1 ) { isMuDDR = 1; isMuDD = 1; isMuDR = 1; isMuD = 1; isMuR = 1; }
+            if ( contDT == 2 && contCSC == 1 ) { isMuDDC = 1; isMuDD = 1; isMuDC = 1; isMuD = 1; isMuC = 1; }
+            if ( contDT == 2 && contGEM == 1 ) { isMuDDG = 1; isMuDD = 1; isMuDG = 1; isMuD = 1; isMuG = 1; }
+            if ( contDT == 2 && contME0 == 1 ) { isMuDDM = 1; isMuDD = 1; isMuDM = 1; isMuD = 1; isMuM = 1; }
 
-	    if ( contDT == 1 && contRPC == 2 ) nMuDRR++;
-	    if ( contDT == 1 && contRPC == 1 && contCSC == 1 ) nMuDRC++;
-	    if ( contDT == 1 && contRPC == 1 && contGEM == 1 ) nMuDRG++;
-	    if ( contDT == 1 && contRPC == 1 && contME0 == 1 ) nMuDRM++;
+	    if ( contDT == 1 && contRPC == 2 ) 		       { isMuDRR = 1; isMuDR = 1; isMuRR = 1; isMuD = 1; isMuR = 1; }
+	    if ( contDT == 1 && contRPC == 1 && contCSC == 1 ) { isMuDRC = 1; isMuDR = 1; isMuDC = 1; isMuRC = 1; isMuD = 1; isMuR = 1; isMuC = 1; }
+	    if ( contDT == 1 && contRPC == 1 && contGEM == 1 ) { isMuDRG = 1; isMuDR = 1; isMuDG = 1; isMuRG = 1; isMuD = 1; isMuR = 1; isMuG = 1; }
+	    if ( contDT == 1 && contRPC == 1 && contME0 == 1 ) { isMuDRM = 1; isMuDR = 1; isMuDM = 1; isMuRM = 1; isMuD = 1; isMuR = 1; isMuM = 1; }
 
-	    if ( contDT == 1 && contCSC == 2 ) 		       nMuDCC++;
-	    if ( contDT == 1 && contCSC == 1 && contGEM == 1 ) nMuDCG++;
-	    if ( contDT == 1 && contCSC == 1 && contME0 == 1 ) nMuDCM++;
+	    if ( contDT == 1 && contCSC == 2 ) 		       { isMuDCC = 1; isMuDC = 1; isMuCC = 1; isMuD = 1; isMuC = 1; }
+	    if ( contDT == 1 && contCSC == 1 && contGEM == 1 ) { isMuDCG = 1; isMuDC = 1; isMuDG = 1; isMuCG = 1; isMuD = 1; isMuC = 1; isMuG = 1; }
+	    if ( contDT == 1 && contCSC == 1 && contME0 == 1 ) { isMuDCM = 1; isMuDC = 1; isMuDM = 1; isMuCM = 1; isMuD = 1; isMuC = 1; isMuM = 1; }
 
-	    if ( contDT == 1 && contGEM == 2 ) 		       nMuDGG++;
-	    if ( contDT == 1 && contGEM == 1 && contME0 == 1 ) nMuDGM++;
+	    if ( contDT == 1 && contGEM == 2 ) 		       { isMuDGG = 1; isMuDG = 1; isMuGG = 1; isMuD = 1; isMuG = 1; }
+	    if ( contDT == 1 && contGEM == 1 && contME0 == 1 ) { isMuDGM = 1; isMuDG = 1; isMuDM = 1; isMuGM = 1; isMuD = 1; isMuG = 1; isMuM = 1; }
 
-	    if ( contDT == 1 && contME0 == 2 ) 		       nMuDMM++;
+	    if ( contDT == 1 && contME0 == 2 ) 		       { isMuDMM = 1; isMuDM = 1; isMuMM = 1; isMuD = 1; isMuM = 1; }
 
-	    if ( contRPC == 3 ) 	        nMuRRR++; 
-            if ( contRPC == 2 && contCSC == 1 ) nMuRRC++;
-            if ( contRPC == 2 && contGEM == 1 ) nMuRRG++;
-            if ( contRPC == 2 && contME0 == 1 ) nMuRRM++;
+	    if ( contRPC == 3 ) 	        { isMuRRR = 1; isMuRR = 1; isMuR = 1; }
+            if ( contRPC == 2 && contCSC == 1 ) { isMuRRC = 1; isMuRR = 1; isMuRC = 1; isMuR = 1; isMuC = 1; }
+            if ( contRPC == 2 && contGEM == 1 ) { isMuRRG = 1; isMuRR = 1; isMuRG = 1; isMuR = 1; isMuG = 1; }
+            if ( contRPC == 2 && contME0 == 1 ) { isMuRRM = 1; isMuRR = 1; isMuRM = 1; isMuR = 1; isMuM = 1; }
 
-	    if ( contRPC == 1 && contCSC == 2 ) 		nMuRCC++;                 
-            if ( contRPC == 1 && contCSC == 1 && contGEM == 1 ) nMuRCG++;
-            if ( contRPC == 1 && contCSC == 1 && contME0 == 1 ) nMuRCM++;
+	    if ( contRPC == 1 && contCSC == 2 ) 		{ isMuRCC = 1; isMuRC = 1; isMuCC = 1; isMuR = 1; isMuC = 1; }
+            if ( contRPC == 1 && contCSC == 1 && contGEM == 1 ) { isMuRCG = 1; isMuRC = 1; isMuRG = 1; isMuCG = 1; isMuR = 1; isMuC = 1; isMuG = 1; }
+            if ( contRPC == 1 && contCSC == 1 && contME0 == 1 ) { isMuRCM = 1; isMuRC = 1; isMuRM = 1; isMuCM = 1; isMuR = 1; isMuC = 1; isMuM = 1; }
 
-	    if ( contRPC == 1 && contGEM == 2 ) 		nMuRGG++;                  
-            if ( contRPC == 1 && contGEM == 1 && contME0 == 1 ) nMuRGM++;
+	    if ( contRPC == 1 && contGEM == 2 ) 		{ isMuRGG = 1; isMuRG = 1; isMuGG = 1; isMuR = 1; isMuG = 1; }                 
+            if ( contRPC == 1 && contGEM == 1 && contME0 == 1 ) { isMuRGM = 1; isMuRG = 1; isMuRM = 1; isMuGM = 1; isMuR = 1; isMuG = 1; isMuM = 1; }
 
-	    if ( contRPC == 1 && contME0 == 2 ) nMuRMM++;                  
+	    if ( contRPC == 1 && contME0 == 2 ) { isMuRMM = 1; isMuRM = 1; isMuMM = 1; isMuR = 1; isMuM = 1; }
 
-	    if ( contCSC == 3 ) 	        nMuCCC++; 
-            if ( contCSC == 2 && contGEM == 1 ) nMuCCG++;
-            if ( contCSC == 2 && contME0 == 1 ) nMuCCM++;
+	    if ( contCSC == 3 ) 	        { isMuCCC = 1; isMuCC = 1; isMuC = 1; }
+            if ( contCSC == 2 && contGEM == 1 ) { isMuCCG = 1; isMuCC = 1; isMuCG = 1; isMuC = 1; isMuG = 1; }
+            if ( contCSC == 2 && contME0 == 1 ) { isMuCCM = 1; isMuCC = 1; isMuCM = 1; isMuC = 1; isMuM = 1; }
 
-	    if ( contCSC == 1 && contGEM == 2 ) 		nMuCGG++;                 
-            if ( contCSC == 1 && contGEM == 1 && contME0 == 1 ) nMuCGM++;
+	    if ( contCSC == 1 && contGEM == 2 ) 		{ isMuCGG = 1; isMuCG = 1; isMuGG = 1; isMuC = 1; isMuG = 1; }
+            if ( contCSC == 1 && contGEM == 1 && contME0 == 1 ) { isMuCGM = 1; isMuCG = 1; isMuCM = 1; isMuGM = 1; isMuC = 1; isMuG = 1; isMuM = 1; }
 
-	    if ( contCSC == 1 && contME0 == 2 ) 		nMuCMM++;                 
+	    if ( contCSC == 1 && contME0 == 2 ) 		{ isMuCMM = 1; isMuCM = 1; isMuMM = 1; isMuC = 1; isMuM = 1; }
 
-	    if ( contGEM == 3 ) 		nMuGGG++;                 
-            if ( contGEM == 2 && contME0 == 1 ) nMuGGM++;
+	    if ( contGEM == 3 ) 		{ isMuGGG = 1; isMuGG = 1; isMuG = 1; }
+            if ( contGEM == 2 && contME0 == 1 ) { isMuGGM = 1; isMuGG = 1; isMuGM = 1; isMuG = 1; isMuM = 1; }
 
-            if ( contGEM == 1 && contME0 == 2 ) nMuGMM++;
+            if ( contGEM == 1 && contME0 == 2 ) { isMuGMM = 1; isMuGM = 1; isMuMM = 1; isMuG = 1; isMuM = 1; }
 
-            if ( contME0 == 3 ) nMuMMM++;
+            if ( contME0 == 3 ) { isMuMMM = 1; isMuMM = 1; isMuM = 1; }
 
 	    //cout << "contNONE:" << contNONE << " contDT:" << contDT << " contRPC:" << contRPC << " contCSC:" << contCSC << " contGEM:" << contGEM << " contME0:" << contME0 << endl;
-
-
-
-
 
 	    contNONE = 0;
             contDT = 0; 
             contRPC = 0; 
             contCSC = 0; 
             contGEM = 0; 
-            contME0 = 0; 
+            contME0 = 0;
 
          }
-      
 
       }
    }
+
+   //increment all nMuXXX variables
+   if ( isMuNNN ) nMuNNN++; 
+   if ( isMuNND ) nMuNND++; 
+   if ( isMuNNR ) nMuNNR++; 
+   if ( isMuNNC ) nMuNNC++; 
+   if ( isMuNNG ) nMuNNG++; 
+   if ( isMuNNM ) nMuNNM++;
+
+   if ( isMuNDD ) nMuNDD++; 
+   if ( isMuNDR ) nMuNDR++; 
+   if ( isMuNDC ) nMuNDC++; 
+   if ( isMuNDG ) nMuNDG++; 
+   if ( isMuNDM ) nMuNDM++;
+
+   if ( isMuNRR ) nMuNRR++; 
+   if ( isMuNRC ) nMuNRC++; 
+   if ( isMuNRG ) nMuNRG++; 
+   if ( isMuNRM ) nMuNRM++;
+
+   if ( isMuNCC ) nMuNCC++; 
+   if ( isMuNCG ) nMuNCG++; 
+   if ( isMuNCM ) nMuNCM++;
+
+   if ( isMuNGG ) nMuNGG++; 
+   if ( isMuNGM ) nMuNGM++;
+
+   if ( isMuNMM ) nMuNMM++;
+
+   if ( isMuDDD ) nMuDDD++; 
+   if ( isMuDDR ) nMuDDR++; 
+   if ( isMuDDC ) nMuDDC++; 
+   if ( isMuDDG ) nMuDDG++; 
+   if ( isMuDDM ) nMuDDM++;
+
+   if ( isMuDRR ) nMuDRR++; 
+   if ( isMuDRC ) nMuDRC++; 
+   if ( isMuDRG ) nMuDRG++; 
+   if ( isMuDRM ) nMuDRM++;
+
+   if ( isMuDCC ) nMuDCC++; 
+   if ( isMuDCG ) nMuDCG++; 
+   if ( isMuDCM ) nMuDCM++;
+
+   if ( isMuDGG ) nMuDGG++; 
+   if ( isMuDGM ) nMuDGM++;
+
+   if ( isMuDMM ) nMuDMM++;
+
+   if ( isMuRRR ) nMuRRR++; 
+   if ( isMuRRC ) nMuRRC++; 
+   if ( isMuRRG ) nMuRRG++; 
+   if ( isMuRRM ) nMuRRM++;
+
+   if ( isMuRCC ) nMuRCC++; 
+   if ( isMuRCG ) nMuRCG++; 
+   if ( isMuRCM ) nMuRCM++;
+
+   if ( isMuRGG ) nMuRGG++; 
+   if ( isMuRGM ) nMuRGM++;
+
+   if ( isMuRMM ) nMuRMM++;
+   
+   if ( isMuCCC ) nMuCCC++; 
+   if ( isMuCCG ) nMuCCG++; 
+   if ( isMuCCM ) nMuCCM++;
+
+   if ( isMuCGG ) nMuCGG++; 
+   if ( isMuCGM ) nMuCGM++;
+
+   if ( isMuCMM ) nMuCMM++;
+
+   if ( isMuGGG ) nMuGGG++; 
+   if ( isMuGGM ) nMuGGM++;
+
+   if ( isMuGMM ) nMuGMM++;
+
+   if ( isMuMMM ) nMuMMM++;
+
+   //incrememnt all nMuXX varibles
+   if ( isMuNN ) nMuNN++; 
+   if ( isMuND ) nMuND++; 
+   if ( isMuNR ) nMuNR++; 
+   if ( isMuNC ) nMuNC++; 
+   if ( isMuNG ) nMuNG++; 
+   if ( isMuNM ) nMuNM++;
+
+   if ( isMuDD ) nMuDD++; 
+   if ( isMuDR ) nMuDR++; 
+   if ( isMuDC ) nMuDC++; 
+   if ( isMuDG ) nMuDG++; 
+   if ( isMuDM ) nMuDM++;
+
+   if ( isMuRR ) nMuRR++; 
+   if ( isMuRC ) nMuRC++; 
+   if ( isMuRG ) nMuRG++; 
+   if ( isMuRM ) nMuRM++;
+
+   if ( isMuCC ) nMuCC++; 
+   if ( isMuCG ) nMuCG++; 
+   if ( isMuCM ) nMuCM++;
+
+   if ( isMuGG ) nMuGG++; 
+   if ( isMuGM ) nMuGM++;
+
+   if ( isMuMM ) nMuMM++;
+
+   //increment all nMuX variables
+   if ( isMuN ) nMuN++; 
+   if ( isMuD ) nMuD++; 
+   if ( isMuR ) nMuR++; 
+   if ( isMuC ) nMuC++; 
+   if ( isMuG ) nMuG++; 
+   if ( isMuM ) nMuM++;
 
    //write a print for all the 56 nMuXXX variables
    cout << "nMuNNN:" << nMuNNN << " nMuNND:" << nMuNND << " nMuNNR:" << nMuNNR << " nMuNNC:" << nMuNNC << " nMuNNG:" << nMuNNG << " nMuNNM:" << nMuNNM << endl;
@@ -3064,7 +3485,192 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 
    cout << "nMuMMM:" << nMuMMM << endl;
 
+   //pt cuts
+   vector<int> ptThr{ 0, 3, 5, 10, 20, 50 };
+   int ptThrSize = ptThr.size();
+   //cout << "ptThr" << endl;   
+
+   int idxPt = 0;
+   for ( int i=0; i < ptThrSize; i++ )
+   {
+      for ( int j=0; j < ptThrSize; j++ )
+      {
+         if ( ptThr[j] < ptThr[i] ) continue;
+         for ( int k=0; k < ptThrSize; k++ )
+         {
+            if ( ptThr[k] < ptThr[j] ) continue;
+
+            //cout << ptThr[i] << " " << ptThr[j] << " " << ptThr[k] << endl;
+
+            if ( muPtlocal[0] >= ptThr[i] && muPtlocal[1] >= ptThr[j] && muPtlocal[2] >= ptThr[k] )
+            {
+               if ( isMuNNN ) isMuNNNpt[ idxPt ]=1;
+               if ( isMuNND ) isMuNNDpt[ idxPt ]=1;
+               if ( isMuNNR ) isMuNNRpt[ idxPt ]=1;
+               if ( isMuNNC ) isMuNNCpt[ idxPt ]=1;
+               if ( isMuNNG ) isMuNNGpt[ idxPt ]=1;
+               if ( isMuNNM ) isMuNNMpt[ idxPt ]=1;
+
+               if ( isMuNDD ) isMuNDDpt[ idxPt ]=1;
+               if ( isMuNDR ) isMuNDRpt[ idxPt ]=1;
+               if ( isMuNDC ) isMuNDCpt[ idxPt ]=1;
+               if ( isMuNDG ) isMuNDGpt[ idxPt ]=1;
+               if ( isMuNDM ) isMuNDMpt[ idxPt ]=1;
+                                     
+               if ( isMuNRR ) isMuNRRpt[ idxPt ]=1;
+               if ( isMuNRC ) isMuNRCpt[ idxPt ]=1;
+               if ( isMuNRG ) isMuNRGpt[ idxPt ]=1;
+               if ( isMuNRM ) isMuNRMpt[ idxPt ]=1;
+                                     
+               if ( isMuNCC ) isMuNCCpt[ idxPt ]=1;
+               if ( isMuNCG ) isMuNCGpt[ idxPt ]=1;
+               if ( isMuNCM ) isMuNCMpt[ idxPt ]=1;
+                                     
+               if ( isMuNGG ) isMuNGGpt[ idxPt ]=1;
+               if ( isMuNGM ) isMuNGMpt[ idxPt ]=1;
+                                     
+               if ( isMuNMM ) isMuNMMpt[ idxPt ]=1;
+                                     
+               if ( isMuDDD ) isMuDDDpt[ idxPt ]=1;
+               if ( isMuDDR ) isMuDDRpt[ idxPt ]=1;
+               if ( isMuDDC ) isMuDDCpt[ idxPt ]=1;
+               if ( isMuDDG ) isMuDDGpt[ idxPt ]=1;
+               if ( isMuDDM ) isMuDDMpt[ idxPt ]=1;
+                                     
+               if ( isMuDRR ) isMuDRRpt[ idxPt ]=1;
+               if ( isMuDRC ) isMuDRCpt[ idxPt ]=1;
+               if ( isMuDRG ) isMuDRGpt[ idxPt ]=1;
+               if ( isMuDRM ) isMuDRMpt[ idxPt ]=1;
+                                     
+               if ( isMuDCC ) isMuDCCpt[ idxPt ]=1;
+               if ( isMuDCG ) isMuDCGpt[ idxPt ]=1;
+               if ( isMuDCM ) isMuDCMpt[ idxPt ]=1;
+                                     
+               if ( isMuDGG ) isMuDGGpt[ idxPt ]=1;
+               if ( isMuDGM ) isMuDGMpt[ idxPt ]=1;
+                                     
+               if ( isMuDMM ) isMuDMMpt[ idxPt ]=1;
+
+               if ( isMuRRR ) isMuRRRpt[ idxPt ]=1;
+               if ( isMuRRC ) isMuRRCpt[ idxPt ]=1;
+               if ( isMuRRG ) isMuRRGpt[ idxPt ]=1;
+               if ( isMuRRM ) isMuRRMpt[ idxPt ]=1;
+                                     
+               if ( isMuRCC ) isMuRCCpt[ idxPt ]=1;
+               if ( isMuRCG ) isMuRCGpt[ idxPt ]=1;
+               if ( isMuRCM ) isMuRCMpt[ idxPt ]=1;
+                                     
+               if ( isMuRGG ) isMuRGGpt[ idxPt ]=1;
+               if ( isMuRGM ) isMuRGMpt[ idxPt ]=1;
+                                     
+               if ( isMuRMM ) isMuRMMpt[ idxPt ]=1;
+                                     
+               if ( isMuCCC ) isMuCCCpt[ idxPt ]=1;
+               if ( isMuCCG ) isMuCCGpt[ idxPt ]=1;
+               if ( isMuCCM ) isMuCCMpt[ idxPt ]=1;
+                                     
+               if ( isMuCGG ) isMuCGGpt[ idxPt ]=1;
+               if ( isMuCGM ) isMuCGMpt[ idxPt ]=1;
+                                     
+               if ( isMuCMM ) isMuCMMpt[ idxPt ]=1;
+                                     
+               if ( isMuGGG ) isMuGGGpt[ idxPt ]=1;
+               if ( isMuGGM ) isMuGGMpt[ idxPt ]=1;
+                                     
+               if ( isMuGMM ) isMuGMMpt[ idxPt ]=1;
+                                     
+               if ( isMuMMM ) isMuMMMpt[ idxPt ]=1;
+
+            }
+            
+            idxPt++;
+         }
+      }
+   }
    
+
+   //increment the nMuXXXpt counters
+   for ( int i=0; i<56; i++ )
+   {
+      if ( isMuNNNpt[i] ) nMuNNNpt[i]++;
+      if ( isMuNNDpt[i] ) nMuNNDpt[i]++;
+      if ( isMuNNRpt[i] ) nMuNNRpt[i]++;
+      if ( isMuNNCpt[i] ) nMuNNCpt[i]++;
+      if ( isMuNNGpt[i] ) nMuNNGpt[i]++;
+      if ( isMuNNMpt[i] ) nMuNNMpt[i]++;
+                              
+      if ( isMuNDDpt[i] ) nMuNDDpt[i]++;
+      if ( isMuNDRpt[i] ) nMuNDRpt[i]++;
+      if ( isMuNDCpt[i] ) nMuNDCpt[i]++;
+      if ( isMuNDGpt[i] ) nMuNDGpt[i]++;
+      if ( isMuNDMpt[i] ) nMuNDMpt[i]++;
+                            
+      if ( isMuNRRpt[i] ) nMuNRRpt[i]++;
+      if ( isMuNRCpt[i] ) nMuNRCpt[i]++;
+      if ( isMuNRGpt[i] ) nMuNRGpt[i]++;
+      if ( isMuNRMpt[i] ) nMuNRMpt[i]++;
+                            
+      if ( isMuNCCpt[i] ) nMuNCCpt[i]++;
+      if ( isMuNCGpt[i] ) nMuNCGpt[i]++;
+      if ( isMuNCMpt[i] ) nMuNCMpt[i]++;
+                            
+      if ( isMuNGGpt[i] ) nMuNGGpt[i]++;
+      if ( isMuNGMpt[i] ) nMuNGMpt[i]++;
+                            
+      if ( isMuNMMpt[i] ) nMuNMMpt[i]++;
+                            
+      if ( isMuDDDpt[i] ) nMuDDDpt[i]++;
+      if ( isMuDDRpt[i] ) nMuDDRpt[i]++;
+      if ( isMuDDCpt[i] ) nMuDDCpt[i]++;
+      if ( isMuDDGpt[i] ) nMuDDGpt[i]++;
+      if ( isMuDDMpt[i] ) nMuDDMpt[i]++;
+                            
+      if ( isMuDRRpt[i] ) nMuDRRpt[i]++;
+      if ( isMuDRCpt[i] ) nMuDRCpt[i]++;
+      if ( isMuDRGpt[i] ) nMuDRGpt[i]++;
+      if ( isMuDRMpt[i] ) nMuDRMpt[i]++;
+                            
+      if ( isMuDCCpt[i] ) nMuDCCpt[i]++;
+      if ( isMuDCGpt[i] ) nMuDCGpt[i]++;
+      if ( isMuDCMpt[i] ) nMuDCMpt[i]++;
+                            
+      if ( isMuDGGpt[i] ) nMuDGGpt[i]++;
+      if ( isMuDGMpt[i] ) nMuDGMpt[i]++;
+                            
+      if ( isMuDMMpt[i] ) nMuDMMpt[i]++;
+                              
+      if ( isMuRRRpt[i] ) nMuRRRpt[i]++;
+      if ( isMuRRCpt[i] ) nMuRRCpt[i]++;
+      if ( isMuRRGpt[i] ) nMuRRGpt[i]++;
+      if ( isMuRRMpt[i] ) nMuRRMpt[i]++;
+                            
+      if ( isMuRCCpt[i] ) nMuRCCpt[i]++;
+      if ( isMuRCGpt[i] ) nMuRCGpt[i]++;
+      if ( isMuRCMpt[i] ) nMuRCMpt[i]++;
+                            
+      if ( isMuRGGpt[i] ) nMuRGGpt[i]++;
+      if ( isMuRGMpt[i] ) nMuRGMpt[i]++;
+                            
+      if ( isMuRMMpt[i] ) nMuRMMpt[i]++;
+                            
+      if ( isMuCCCpt[i] ) nMuCCCpt[i]++;
+      if ( isMuCCGpt[i] ) nMuCCGpt[i]++;
+      if ( isMuCCMpt[i] ) nMuCCMpt[i]++;
+                            
+      if ( isMuCGGpt[i] ) nMuCGGpt[i]++;
+      if ( isMuCGMpt[i] ) nMuCGMpt[i]++;
+                            
+      if ( isMuCMMpt[i] ) nMuCMMpt[i]++;
+                            
+      if ( isMuGGGpt[i] ) nMuGGGpt[i]++;
+      if ( isMuGGMpt[i] ) nMuGGMpt[i]++;
+                            
+      if ( isMuGMMpt[i] ) nMuGMMpt[i]++;
+                            
+      if ( isMuMMMpt[i] ) nMuMMMpt[i]++;
+
+   }
+
 
    //ME0
    ESHandle<ME0Geometry> me0Geom;
@@ -4370,28 +4976,28 @@ DeltaGlobalPhiAnalyzer::endJob()
 
  //count the couples of detector that aare activated by the three canditdate muons
  //sum the triplets
- nMuNN = nMuNNN + nMuNND + nMuNNR + nMuNNC + nMuNNG + nMuNNM;
- nMuND = nMuNND + nMuNDD + nMuNDR + nMuNDC + nMuNDG + nMuNDM;
- nMuNR = nMuNNR + nMuNDR + nMuNRR + nMuNRC + nMuNRG + nMuNRM;
- nMuNC = nMuNNC + nMuNDC + nMuNRC + nMuNCC + nMuNCG + nMuNCM;
- nMuNG = nMuNNG + nMuNDG + nMuNRG + nMuNCG + nMuNGG + nMuNGM;
- nMuNM = nMuNNM + nMuNDM + nMuNRM + nMuNCM + nMuNGM + nMuNMM;
+ //nMuNN = nMuNNN + nMuNND + nMuNNR + nMuNNC + nMuNNG + nMuNNM;
+ //nMuND = nMuNND + nMuNDD + nMuNDR + nMuNDC + nMuNDG + nMuNDM;
+ //nMuNR = nMuNNR + nMuNDR + nMuNRR + nMuNRC + nMuNRG + nMuNRM;
+ //nMuNC = nMuNNC + nMuNDC + nMuNRC + nMuNCC + nMuNCG + nMuNCM;
+ //nMuNG = nMuNNG + nMuNDG + nMuNRG + nMuNCG + nMuNGG + nMuNGM;
+ //nMuNM = nMuNNM + nMuNDM + nMuNRM + nMuNCM + nMuNGM + nMuNMM;
 
- nMuDD = nMuDDD + nMuDDR + nMuDDC + nMuDDG + nMuDDM + nMuNDD;
- nMuDR = nMuDDR + nMuDRR + nMuDRC + nMuDRG + nMuDRM + nMuNDR;
- nMuDC = nMuDDC + nMuDRC + nMuDCC + nMuDCG + nMuDCM + nMuNDC;
- nMuDG = nMuDDG + nMuDRG + nMuDCG + nMuDGG + nMuDGM + nMuNDG;
- nMuDM = nMuDDM + nMuDRM + nMuDCM + nMuDGM + nMuDMM + nMuNDM;
- nMuRR = nMuDRR + nMuRRR + nMuRRC + nMuRRG + nMuRRM + nMuNRR;
- nMuRC = nMuDRC + nMuRRC + nMuRCC + nMuRCG + nMuRCM + nMuNRC;
- nMuRG = nMuDRG + nMuRRG + nMuRCG + nMuRGG + nMuRGM + nMuNRG;
- nMuRM = nMuDRM + nMuRRM + nMuRCM + nMuRGM + nMuRMM + nMuNRM;
- nMuCC = nMuDCC + nMuRCC + nMuCCC + nMuCCG + nMuCCM + nMuNCC;
- nMuCG = nMuDCG + nMuRCG + nMuCCG + nMuCGG + nMuCGM + nMuNCG;
- nMuCM = nMuDCM + nMuRCM + nMuCCM + nMuCGM + nMuCMM + nMuNCM;
- nMuGG = nMuDGG + nMuRGG + nMuCGG + nMuGGG + nMuGGM + nMuNGG;
- nMuGM = nMuDGM + nMuRGM + nMuCGM + nMuGGM + nMuGMM + nMuNGM;
- nMuMM = nMuDMM + nMuRMM + nMuCMM + nMuGMM + nMuMMM + nMuNMM;
+ //nMuDD = nMuDDD + nMuDDR + nMuDDC + nMuDDG + nMuDDM + nMuNDD;
+ //nMuDR = nMuDDR + nMuDRR + nMuDRC + nMuDRG + nMuDRM + nMuNDR;
+ //nMuDC = nMuDDC + nMuDRC + nMuDCC + nMuDCG + nMuDCM + nMuNDC;
+ //nMuDG = nMuDDG + nMuDRG + nMuDCG + nMuDGG + nMuDGM + nMuNDG;
+ //nMuDM = nMuDDM + nMuDRM + nMuDCM + nMuDGM + nMuDMM + nMuNDM;
+ //nMuRR = nMuDRR + nMuRRR + nMuRRC + nMuRRG + nMuRRM + nMuNRR;
+ //nMuRC = nMuDRC + nMuRRC + nMuRCC + nMuRCG + nMuRCM + nMuNRC;
+ //nMuRG = nMuDRG + nMuRRG + nMuRCG + nMuRGG + nMuRGM + nMuNRG;
+ //nMuRM = nMuDRM + nMuRRM + nMuRCM + nMuRGM + nMuRMM + nMuNRM;
+ //nMuCC = nMuDCC + nMuRCC + nMuCCC + nMuCCG + nMuCCM + nMuNCC;
+ //nMuCG = nMuDCG + nMuRCG + nMuCCG + nMuCGG + nMuCGM + nMuNCG;
+ //nMuCM = nMuDCM + nMuRCM + nMuCCM + nMuCGM + nMuCMM + nMuNCM;
+ //nMuGG = nMuDGG + nMuRGG + nMuCGG + nMuGGG + nMuGGM + nMuNGG;
+ //nMuGM = nMuDGM + nMuRGM + nMuCGM + nMuGGM + nMuGMM + nMuNGM;
+ //nMuMM = nMuDMM + nMuRMM + nMuCMM + nMuGMM + nMuMMM + nMuNMM;
 
  cout << "nMuNN:" << nMuNN << " nMuND:" << nMuND << " nMuNR:" << nMuNR << " nMuNC:" << nMuNC << " nMuNG:" << nMuNG << " nMuNM:" << nMuNM << endl;
  cout << "nMuDD:" << nMuDD << " nMuDR:" << nMuDR << " nMuDC:" << nMuDC << " nMuDG:" << nMuDG << " nMuDM:" << nMuDM << endl;
@@ -4400,16 +5006,96 @@ DeltaGlobalPhiAnalyzer::endJob()
  cout << "nMuGG:" << nMuGG << " nMuGM:" << nMuGM << endl;
  cout << "nMuMM:" << nMuMM << endl;
 
- nMuN = nMuNN + nMuND + nMuNR + nMuNC + nMuNG + nMuNM; 
- nMuD = nMuND + nMuDD + nMuDR + nMuDC + nMuDG + nMuDM; 
- nMuR = nMuNR + nMuDR + nMuRR + nMuRC + nMuRG + nMuRM; 
- nMuC = nMuNC + nMuDC + nMuRC + nMuCC + nMuCG + nMuCM; 
- nMuG = nMuNG + nMuDG + nMuRG + nMuCG + nMuGG + nMuGM; 
- nMuM = nMuNM + nMuDM + nMuRM + nMuCM + nMuGM + nMuMM; 
+ //nMuN = nMuNN + nMuND + nMuNR + nMuNC + nMuNG + nMuNM; 
+ //nMuD = nMuND + nMuDD + nMuDR + nMuDC + nMuDG + nMuDM; 
+ //nMuR = nMuNR + nMuDR + nMuRR + nMuRC + nMuRG + nMuRM; 
+ //nMuC = nMuNC + nMuDC + nMuRC + nMuCC + nMuCG + nMuCM; 
+ //nMuG = nMuNG + nMuDG + nMuRG + nMuCG + nMuGG + nMuGM; 
+ //nMuM = nMuNM + nMuDM + nMuRM + nMuCM + nMuGM + nMuMM; 
 
  cout << "nMuN:" << nMuN << " nMuD:" << nMuD << " nMuR:" << nMuR << " nMuC:" << nMuC << " nMuG:" << nMuG << " nMuM:" << nMuM << endl;
 
- 
+ cout << "nBBB:" << nBBB << " nBBO:" << nBBO << " nBBE:" << nBBE << " nBOO:" << nBOO << " nBOE:" << nBOE << endl;
+ cout << "nBEE:" << nBEE << " nOOO:" << nOOO << " nOOE:" << nOOE << " nOEE:" << nOEE << " nEEE:" << nEEE << " nEEEME0:" << nEEEME0 << endl; 
+
+ for ( int i=0; i<56; i++)
+ {
+    cout << "isMuNNNpt[" << i << "]: " << isMuNNNpt[i] << endl;
+    cout << "isMuNNDpt[" << i << "]: " << isMuNNDpt[i] << endl;
+    cout << "isMuNNRpt[" << i << "]: " << isMuNNRpt[i] << endl;
+    cout << "isMuNNCpt[" << i << "]: " << isMuNNCpt[i] << endl;
+    cout << "isMuNNGpt[" << i << "]: " << isMuNNGpt[i] << endl;
+    cout << "isMuNNMpt[" << i << "]: " << isMuNNMpt[i] << endl;
+    cout << "isMuNDDpt[" << i << "]: " << isMuNDDpt[i] << endl;
+    cout << "isMuNDRpt[" << i << "]: " << isMuNDRpt[i] << endl;
+    cout << "isMuNDCpt[" << i << "]: " << isMuNDCpt[i] << endl;
+    cout << "isMuNDGpt[" << i << "]: " << isMuNDGpt[i] << endl;
+    cout << "isMuNDMpt[" << i << "]: " << isMuNDMpt[i] << endl;
+    cout << "isMuNRRpt[" << i << "]: " << isMuNRRpt[i] << endl;
+    cout << "isMuNRCpt[" << i << "]: " << isMuNRCpt[i] << endl;
+    cout << "isMuNRGpt[" << i << "]: " << isMuNRGpt[i] << endl;
+    cout << "isMuNRMpt[" << i << "]: " << isMuNRMpt[i] << endl;
+    cout << "isMuNCCpt[" << i << "]: " << isMuNCCpt[i] << endl;
+    cout << "isMuNCGpt[" << i << "]: " << isMuNCGpt[i] << endl;
+    cout << "isMuNCMpt[" << i << "]: " << isMuNCMpt[i] << endl;
+    cout << "isMuNGGpt[" << i << "]: " << isMuNGGpt[i] << endl;
+    cout << "isMuNGMpt[" << i << "]: " << isMuNGMpt[i] << endl;
+    cout << "isMuNMMpt[" << i << "]: " << isMuNMMpt[i] << endl;
+    
+    cout << endl;
+
+    cout << "isMuDDDpt[" << i << "]: " << isMuDDDpt[i] << endl;
+    cout << "isMuDDRpt[" << i << "]: " << isMuDDRpt[i] << endl;
+    cout << "isMuDDCpt[" << i << "]: " << isMuDDCpt[i] << endl;
+    cout << "isMuDDGpt[" << i << "]: " << isMuDDGpt[i] << endl;
+    cout << "isMuDDMpt[" << i << "]: " << isMuDDMpt[i] << endl;
+    cout << "isMuDRRpt[" << i << "]: " << isMuDRRpt[i] << endl;
+    cout << "isMuDRCpt[" << i << "]: " << isMuDRCpt[i] << endl;
+    cout << "isMuDRGpt[" << i << "]: " << isMuDRGpt[i] << endl;
+    cout << "isMuDRMpt[" << i << "]: " << isMuDRMpt[i] << endl;
+    cout << "isMuDCCpt[" << i << "]: " << isMuDCCpt[i] << endl;
+    cout << "isMuDCGpt[" << i << "]: " << isMuDCGpt[i] << endl;
+    cout << "isMuDCMpt[" << i << "]: " << isMuDCMpt[i] << endl;
+    cout << "isMuDGGpt[" << i << "]: " << isMuDGGpt[i] << endl;
+    cout << "isMuDGMpt[" << i << "]: " << isMuDGMpt[i] << endl;
+    cout << "isMuDMMpt[" << i << "]: " << isMuDMMpt[i] << endl;
+
+    cout << endl;
+
+    cout << "isMuRRRpt[" << i << "]: " << isMuRRRpt[i] << endl;
+    cout << "isMuRRCpt[" << i << "]: " << isMuRRCpt[i] << endl;
+    cout << "isMuRRGpt[" << i << "]: " << isMuRRGpt[i] << endl;
+    cout << "isMuRRMpt[" << i << "]: " << isMuRRMpt[i] << endl;
+    cout << "isMuRCCpt[" << i << "]: " << isMuRCCpt[i] << endl;
+    cout << "isMuRCGpt[" << i << "]: " << isMuRCGpt[i] << endl;
+    cout << "isMuRCMpt[" << i << "]: " << isMuRCMpt[i] << endl;
+    cout << "isMuRGGpt[" << i << "]: " << isMuRGGpt[i] << endl;
+    cout << "isMuRGMpt[" << i << "]: " << isMuRGMpt[i] << endl;
+    cout << "isMuRMMpt[" << i << "]: " << isMuRMMpt[i] << endl;
+
+    cout << endl;
+
+    cout << "isMuCCCpt[" << i << "]: " << isMuCCCpt[i] << endl;
+    cout << "isMuCCGpt[" << i << "]: " << isMuCCGpt[i] << endl;
+    cout << "isMuCCMpt[" << i << "]: " << isMuCCMpt[i] << endl;
+    cout << "isMuCGGpt[" << i << "]: " << isMuCGGpt[i] << endl;
+    cout << "isMuCGMpt[" << i << "]: " << isMuCGMpt[i] << endl;
+    cout << "isMuCMMpt[" << i << "]: " << isMuCMMpt[i] << endl;
+
+    cout << endl;
+
+    cout << "isMuGGGpt[" << i << "]: " << isMuGGGpt[i] << endl;
+    cout << "isMuGGMpt[" << i << "]: " << isMuGGMpt[i] << endl;
+    cout << "isMuGMMpt[" << i << "]: " << isMuGMMpt[i] << endl;
+
+    cout << endl;
+
+    cout << "isMuMMMpt[" << i << "]: " << isMuMMMpt[i] << endl;
+
+    cout << endl;
+ }
+
+
  //mME0 is only the number of muons that are generate din eta region of ME0
  //but they have to be visible: this is controlled by nVisibleMuME0
   
