@@ -205,6 +205,74 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       TH1F * h_z_strangeEP7;
       TH1F * h_z_strangeEP8;
 
+   //histograms muons tau->3mu
+   const Int_t ptBins = 70;
+   const Int_t etaBins = 50;
+   Double_t ptEdges[ 71 ];
+   Double_t etaEdges[ 51 ]; 
+   TH2F * h_nMuNNN_PtVsEta;   
+   TH2F * h_nMuNND_PtVsEta;   
+   TH2F * h_nMuNNR_PtVsEta;   
+   TH2F * h_nMuNNC_PtVsEta;   
+   TH2F * h_nMuNNG_PtVsEta;   
+   TH2F * h_nMuNNM_PtVsEta;   
+   TH2F * h_nMuNDD_PtVsEta;   
+   TH2F * h_nMuNDR_PtVsEta;   
+   TH2F * h_nMuNDC_PtVsEta;   
+   TH2F * h_nMuNDG_PtVsEta;   
+   TH2F * h_nMuNDM_PtVsEta;   
+   TH2F * h_nMuNRR_PtVsEta;   
+   TH2F * h_nMuNRC_PtVsEta;   
+   TH2F * h_nMuNRG_PtVsEta;   
+   TH2F * h_nMuNRM_PtVsEta;   
+   TH2F * h_nMuNCC_PtVsEta;   
+   TH2F * h_nMuNCG_PtVsEta;   
+   TH2F * h_nMuNCM_PtVsEta;   
+   TH2F * h_nMuNGG_PtVsEta;   
+   TH2F * h_nMuNGM_PtVsEta;   
+   TH2F * h_nMuNMM_PtVsEta; 
+  
+   TH2F * h_nMuDDD_PtVsEta;   
+   TH2F * h_nMuDDR_PtVsEta;   
+   TH2F * h_nMuDDC_PtVsEta;   
+   TH2F * h_nMuDDG_PtVsEta;   
+   TH2F * h_nMuDDM_PtVsEta;   
+   TH2F * h_nMuDRR_PtVsEta;   
+   TH2F * h_nMuDRC_PtVsEta;   
+   TH2F * h_nMuDRG_PtVsEta;   
+   TH2F * h_nMuDRM_PtVsEta;   
+   TH2F * h_nMuDCC_PtVsEta;   
+   TH2F * h_nMuDCG_PtVsEta;   
+   TH2F * h_nMuDCM_PtVsEta;   
+   TH2F * h_nMuDGG_PtVsEta;   
+   TH2F * h_nMuDGM_PtVsEta;   
+   TH2F * h_nMuDMM_PtVsEta;   
+
+   TH2F * h_nMuRRR_PtVsEta;   
+   TH2F * h_nMuRRC_PtVsEta;   
+   TH2F * h_nMuRRG_PtVsEta;   
+   TH2F * h_nMuRRM_PtVsEta;   
+   TH2F * h_nMuRCC_PtVsEta;   
+   TH2F * h_nMuRCG_PtVsEta;   
+   TH2F * h_nMuRCM_PtVsEta;   
+   TH2F * h_nMuRGG_PtVsEta;   
+   TH2F * h_nMuRGM_PtVsEta;   
+   TH2F * h_nMuRMM_PtVsEta;   
+
+   TH2F * h_nMuCCC_PtVsEta;   
+   TH2F * h_nMuCCG_PtVsEta;   
+   TH2F * h_nMuCCM_PtVsEta;   
+   TH2F * h_nMuCGG_PtVsEta;   
+   TH2F * h_nMuCGM_PtVsEta;   
+   TH2F * h_nMuCMM_PtVsEta;   
+
+   TH2F * h_nMuGGG_PtVsEta;   
+   TH2F * h_nMuGGM_PtVsEta;   
+   TH2F * h_nMuGMM_PtVsEta;   
+
+   TH2F * h_nMuMMM_PtVsEta;   
+
+
    std::map<ME0DetId,vector<float>> deltaPhiMap;
    std::map<ME0DetId,vector<float>> alphaMap;
    std::map<ME0DetId,vector<float>> thetaMap;
@@ -818,49 +886,52 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
 
       int nIsMuVisibleMoreThanOneERR =0;
 
-      Bool_t isMuNNNpt[56];       Bool_t isMuDDDpt[56];      Bool_t isMuRRRpt[56];      Bool_t isMuCCCpt[56];       
-      Bool_t isMuNNDpt[56];       Bool_t isMuDDRpt[56];      Bool_t isMuRRCpt[56];      Bool_t isMuCCGpt[56];
-      Bool_t isMuNNRpt[56];       Bool_t isMuDDCpt[56];      Bool_t isMuRRGpt[56];      Bool_t isMuCCMpt[56];
-      Bool_t isMuNNCpt[56];       Bool_t isMuDDGpt[56];      Bool_t isMuRRMpt[56];      Bool_t isMuCGGpt[56];
-      Bool_t isMuNNGpt[56];       Bool_t isMuDDMpt[56];      Bool_t isMuRCCpt[56];      Bool_t isMuCGMpt[56];
-      Bool_t isMuNNMpt[56];       Bool_t isMuDRRpt[56];      Bool_t isMuRCGpt[56];      Bool_t isMuCMMpt[56];
-      Bool_t isMuNDDpt[56];       Bool_t isMuDRCpt[56];      Bool_t isMuRCMpt[56];      
-      Bool_t isMuNDRpt[56];       Bool_t isMuDRGpt[56];      Bool_t isMuRGGpt[56];      Bool_t isMuGGGpt[56]; 
-      Bool_t isMuNDCpt[56];       Bool_t isMuDRMpt[56];      Bool_t isMuRGMpt[56];      Bool_t isMuGGMpt[56];
-      Bool_t isMuNDGpt[56];       Bool_t isMuDCCpt[56];      Bool_t isMuRMMpt[56];      Bool_t isMuGMMpt[56];
-      Bool_t isMuNDMpt[56];       Bool_t isMuDCGpt[56];
-      Bool_t isMuNRRpt[56];       Bool_t isMuDCMpt[56];                          	Bool_t isMuMMMpt[56];
-      Bool_t isMuNRCpt[56];       Bool_t isMuDGGpt[56];
-      Bool_t isMuNRGpt[56];       Bool_t isMuDGMpt[56];
-      Bool_t isMuNRMpt[56];       Bool_t isMuDMMpt[56];
-      Bool_t isMuNCCpt[56];
-      Bool_t isMuNCGpt[56];
-      Bool_t isMuNCMpt[56];
-      Bool_t isMuNGGpt[56];
-      Bool_t isMuNGMpt[56];
-      Bool_t isMuNMMpt[56];
+      Bool_t isMuNNNpt[120];       Bool_t isMuDDDpt[120];      Bool_t isMuRRRpt[120];      Bool_t isMuCCCpt[120];       
+      Bool_t isMuNNDpt[120];       Bool_t isMuDDRpt[120];      Bool_t isMuRRCpt[120];      Bool_t isMuCCGpt[120];
+      Bool_t isMuNNRpt[120];       Bool_t isMuDDCpt[120];      Bool_t isMuRRGpt[120];      Bool_t isMuCCMpt[120];
+      Bool_t isMuNNCpt[120];       Bool_t isMuDDGpt[120];      Bool_t isMuRRMpt[120];      Bool_t isMuCGGpt[120];
+      Bool_t isMuNNGpt[120];       Bool_t isMuDDMpt[120];      Bool_t isMuRCCpt[120];      Bool_t isMuCGMpt[120];
+      Bool_t isMuNNMpt[120];       Bool_t isMuDRRpt[120];      Bool_t isMuRCGpt[120];      Bool_t isMuCMMpt[120];
+      Bool_t isMuNDDpt[120];       Bool_t isMuDRCpt[120];      Bool_t isMuRCMpt[120];      
+      Bool_t isMuNDRpt[120];       Bool_t isMuDRGpt[120];      Bool_t isMuRGGpt[120];      Bool_t isMuGGGpt[120]; 
+      Bool_t isMuNDCpt[120];       Bool_t isMuDRMpt[120];      Bool_t isMuRGMpt[120];      Bool_t isMuGGMpt[120];
+      Bool_t isMuNDGpt[120];       Bool_t isMuDCCpt[120];      Bool_t isMuRMMpt[120];      Bool_t isMuGMMpt[120];
+      Bool_t isMuNDMpt[120];       Bool_t isMuDCGpt[120];
+      Bool_t isMuNRRpt[120];       Bool_t isMuDCMpt[120];   	                       	   Bool_t isMuMMMpt[120];
+      Bool_t isMuNRCpt[120];       Bool_t isMuDGGpt[120];
+      Bool_t isMuNRGpt[120];       Bool_t isMuDGMpt[120];
+      Bool_t isMuNRMpt[120];       Bool_t isMuDMMpt[120];
+      Bool_t isMuNCCpt[120];
+      Bool_t isMuNCGpt[120];
+      Bool_t isMuNCMpt[120];
+      Bool_t isMuNGGpt[120];
+      Bool_t isMuNGMpt[120];
+      Bool_t isMuNMMpt[120];
                                                                                                                    
-      int nMuNNNpt[56];       int nMuDDDpt[56];      int nMuRRRpt[56];      int nMuCCCpt[56];       
-      int nMuNNDpt[56];       int nMuDDRpt[56];      int nMuRRCpt[56];      int nMuCCGpt[56];
-      int nMuNNRpt[56];       int nMuDDCpt[56];      int nMuRRGpt[56];      int nMuCCMpt[56];
-      int nMuNNCpt[56];       int nMuDDGpt[56];      int nMuRRMpt[56];      int nMuCGGpt[56];
-      int nMuNNGpt[56];       int nMuDDMpt[56];      int nMuRCCpt[56];      int nMuCGMpt[56];
-      int nMuNNMpt[56];       int nMuDRRpt[56];      int nMuRCGpt[56];      int nMuCMMpt[56];
-      int nMuNDDpt[56];       int nMuDRCpt[56];      int nMuRCMpt[56];      
-      int nMuNDRpt[56];       int nMuDRGpt[56];      int nMuRGGpt[56];      int nMuGGGpt[56]; 
-      int nMuNDCpt[56];       int nMuDRMpt[56];      int nMuRGMpt[56];      int nMuGGMpt[56];
-      int nMuNDGpt[56];       int nMuDCCpt[56];      int nMuRMMpt[56];      int nMuGMMpt[56];
-      int nMuNDMpt[56];       int nMuDCGpt[56];
-      int nMuNRRpt[56];       int nMuDCMpt[56];                             int nMuMMMpt[56];
-      int nMuNRCpt[56];       int nMuDGGpt[56];
-      int nMuNRGpt[56];       int nMuDGMpt[56];
-      int nMuNRMpt[56];       int nMuDMMpt[56];
-      int nMuNCCpt[56];
-      int nMuNCGpt[56];
-      int nMuNCMpt[56];
-      int nMuNGGpt[56];
-      int nMuNGMpt[56];
-      int nMuNMMpt[56];
+      int nMuNNNpt[120];       int nMuDDDpt[120];      int nMuRRRpt[120];      int nMuCCCpt[120];       
+      int nMuNNDpt[120];       int nMuDDRpt[120];      int nMuRRCpt[120];      int nMuCCGpt[120];
+      int nMuNNRpt[120];       int nMuDDCpt[120];      int nMuRRGpt[120];      int nMuCCMpt[120];
+      int nMuNNCpt[120];       int nMuDDGpt[120];      int nMuRRMpt[120];      int nMuCGGpt[120];
+      int nMuNNGpt[120];       int nMuDDMpt[120];      int nMuRCCpt[120];      int nMuCGMpt[120];
+      int nMuNNMpt[120];       int nMuDRRpt[120];      int nMuRCGpt[120];      int nMuCMMpt[120];
+      int nMuNDDpt[120];       int nMuDRCpt[120];      int nMuRCMpt[120];      
+      int nMuNDRpt[120];       int nMuDRGpt[120];      int nMuRGGpt[120];      int nMuGGGpt[120]; 
+      int nMuNDCpt[120];       int nMuDRMpt[120];      int nMuRGMpt[120];      int nMuGGMpt[120];
+      int nMuNDGpt[120];       int nMuDCCpt[120];      int nMuRMMpt[120];      int nMuGMMpt[120];
+      int nMuNDMpt[120];       int nMuDCGpt[120];
+      int nMuNRRpt[120];       int nMuDCMpt[120];                              int nMuMMMpt[120];
+      int nMuNRCpt[120];       int nMuDGGpt[120];
+      int nMuNRGpt[120];       int nMuDGMpt[120];
+      int nMuNRMpt[120];       int nMuDMMpt[120];
+      int nMuNCCpt[120];
+      int nMuNCGpt[120];
+      int nMuNCMpt[120];
+      int nMuNGGpt[120];
+      int nMuNGMpt[120];
+      int nMuNMMpt[120];
+
+      float maxPtAll=0;
+      float maxEtaAll =0;
 
 
       Bool_t mu_isME0[3]		;	//true if mu in 1.8 < |eta| < 3 
@@ -1092,7 +1163,7 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
 
 				}
 
-   for ( int i=0; i<56; i++ )
+   for ( int i=0; i<120; i++ )
    {
       isMuNNNpt[i]=0;       isMuDDDpt[i]=0;      isMuRRRpt[i]=0;      isMuCCCpt[i]=0;       
       isMuNNDpt[i]=0;       isMuDDRpt[i]=0;      isMuRRCpt[i]=0;      isMuCCGpt[i]=0;             
@@ -1162,21 +1233,165 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    TString tripleStringIntLow = "";
    TString tripleStringBoolLow = "";
    TString tripleStringFloatLow = "";
-   TString ptLow[6] = {"0","3","5","10","20","50"};
-   for (int i1=0 ; i1<6 ; i1++)
-     for (int i2=i1 ; i2<6; i2++)
-       for (int i3=i2 ; i3<6; i3++)
+   TString ptLow[8] = {"0","1","2","3","5","10","20","50"};
+   for (int i1=0 ; i1<8 ; i1++)
+     for (int i2=i1 ; i2<8; i2++)
+       for (int i3=i2 ; i3<8; i3++)
          {
          tripleStringIntLow   = tripleStringIntLow   +ptLow[i1]+"_"+ptLow[i2]+"_"+ptLow[i3]+"GeV/I";
          tripleStringBoolLow  = tripleStringBoolLow  +ptLow[i1]+"_"+ptLow[i2]+"_"+ptLow[i3]+"GeV/O";
          tripleStringFloatLow = tripleStringFloatLow +ptLow[i1]+"_"+ptLow[i2]+"_"+ptLow[i3]+"GeV/F";
-         if ( !(i1==5 && i2==5 && i3==5) ) 
+         if ( !(i1==7 && i2==7 && i3==7) ) 
            {
            tripleStringIntLow   =tripleStringIntLow   +":";
            tripleStringBoolLow  =tripleStringBoolLow  +":";
            tripleStringFloatLow =tripleStringFloatLow +":";
            }
          }
+
+   //pt from 0 to 70 GeV/c with 1 GeV/c step
+   for( int i=0; i<71; i++ )
+   {
+      ptEdges[i] = i;
+   }
+                                              
+   //eta from 0 to 5 with 0.1 step
+   for( int i=0; i<51; i++ )
+   {
+      etaEdges[i] = 0.1*i;
+   }
+
+    gStyle->SetPalette(1);
+
+    h_nMuNNN_PtVsEta = fs->make<TH2F>("h_nMuNNN_PtVsEta","h_nMuNNN_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNND_PtVsEta = fs->make<TH2F>("h_nMuNND_PtVsEta","h_nMuNND_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNNR_PtVsEta = fs->make<TH2F>("h_nMuNNR_PtVsEta","h_nMuNNR_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNNC_PtVsEta = fs->make<TH2F>("h_nMuNNC_PtVsEta","h_nMuNNC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNNG_PtVsEta = fs->make<TH2F>("h_nMuNNG_PtVsEta","h_nMuNNG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNNM_PtVsEta = fs->make<TH2F>("h_nMuNNM_PtVsEta","h_nMuNNM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNDD_PtVsEta = fs->make<TH2F>("h_nMuNDD_PtVsEta","h_nMuNDD_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNDR_PtVsEta = fs->make<TH2F>("h_nMuNDR_PtVsEta","h_nMuNDR_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNDC_PtVsEta = fs->make<TH2F>("h_nMuNDC_PtVsEta","h_nMuNDC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNDG_PtVsEta = fs->make<TH2F>("h_nMuNDG_PtVsEta","h_nMuNDG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNDM_PtVsEta = fs->make<TH2F>("h_nMuNDM_PtVsEta","h_nMuNDM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNRR_PtVsEta = fs->make<TH2F>("h_nMuNRR_PtVsEta","h_nMuNRR_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNRC_PtVsEta = fs->make<TH2F>("h_nMuNRC_PtVsEta","h_nMuNRC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNRG_PtVsEta = fs->make<TH2F>("h_nMuNRG_PtVsEta","h_nMuNRG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNRM_PtVsEta = fs->make<TH2F>("h_nMuNRM_PtVsEta","h_nMuNRM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNCC_PtVsEta = fs->make<TH2F>("h_nMuNCC_PtVsEta","h_nMuNCC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNCG_PtVsEta = fs->make<TH2F>("h_nMuNCG_PtVsEta","h_nMuNCG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNCM_PtVsEta = fs->make<TH2F>("h_nMuNCM_PtVsEta","h_nMuNCM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNGG_PtVsEta = fs->make<TH2F>("h_nMuNGG_PtVsEta","h_nMuNGG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNGM_PtVsEta = fs->make<TH2F>("h_nMuNGM_PtVsEta","h_nMuNGM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuNMM_PtVsEta = fs->make<TH2F>("h_nMuNMM_PtVsEta","h_nMuNMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+                                                                  
+    h_nMuDDD_PtVsEta = fs->make<TH2F>("h_nMuDDD_PtVsEta","h_nMuDDD_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDDR_PtVsEta = fs->make<TH2F>("h_nMuDDR_PtVsEta","h_nMuDDR_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDDC_PtVsEta = fs->make<TH2F>("h_nMuDDC_PtVsEta","h_nMuDDC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDDG_PtVsEta = fs->make<TH2F>("h_nMuDDG_PtVsEta","h_nMuDDG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDDM_PtVsEta = fs->make<TH2F>("h_nMuDDM_PtVsEta","h_nMuDDM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDRR_PtVsEta = fs->make<TH2F>("h_nMuDRR_PtVsEta","h_nMuDRR_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDRC_PtVsEta = fs->make<TH2F>("h_nMuDRC_PtVsEta","h_nMuDRC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDRG_PtVsEta = fs->make<TH2F>("h_nMuDRG_PtVsEta","h_nMuDRG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDRM_PtVsEta = fs->make<TH2F>("h_nMuDRM_PtVsEta","h_nMuDRM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDCC_PtVsEta = fs->make<TH2F>("h_nMuDCC_PtVsEta","h_nMuDCC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDCG_PtVsEta = fs->make<TH2F>("h_nMuDCG_PtVsEta","h_nMuDCG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDCM_PtVsEta = fs->make<TH2F>("h_nMuDCM_PtVsEta","h_nMuDCM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDGG_PtVsEta = fs->make<TH2F>("h_nMuDGG_PtVsEta","h_nMuDGG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDGM_PtVsEta = fs->make<TH2F>("h_nMuDGM_PtVsEta","h_nMuDGM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuDMM_PtVsEta = fs->make<TH2F>("h_nMuDMM_PtVsEta","h_nMuDMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+                                                                  
+    h_nMuRRR_PtVsEta = fs->make<TH2F>("h_nMuRRR_PtVsEta","h_nMuRRR_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuRRC_PtVsEta = fs->make<TH2F>("h_nMuRRC_PtVsEta","h_nMuRRC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuRRG_PtVsEta = fs->make<TH2F>("h_nMuRRG_PtVsEta","h_nMuRRG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuRRM_PtVsEta = fs->make<TH2F>("h_nMuRRM_PtVsEta","h_nMuRRM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuRCC_PtVsEta = fs->make<TH2F>("h_nMuRCC_PtVsEta","h_nMuRCC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuRCG_PtVsEta = fs->make<TH2F>("h_nMuRCG_PtVsEta","h_nMuRCG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuRCM_PtVsEta = fs->make<TH2F>("h_nMuRCM_PtVsEta","h_nMuRCM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuRGG_PtVsEta = fs->make<TH2F>("h_nMuRGG_PtVsEta","h_nMuRGG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuRGM_PtVsEta = fs->make<TH2F>("h_nMuRGM_PtVsEta","h_nMuRGM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuRMM_PtVsEta = fs->make<TH2F>("h_nMuRMM_PtVsEta","h_nMuRMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+                                                                  
+    h_nMuCCC_PtVsEta = fs->make<TH2F>("h_nMuCCC_PtVsEta","h_nMuCCC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuCCG_PtVsEta = fs->make<TH2F>("h_nMuCCG_PtVsEta","h_nMuCCG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuCCM_PtVsEta = fs->make<TH2F>("h_nMuCCM_PtVsEta","h_nMuCCM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuCGG_PtVsEta = fs->make<TH2F>("h_nMuCGG_PtVsEta","h_nMuCGG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuCGM_PtVsEta = fs->make<TH2F>("h_nMuCGM_PtVsEta","h_nMuCGM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuCMM_PtVsEta = fs->make<TH2F>("h_nMuCMM_PtVsEta","h_nMuCMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+                                                                  
+    h_nMuGGG_PtVsEta = fs->make<TH2F>("h_nMuGGG_PtVsEta","h_nMuGGG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuGGM_PtVsEta = fs->make<TH2F>("h_nMuGGM_PtVsEta","h_nMuGGM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+    h_nMuGMM_PtVsEta = fs->make<TH2F>("h_nMuGMM_PtVsEta","h_nMuGMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+                                                                  
+    h_nMuMMM_PtVsEta = fs->make<TH2F>("h_nMuMMM_PtVsEta","h_nMuMMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+
+    h_nMuNNN_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNNN_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNND_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNND_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNNR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNNR_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNNC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNNC_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNNG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNNG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNNM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNNM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNDD_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNDD_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNDR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNDR_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNDC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNDC_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNDG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNDG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNDM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNDM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNRR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNRR_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNRC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNRC_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNRG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNRG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNRM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNRM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNCC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNCC_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNCG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNCG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNCM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNCM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNGG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNGG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNGM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNGM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuNMM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNMM_PtVsEta->GetYaxis()->SetTitle("Pt");
+                                                           
+    h_nMuDDD_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDDD_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDDR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDDR_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDDC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDDC_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDDG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDDG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDDM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDDM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDRR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDRR_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDRC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDRC_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDRG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDRG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDRM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDRM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDCC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDCC_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDCG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDCG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDCM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDCM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDGG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDGG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDGM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDGM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuDMM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDMM_PtVsEta->GetYaxis()->SetTitle("Pt");
+                                                           
+    h_nMuRRR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRRR_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuRRC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRRC_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuRRG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRRG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuRRM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRRM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuRCC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRCC_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuRCG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRCG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuRCM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRCM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuRGG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRGG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuRGM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRGM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuRMM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRMM_PtVsEta->GetYaxis()->SetTitle("Pt");
+                                                           
+    h_nMuCCC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuCCC_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuCCG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuCCG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuCCM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuCCM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuCGG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuCGG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuCGM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuCGM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuCMM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuCMM_PtVsEta->GetYaxis()->SetTitle("Pt");
+                                                           
+    h_nMuGGG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuGGG_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuGGM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuGGM_PtVsEta->GetYaxis()->SetTitle("Pt");
+    h_nMuGMM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuGMM_PtVsEta->GetYaxis()->SetTitle("Pt");
+                                                           
+    h_nMuMMM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuMMM_PtVsEta->GetYaxis()->SetTitle("Pt");
+
+
+
+
+
+
 
 
    //tr->Branch("nEvent"     ,	&nEvent	  , 	"nEvent/I"     	);
@@ -1295,6 +1510,8 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
 
    trSum->Branch("nIsMuVisibleMoreThanOneERR"  ,	&nIsMuVisibleMoreThanOneERR,	"nIsMuVisibleMoreThanOneERR/I"	);
 
+   trSum->Branch("maxPtAll"  ,	&maxPtAll,	"maxPtAll/F"	);
+   trSum->Branch("maxEtaAll"  ,	&maxEtaAll,	"maxEtaAll/F"	);
    
    tr->Branch("isMuNNN", &isMuNNN, "isMuNNN/O"	);	tr->Branch("isMuDDD", &isMuDDD, "isMuDDD/O"	);
    tr->Branch("isMuNND", &isMuNND, "isMuNND/O"	); 	tr->Branch("isMuDDR", &isMuDDR, "isMuDDR/O"	);
@@ -2651,6 +2868,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 
 
      float muPtlocal[3] = { 0,0,0 };
+     float muEtalocal[3] = { 0,0,0 };
      int nMu = 0;
      for(size_t i = 0; i < genParticles->size(); ++ i) 
      {
@@ -2697,23 +2915,28 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
          {
          muIdx[nMu] = i;
 	 muPtlocal[nMu] = p.pt();
+         muEtalocal[nMu] = fabs(p.eta());
          nMu++;
          }
        if (nMu==3) break;
       }
       
-      cout << "Muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
-      cout << "Muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
+      //cout << "Muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
+      //cout << "Muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
+      //cout << "Muon eta: " << muEtalocal[0] << "  " << muEtalocal[1] << "  " << muEtalocal[2] << endl;
       // sort arrays according to increasing Pt
       int imax = distance(muPtlocal, max_element(muPtlocal, muPtlocal + 3));
       std::swap(muIdx[2], muIdx[imax]);
       std::swap(muPtlocal[2], muPtlocal[imax]);
+      std::swap(muEtalocal[2], muEtalocal[imax]);
       int imin = distance(muPtlocal, min_element(muPtlocal, muPtlocal + 3));
-      cout << "imin=" << imin << "  imax=" << imax << endl;
+      //cout << "imin=" << imin << "  imax=" << imax << endl;
       std::swap(muIdx[0], muIdx[imin]);
       std::swap(muPtlocal[0], muPtlocal[imin]);
+      std::swap(muEtalocal[0], muEtalocal[imin]);
       //cout << "Ordered muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
       //cout << "Ordered muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
+      //cout << "Muon eta (is pt that was ordered): " << muEtalocal[0] << "  " << muEtalocal[1] << "  " << muEtalocal[2] << endl;
       // 0th is the least energetic, 2nd is the most energetic        
 
       //look to the regions where the three muons are
@@ -2781,7 +3004,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
       //check eta particle
        
 
-      cout << "nBBB:" << nBBB << " nBBO:" << nBBO << " nBBE:" << nBBE << " nBBF:" << nBBF << endl;
+      /*cout << "nBBB:" << nBBB << " nBBO:" << nBBO << " nBBE:" << nBBE << " nBBF:" << nBBF << endl;
       cout << "nBOO:" << nBOO << " nBOE:" << nBOE << " nBOF:" << nBOF << endl;
       cout << "nBEE:" << nBEE << " nBEF:" << nBEF << endl;
       cout << "nBFF:" << nBFF << endl;
@@ -2795,7 +3018,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
       
       cout << "nFFF:" << nFFF << endl;
 
-      cout << "nEEEME0:" << nEEEME0 << endl;
+      cout << "nEEEME0:" << nEEEME0 << endl;*/
 
 
 //h_PtVsEta	->Draw("COLZ");
@@ -3179,7 +3402,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
    isMuN = 0; isMuD = 0; isMuR = 0; isMuC = 0; isMuG = 0; isMuM = 0; 
 
    //turn to zero all pt cuts triplets
-   for ( int i=0; i<56; i++)
+   for ( int i=0; i<120; i++)
    {
       isMuNNNpt[i]=0;       isMuDDDpt[i]=0;      isMuRRRpt[i]=0;      isMuCCCpt[i]=0;       
       isMuNNDpt[i]=0;       isMuDDRpt[i]=0;      isMuRRCpt[i]=0;      isMuCCGpt[i]=0;             
@@ -3448,7 +3671,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
    if ( isMuM ) nMuM++;
 
    //write a print for all the 56 nMuXXX variables
-   cout << "nMuNNN:" << nMuNNN << " nMuNND:" << nMuNND << " nMuNNR:" << nMuNNR << " nMuNNC:" << nMuNNC << " nMuNNG:" << nMuNNG << " nMuNNM:" << nMuNNM << endl;
+   /*cout << "nMuNNN:" << nMuNNN << " nMuNND:" << nMuNND << " nMuNNR:" << nMuNNR << " nMuNNC:" << nMuNNC << " nMuNNG:" << nMuNNG << " nMuNNM:" << nMuNNM << endl;
    cout << "nMuNDD:" << nMuNDD << " nMuNDR:" << nMuNDR << " nMuNDC:" << nMuNDC << " nMuNDG:" << nMuNDG << " nMuNDM:" << nMuNDM << endl;
    cout << "nMuNRR:" << nMuNRR << " nMuNRC:" << nMuNRC << " nMuNRG:" << nMuNRG << " nMuNRM:" << nMuNRM << endl;
    cout << "nMuNCC:" << nMuNCC << " nMuNCG:" << nMuNCG << " nMuNCM:" << nMuNCM << endl;
@@ -3483,10 +3706,78 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
    
    cout << endl;
 
-   cout << "nMuMMM:" << nMuMMM << endl;
+   cout << "nMuMMM:" << nMuMMM << endl;*/
+
+   //fill pt vs eta histograms
+   for ( int i=0; i<3; i++ )
+   {
+      if ( isMuNNN ) h_nMuNNN_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNND ) h_nMuNND_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNNR ) h_nMuNNR_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNNC ) h_nMuNNC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNNG ) h_nMuNNG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNNM ) h_nMuNNM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNDD ) h_nMuNDD_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNDR ) h_nMuNDR_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNDC ) h_nMuNDC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNDG ) h_nMuNDG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNDM ) h_nMuNDM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNRR ) h_nMuNRR_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNRC ) h_nMuNRC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNRG ) h_nMuNRG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNRM ) h_nMuNRM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNCC ) h_nMuNCC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNCG ) h_nMuNCG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNCM ) h_nMuNCM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNGG ) h_nMuNGG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNGM ) h_nMuNGM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNMM ) h_nMuNMM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+                             
+      if ( isMuDDD ) h_nMuDDD_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDDR ) h_nMuDDR_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDDC ) h_nMuDDC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDDG ) h_nMuDDG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDDM ) h_nMuDDM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDRR ) h_nMuDRR_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDRC ) h_nMuDRC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDRG ) h_nMuDRG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDRM ) h_nMuDRM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDCC ) h_nMuDCC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDCG ) h_nMuDCG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDCM ) h_nMuDCM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDGG ) h_nMuDGG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDGM ) h_nMuDGM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDMM ) h_nMuDMM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+                             
+      if ( isMuRRR ) h_nMuRRR_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRRC ) h_nMuRRC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRRG ) h_nMuRRG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRRM ) h_nMuRRM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRCC ) h_nMuRCC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRCG ) h_nMuRCG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRCM ) h_nMuRCM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRGG ) h_nMuRGG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRGM ) h_nMuRGM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRMM ) h_nMuRMM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+                             
+      if ( isMuCCC ) h_nMuCCC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuCCG ) h_nMuCCG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuCCM ) h_nMuCCM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuCGG ) h_nMuCGG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuCGM ) h_nMuCGM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuCMM ) h_nMuCMM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+                             
+      if ( isMuGGG ) h_nMuGGG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuGGM ) h_nMuGGM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuGMM ) h_nMuGMM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+                             
+      if ( isMuMMM ) h_nMuMMM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+
+   }
+
 
    //pt cuts
-   vector<int> ptThr{ 0, 3, 5, 10, 20, 50 };
+   vector<int> ptThr{ 0, 1, 2, 3, 5, 10, 20, 50 };
    int ptThrSize = ptThr.size();
    //cout << "ptThr" << endl;   
 
@@ -3590,7 +3881,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
    
 
    //increment the nMuXXXpt counters
-   for ( int i=0; i<56; i++ )
+   for ( int i=0; i<120; i++ )
    {
       if ( isMuNNNpt[i] ) nMuNNNpt[i]++;
       if ( isMuNNDpt[i] ) nMuNNDpt[i]++;
@@ -3670,6 +3961,32 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
       if ( isMuMMMpt[i] ) nMuMMMpt[i]++;
 
    }
+
+   //register maximum pt and eta
+   for ( int i=0; i<3; i++ )
+   {
+      if ( muPtlocal[i]>maxPtAll ) maxPtAll = muPtlocal[i];
+      if ( muEtalocal[i]>maxEtaAll ) maxEtaAll = muEtalocal[i];
+   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
    //ME0
@@ -5018,7 +5335,7 @@ DeltaGlobalPhiAnalyzer::endJob()
  cout << "nBBB:" << nBBB << " nBBO:" << nBBO << " nBBE:" << nBBE << " nBOO:" << nBOO << " nBOE:" << nBOE << endl;
  cout << "nBEE:" << nBEE << " nOOO:" << nOOO << " nOOE:" << nOOE << " nOEE:" << nOEE << " nEEE:" << nEEE << " nEEEME0:" << nEEEME0 << endl; 
 
- for ( int i=0; i<56; i++)
+ for ( int i=0; i<120; i++)
  {
     cout << "nMuNNNpt[" << i << "]: " << nMuNNNpt[i] << endl;
     cout << "nMuNNDpt[" << i << "]: " << nMuNNDpt[i] << endl;
