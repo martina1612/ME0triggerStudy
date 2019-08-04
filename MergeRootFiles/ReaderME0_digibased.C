@@ -4,12 +4,40 @@ void ReaderME0_digibased()
   
    TFile *rfile = new TFile("out_digibased_both.root");
    //TFile *rfile = new TFile("out_DeltaGlobalPhiAnalyzer_1.root");
+
+   TFile *outfile = new TFile("outAnalyzerReaderDigibased.root", "RECREATE");
  
    //string dirName = "demo";
    //TDirectory demo = TDirectory(dirName.c_str(), dirName.c_str());
 
    TTree *tree_event_summary = (TTree*)rfile->Get("demo/EventSummary");
+   TTree *tree_event         = (TTree*)rfile->Get("demo/Event");
 
+   //TTree of the output file of this macro 
+   TTree *tree_RRR = new TTree("RRREvents", "RRREvents");
+   TTree *tree_RRC = new TTree("RRCEvents", "RRCEvents");
+   TTree *tree_RRG = new TTree("RRGEvents", "RRGEvents");
+   TTree *tree_RRM = new TTree("RRMEvents", "RRMEvents");
+   TTree *tree_RCC = new TTree("RCCEvents", "RCCEvents");
+   TTree *tree_RCG = new TTree("RCGEvents", "RCGEvents");
+   TTree *tree_RCM = new TTree("RCMEvents", "RCMEvents");
+   TTree *tree_RGG = new TTree("RGGEvents", "RGGEvents");
+   TTree *tree_RGM = new TTree("RGMEvents", "RGMEvents");
+   TTree *tree_RMM = new TTree("RMMEvents", "RMMEvents");
+   TTree *tree_CCC = new TTree("CCCEvents", "CCCEvents");
+   TTree *tree_CCG = new TTree("CCGEvents", "CCGEvents");
+   TTree *tree_CCM = new TTree("CCMEvents", "CCMEvents");
+   TTree *tree_CGG = new TTree("CGGEvents", "CGGEvents");
+   TTree *tree_CGM = new TTree("CGMEvents", "CGMEvents");
+   TTree *tree_CMM = new TTree("CMMEvents", "CMMEvents");
+   TTree *tree_GGG = new TTree("GGGEvents", "GGGEvents");
+   TTree *tree_GGM = new TTree("GGMEvents", "GGMEvents");
+   TTree *tree_GMM = new TTree("GMMEvents", "GMMEvents");
+   TTree *tree_MMM = new TTree("MMMEvents", "MMMEvents");
+
+   TTree *tree_summary = new TTree("EventSummary", "EventSummary");
+
+   //declarations and initialisations
    Int_t lastEvent = 0;
    Int_t lastEvent_total = 0;
 
@@ -67,7 +95,85 @@ void ReaderME0_digibased()
    Int_t nMuCMM_total = 0;
 
    Int_t nMuN_total = 0;
- 
+
+   Bool_t isMuRRR = 0;
+   Bool_t isMuRRC = 0;
+   Bool_t isMuRRG = 0;
+   Bool_t isMuRRM = 0;
+   Bool_t isMuRCC = 0;
+   Bool_t isMuRCG = 0;
+   Bool_t isMuRCM = 0;
+   Bool_t isMuRGG = 0;
+   Bool_t isMuRGM = 0;
+   Bool_t isMuRMM = 0;
+   Bool_t isMuCCC = 0;
+   Bool_t isMuCCG = 0;
+   Bool_t isMuCCM = 0;
+   Bool_t isMuCGG = 0;
+   Bool_t isMuCGM = 0;
+   Bool_t isMuCMM = 0;
+   Bool_t isMuGGG = 0;
+   Bool_t isMuGGM = 0;
+   Bool_t isMuGMM = 0;
+   Bool_t isMuMMM = 0;
+
+   Float_t muEta[3] = {0, 0, 0};
+   Float_t muPt[3]  = {0, 0, 0};   
+
+   float RRRminEta = 0;  float RRCminEta = 0;  float RRGminEta = 0;  float RMMminEta = 0; 
+   float RRRmaxEta = 0;  float RRCmaxEta = 0;  float RRGmaxEta = 0;  float RMMmaxEta = 0;
+   float RRRminPt  = 0;  float RRCminPt  = 0;  float RRGminPt  = 0;  float RMMminPt  = 0;
+   float RRRmaxPt  = 0;  float RRCmaxPt  = 0;  float RRGmaxPt  = 0;  float RMMmaxPt  = 0;
+
+   float RRMminEta = 0;  float RCCminEta = 0;  float RCGminEta = 0;  float RCMminEta = 0; 
+   float RRMmaxEta = 0;  float RCCmaxEta = 0;  float RCGmaxEta = 0;  float RCMmaxEta = 0;
+   float RRMminPt  = 0;  float RCCminPt  = 0;  float RCGminPt  = 0;  float RCMminPt  = 0;
+   float RRMmaxPt  = 0;  float RCCmaxPt  = 0;  float RCGmaxPt  = 0;  float RCMmaxPt  = 0;
+
+   float RGGminEta = 0;  float RGMminEta = 0;  float CCCminEta = 0;  float CCGminEta = 0; 
+   float RGGmaxEta = 0;  float RGMmaxEta = 0;  float CCCmaxEta = 0;  float CCGmaxEta = 0;
+   float RGGminPt  = 0;  float RGMminPt  = 0;  float CCCminPt  = 0;  float CCGminPt  = 0;
+   float RGGmaxPt  = 0;  float RGMmaxPt  = 0;  float CCCmaxPt  = 0;  float CCGmaxPt  = 0;
+
+   float CCMminEta = 0;  float CGGminEta = 0;  float CGMminEta = 0;  float CMMminEta = 0; 
+   float CCMmaxEta = 0;  float CGGmaxEta = 0;  float CGMmaxEta = 0;  float CMMmaxEta = 0;
+   float CCMminPt  = 0;  float CGGminPt  = 0;  float CGMminPt  = 0;  float CMMminPt  = 0;
+   float CCMmaxPt  = 0;  float CGGmaxPt  = 0;  float CGMmaxPt  = 0;  float CMMmaxPt  = 0;
+
+   float GGGminEta = 0;  float GGMminEta = 0;  float GMMminEta = 0;  float MMMminEta = 0; 
+   float GGGmaxEta = 0;  float GGMmaxEta = 0;  float GMMmaxEta = 0;  float MMMmaxEta = 0;
+   float GGGminPt  = 0;  float GGMminPt  = 0;  float GMMminPt  = 0;  float MMMminPt  = 0;
+   float GGGmaxPt  = 0;  float GGMmaxPt  = 0;  float GMMmaxPt  = 0;  float MMMmaxPt  = 0;
+
+   //-------------------EVENT-----------------------------------
+   tree_event-> SetBranchAddress("isMuRRR", &isMuRRR);
+   tree_event-> SetBranchAddress("isMuRRC", &isMuRRC);
+   tree_event-> SetBranchAddress("isMuRRG", &isMuRRG);
+   tree_event-> SetBranchAddress("isMuRRM", &isMuRRM);
+   tree_event-> SetBranchAddress("isMuRCC", &isMuRCC);
+   tree_event-> SetBranchAddress("isMuRCG", &isMuRCG);
+   tree_event-> SetBranchAddress("isMuRCM", &isMuRCM);
+   tree_event-> SetBranchAddress("isMuRGG", &isMuRGG);
+   tree_event-> SetBranchAddress("isMuRGM", &isMuRGM);
+   tree_event-> SetBranchAddress("isMuRMM", &isMuRMM);
+   tree_event-> SetBranchAddress("isMuCCC", &isMuCCC);
+   tree_event-> SetBranchAddress("isMuCCG", &isMuCCG);
+   tree_event-> SetBranchAddress("isMuCCM", &isMuCCM);
+   tree_event-> SetBranchAddress("isMuCGG", &isMuCGG);
+   tree_event-> SetBranchAddress("isMuCGM", &isMuCGM);
+   tree_event-> SetBranchAddress("isMuCMM", &isMuCMM);
+   tree_event-> SetBranchAddress("isMuGGG", &isMuGGG);
+   tree_event-> SetBranchAddress("isMuGGM", &isMuGGM);
+   tree_event-> SetBranchAddress("isMuGMM", &isMuGMM);
+   tree_event-> SetBranchAddress("isMuMMM", &isMuMMM);
+   
+   tree_event-> SetBranchAddress("muEta", &muEta[0]);
+   tree_event-> SetBranchAddress("muPt", &muPt[0]);
+
+
+
+
+   //-----------------EVENT SUMMARY------------------------------ 
    //tree_event_summary->Print();
  
    tree_event_summary->SetBranchAddress("lastEvent",&lastEvent);
@@ -136,9 +242,136 @@ void ReaderME0_digibased()
    
    tree_event_summary->SetBranchAddress("nMuN",&nMuN);
 
-   Int_t nentries = (Int_t)tree_event_summary -> GetEntries();
+   //Branches of trees produced by this macro 
+   tree_RRR -> Branch( "RRRminEta", &RRRminEta );
+   tree_RRR -> Branch( "RRRmaxEta", &RRRmaxEta );
+   tree_RRR -> Branch( "RRRminPt" , &RRRminPt  );
+   tree_RRR -> Branch( "RRRmaxPt" , &RRRmaxPt  );
+
+   tree_RRC -> Branch( "RRCminEta", &RRCminEta );
+   tree_RRC -> Branch( "RRCmaxEta", &RRCmaxEta );
+   tree_RRC -> Branch( "RRCminPt" , &RRCminPt  );
+   tree_RRC -> Branch( "RRCmaxPt" , &RRCmaxPt  );
+
+   tree_RRG -> Branch( "RRGminEta", &RRGminEta );
+   tree_RRG -> Branch( "RRGmaxEta", &RRGmaxEta );
+   tree_RRG -> Branch( "RRGminPt" , &RRGminPt  );
+   tree_RRG -> Branch( "RRGmaxPt" , &RRGmaxPt  );
+
+   tree_RRM -> Branch( "RRMminEta", &RRMminEta );
+   tree_RRM -> Branch( "RRMmaxEta", &RRMmaxEta );
+   tree_RRM -> Branch( "RRMminPt" , &RRMminPt  );
+   tree_RRM -> Branch( "RRMmaxPt" , &RRMmaxPt  );
+
+   tree_RCC -> Branch( "RCCminEta", &RCCminEta );
+   tree_RCC -> Branch( "RCCmaxEta", &RCCmaxEta );
+   tree_RCC -> Branch( "RCCminPt" , &RCCminPt  );
+   tree_RCC -> Branch( "RCCmaxPt" , &RCCmaxPt  );
+
+   tree_RCG -> Branch( "RCGminEta", &RCGminEta );
+   tree_RCG -> Branch( "RCGmaxEta", &RCGmaxEta );
+   tree_RCG -> Branch( "RCGminPt" , &RCGminPt  );
+   tree_RCG -> Branch( "RCGmaxPt" , &RCGmaxPt  );
+
+   tree_RCM -> Branch( "RCMminEta", &RCMminEta );
+   tree_RCM -> Branch( "RCMmaxEta", &RCMmaxEta );
+   tree_RCM -> Branch( "RCMminPt" , &RCMminPt  );
+   tree_RCM -> Branch( "RCMmaxPt" , &RCMmaxPt  );
+
+   tree_RGG -> Branch( "RGGminEta", &RGGminEta );
+   tree_RGG -> Branch( "RGGmaxEta", &RGGmaxEta );
+   tree_RGG -> Branch( "RGGminPt" , &RGGminPt  );
+   tree_RGG -> Branch( "RGGmaxPt" , &RGGmaxPt  );
+
+   tree_RGM -> Branch( "RGMminEta", &RGMminEta );
+   tree_RGM -> Branch( "RGMmaxEta", &RGMmaxEta );
+   tree_RGM -> Branch( "RGMminPt" , &RGMminPt  );
+   tree_RGM -> Branch( "RGMmaxPt" , &RGMmaxPt  );
+
+   tree_RMM -> Branch( "RMMminEta", &RMMminEta );
+   tree_RMM -> Branch( "RMMmaxEta", &RMMmaxEta );
+   tree_RMM -> Branch( "RMMminPt" , &RMMminPt  );
+   tree_RMM -> Branch( "RMMmaxPt" , &RMMmaxPt  );
+
+   tree_CCC -> Branch( "CCCminEta", &CCCminEta );
+   tree_CCC -> Branch( "CCCmaxEta", &CCCmaxEta );
+   tree_CCC -> Branch( "CCCminPt" , &CCCminPt  );
+   tree_CCC -> Branch( "CCCmaxPt" , &CCCmaxPt  );
+
+   tree_CCG -> Branch( "CCGminEta", &CCGminEta );   
+   tree_CCG -> Branch( "CCGmaxEta", &CCGmaxEta );
+   tree_CCG -> Branch( "CCGminPt" , &CCGminPt  );   
+   tree_CCG -> Branch( "CCGmaxPt" , &CCGmaxPt  );
+
+   tree_CCM -> Branch( "CCMminEta", &CCMminEta );
+   tree_CCM -> Branch( "CCMmaxEta", &CCMmaxEta );
+   tree_CCM -> Branch( "CCMminPt" , &CCMminPt  );
+   tree_CCM -> Branch( "CCMmaxPt" , &CCMmaxPt  );
+
+   tree_CGG -> Branch( "CGGminEta", &CGGminEta );
+   tree_CGG -> Branch( "CGGmaxEta", &CGGmaxEta );
+   tree_CGG -> Branch( "CGGminPt" , &CGGminPt  );
+   tree_CGG -> Branch( "CGGmaxPt" , &CGGmaxPt  );
+
+   tree_CGM -> Branch( "CGMminEta", &CGMminEta );
+   tree_CGM -> Branch( "CGMmaxEta", &CGMmaxEta );
+   tree_CGM -> Branch( "CGMminPt" , &CGMminPt  );
+   tree_CGM -> Branch( "CGMmaxPt" , &CGMmaxPt  );
+
+   tree_CMM -> Branch( "CMMminEta", &CMMminEta );
+   tree_CMM -> Branch( "CMMmaxEta", &CMMmaxEta );
+   tree_CMM -> Branch( "CMMminPt" , &CMMminPt  );
+   tree_CMM -> Branch( "CMMmaxPt" , &CMMmaxPt  );
+
+   tree_GGG -> Branch( "GGGminEta", &GGGminEta );
+   tree_GGG -> Branch( "GGGmaxEta", &GGGmaxEta );
+   tree_GGG -> Branch( "GGGminPt" , &GGGminPt  );
+   tree_GGG -> Branch( "GGGmaxPt" , &GGGmaxPt  );
+
+   tree_GGM -> Branch( "GGMminEta", &GGMminEta );
+   tree_GGM -> Branch( "GGMmaxEta", &GGMmaxEta );
+   tree_GGM -> Branch( "GGMminPt" , &GGMminPt  );
+   tree_GGM -> Branch( "GGMmaxPt" , &GGMmaxPt  );
+
+   tree_GMM -> Branch( "GMMminEta", &GMMminEta );
+   tree_GMM -> Branch( "GMMmaxEta", &GMMmaxEta );
+   tree_GMM -> Branch( "GMMminPt" , &GMMminPt  );
+   tree_GMM -> Branch( "GMMmaxPt" , &GMMmaxPt  );
+
+   tree_MMM -> Branch( "MMMminEta", &MMMminEta );
+   tree_MMM -> Branch( "MMMmaxEta", &MMMmaxEta );
+   tree_MMM -> Branch( "MMMminPt" , &MMMminPt  );
+   tree_MMM -> Branch( "MMMmaxPt" , &MMMmaxPt  );
+
+
+   tree_summary -> Branch("nMuRRR_total", &nMuRRR_total);
+   tree_summary -> Branch("nMuRRC_total", &nMuRRC_total);
+   tree_summary -> Branch("nMuRRG_total", &nMuRRG_total);
+   tree_summary -> Branch("nMuRRM_total", &nMuRRM_total);
+   tree_summary -> Branch("nMuRCC_total", &nMuRCC_total);
+   tree_summary -> Branch("nMuRCG_total", &nMuRCG_total);
+   tree_summary -> Branch("nMuRCM_total", &nMuRCM_total);
+   tree_summary -> Branch("nMuRGG_total", &nMuRGG_total);
+   tree_summary -> Branch("nMuRGM_total", &nMuRGM_total);
+   tree_summary -> Branch("nMuRMM_total", &nMuRMM_total);
+   tree_summary -> Branch("nMuCCC_total", &nMuCCC_total);
+   tree_summary -> Branch("nMuCCG_total", &nMuCCG_total);
+   tree_summary -> Branch("nMuCCM_total", &nMuCCM_total);
+   tree_summary -> Branch("nMuCGG_total", &nMuCGG_total);
+   tree_summary -> Branch("nMuCGM_total", &nMuCGM_total);
+   tree_summary -> Branch("nMuCMM_total", &nMuCMM_total);
+   tree_summary -> Branch("nMuGGG_total", &nMuGGG_total);
+   tree_summary -> Branch("nMuGGM_total", &nMuGGM_total);
+   tree_summary -> Branch("nMuGMM_total", &nMuGMM_total);
+   tree_summary -> Branch("nMuMMM_total", &nMuMMM_total);
+
+
+
+
+   Int_t summaryEntries = (Int_t)tree_event_summary -> GetEntries();
+   Int_t eventEntries = (Int_t)tree_event -> GetEntries();
   
-   for ( Int_t i=0; i < nentries; i++ ) 
+   for ( Int_t i=0; i < summaryEntries; i++ ) 
    {
       tree_event_summary->GetEntry(i);
       //cout << i << "lastEvent:"<< lastEvent << endl;
@@ -318,6 +551,7 @@ void ReaderME0_digibased()
    tripleMuTopology->Draw("");
 
    //only events D R C G M (see all the three mu)
+   cout << "\nOnly with all three muons visible"<< endl;
    Int_t lastEvent_allThreeSeen = lastEvent_total - nMuN_total; 
     cout << "nMuDDD_total%: " << (Float_t)nMuDDD_total/lastEvent_allThreeSeen*100. << " nMuRRR_total%: " << (Float_t)nMuRRR_total/lastEvent_allThreeSeen*100. << endl; 
     cout << "nMuDDR_total%: " << (Float_t)nMuDDR_total/lastEvent_allThreeSeen*100. << " nMuRRC_total%: " << (Float_t)nMuRRC_total/lastEvent_allThreeSeen*100. << endl;      
@@ -407,6 +641,525 @@ void ReaderME0_digibased()
     tripleMuTopology_allThreeSeen->SetMarkerStyle(21);
     tripleMuTopology_allThreeSeen->SetMarkerSize(0.8);
     tripleMuTopology_allThreeSeen->Draw("");
+
+    //check the Delta Eta and Delta pt of muons
+    //
+    cout << "eventEntries:" << eventEntries << endl;
+
+    for ( Int_t i=0; i < eventEntries; i++ ) 
+    {
+       cout << "Entry#" << i << endl;
+       tree_event->GetEntry(i);
+  
+       
+        
+       if ( isMuRRR )  
+       { 
+          cout << i << " isMuRRR" << endl; 
+          //calculate the minimum eta
+          RRRminEta = fabs(muEta[0]);
+          RRRmaxEta = fabs(muEta[0]);
+          RRRminPt  = fabs(muPt[0]);
+          RRRmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < RRRminEta ) RRRminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > RRRmaxEta ) RRRmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < RRRminPt  ) RRRminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > RRRmaxPt  ) RRRmaxPt  = fabs(muPt[j]);
+          }
+          //cout << RRRminEta << " " << RRRmaxEta << endl;
+          //cout << RRRminPt  << " " << RRRmaxPt  << endl;
+          
+          tree_RRR -> Fill();
+
+       }
+
+       if ( isMuRRC )  
+       { 
+          cout << i << " isMuRRC" << endl; 
+          //calculate the minimum eta
+          RRCminEta = fabs(muEta[0]);
+          RRCmaxEta = fabs(muEta[0]);
+          RRCminPt  = fabs(muPt[0]);
+          RRCmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < RRCminEta ) RRCminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > RRCmaxEta ) RRCmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < RRCminPt  ) RRCminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > RRCmaxPt  ) RRCmaxPt  = fabs(muPt[j]);
+          }
+          //cout << RRCminEta << " " << RRCmaxEta << endl;
+          //cout << RRCminPt  << " " << RRCmaxPt  << endl;
+          
+          tree_RRC -> Fill();
+                                                                                              
+       }
+
+       if ( isMuRRG )                                                                              
+       { 
+          cout << i << " isMuRRG" << endl; 
+          //calculate the minimum eta
+          RRGminEta = fabs(muEta[0]);
+          RRGmaxEta = fabs(muEta[0]);
+          RRGminPt  = fabs(muPt[0]);
+          RRGmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < RRGminEta ) RRGminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > RRGmaxEta ) RRGmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < RRGminPt  ) RRGminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > RRGmaxPt  ) RRGmaxPt  = fabs(muPt[j]);
+          }
+          //cout << RRGminEta << " " << RRGmaxEta << endl;
+          //cout << RRGminPt  << " " << RRGmaxPt  << endl;
+          
+          tree_RRG -> Fill();
+                                                                                              
+       }
+
+       if ( isMuRRM )  
+       { 
+          cout << i << " isMuRRM" << endl; 
+          //calculate the minimum eta
+          RRMminEta = fabs(muEta[0]);
+          RRMmaxEta = fabs(muEta[0]);
+          RRMminPt  = fabs(muPt[0]);
+          RRMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < RRMminEta ) RRMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > RRMmaxEta ) RRMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < RRMminPt  ) RRMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > RRMmaxPt  ) RRMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << RRMminEta << " " << RRMmaxEta << endl;
+          //cout << RRMminPt  << " " << RRMmaxPt  << endl;
+          
+          tree_RRM -> Fill();
+                                                                                              
+       }
+
+       if ( isMuRCC )  
+       { 
+          cout << i << " isMuRCC" << endl; 
+          //calculate the minimum eta
+          RCCminEta = fabs(muEta[0]);
+          RCCmaxEta = fabs(muEta[0]);
+          RCCminPt  = fabs(muPt[0]);
+          RCCmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < RCCminEta ) RCCminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > RCCmaxEta ) RCCmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < RCCminPt  ) RCCminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > RCCmaxPt  ) RCCmaxPt  = fabs(muPt[j]);
+          }
+          //cout << RCCminEta << " " << RCCmaxEta << endl;
+          //cout << RCCminPt  << " " << RCCmaxPt  << endl;
+          
+          tree_RCC -> Fill();
+                                                                                              
+       }
+
+       if ( isMuRCG )  
+       { 
+          cout << i << " isMuRCG" << endl; 
+          //calculate the minimum eta
+          RCGminEta = fabs(muEta[0]);
+          RCGmaxEta = fabs(muEta[0]);
+          RCGminPt  = fabs(muPt[0]);
+          RCGmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < RCGminEta ) RCGminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > RCGmaxEta ) RCGmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < RCGminPt  ) RCGminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > RCGmaxPt  ) RCGmaxPt  = fabs(muPt[j]);
+          }
+          //cout << RCGminEta << " " << RCGmaxEta << endl;
+          //cout << RCGminPt  << " " << RCGmaxPt  << endl;
+          
+          tree_RCG -> Fill();
+                                                                                              
+       }
+
+       if ( isMuRCM )  
+       { 
+          cout << i << " isMuRCM" << endl;                                                     
+          //calculate the minimum eta
+          RCMminEta = fabs(muEta[0]);
+          RCMmaxEta = fabs(muEta[0]);
+          RCMminPt  = fabs(muPt[0]);
+          RCMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < RCMminEta ) RCMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > RCMmaxEta ) RCMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < RCMminPt  ) RCMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > RCMmaxPt  ) RCMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << RCMminEta << " " << RCMmaxEta << endl;
+          //cout << RCMminPt  << " " << RCMmaxPt  << endl;
+          
+          tree_RCM -> Fill();
+                                                                                              
+       }
+
+       if ( isMuRGG )  
+       { 
+          cout << i << " isMuRGG" << endl; 
+          //calculate the minimum eta
+          RGGminEta = fabs(muEta[0]);
+          RGGmaxEta = fabs(muEta[0]);
+          RGGminPt  = fabs(muPt[0]);
+          RGGmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+        
+  for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < RGGminEta ) RGGminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > RGGmaxEta ) RGGmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < RGGminPt  ) RGGminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > RGGmaxPt  ) RGGmaxPt  = fabs(muPt[j]);
+          }
+          //cout << RGGminEta << " " << RGGmaxEta << endl;
+          //cout << RGGminPt  << " " << RGGmaxPt  << endl;
+          
+          tree_RGG -> Fill();
+                                                                                              
+       }
+
+       if ( isMuRGM )  
+       { 
+          cout << i << " isMuRGM" << endl; 
+          //calculate the minimum eta
+          RGMminEta = fabs(muEta[0]);
+          RGMmaxEta = fabs(muEta[0]);
+          RGMminPt  = fabs(muPt[0]);
+          RGMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < RGMminEta ) RGMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > RGMmaxEta ) RGMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < RGMminPt  ) RGMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > RGMmaxPt  ) RGMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << RGMminEta << " " << RGMmaxEta << endl;
+          //cout << RGMminPt  << " " << RGMmaxPt  << endl;
+          
+          tree_RGM -> Fill();
+                                                                                              
+       }
+
+       if ( isMuRMM )  
+       { 
+          cout << i << " isMuRMM" << endl; 
+          //calculate the minimum eta
+          RMMminEta = fabs(muEta[0]);
+          RMMmaxEta = fabs(muEta[0]);
+          RMMminPt  = fabs(muPt[0]);
+          RMMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < RMMminEta ) RMMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > RMMmaxEta ) RMMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < RMMminPt  ) RMMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > RMMmaxPt  ) RMMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << RMMminEta << " " << RMMmaxEta << endl;
+          //cout << RMMminPt  << " " << RMMmaxPt  << endl;
+          
+          tree_RMM -> Fill();
+                                                                                              
+       }
+
+       if ( isMuCCC )  
+       { 
+          cout << i << " isMuCCC" << endl; 
+          //calculate the minimum eta
+          CCCminEta = fabs(muEta[0]);
+          CCCmaxEta = fabs(muEta[0]);
+          CCCminPt  = fabs(muPt[0]);
+          CCCmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < CCCminEta ) CCCminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > CCCmaxEta ) CCCmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < CCCminPt  ) CCCminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > CCCmaxPt  ) CCCmaxPt  = fabs(muPt[j]);
+          }
+          //cout << CCCminEta << " " << CCCmaxEta << endl;
+          //cout << CCCminPt  << " " << CCCmaxPt  << endl;
+          
+          tree_CCC -> Fill();
+                                                                                              
+       }
+
+       if ( isMuCCG )  
+       { 
+          cout << i << " isMuCCG" << endl; 
+          //calculate the minimum eta
+          CCGminEta = fabs(muEta[0]);
+          CCGmaxEta = fabs(muEta[0]);
+          CCGminPt  = fabs(muPt[0]);
+          CCGmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < CCGminEta ) CCGminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > CCGmaxEta ) CCGmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < CCGminPt  ) CCGminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > CCGmaxPt  ) CCGmaxPt  = fabs(muPt[j]);
+          }
+          //cout << CCGminEta << " " << CCGmaxEta << endl;
+          //cout << CCGminPt  << " " << CCGmaxPt  << endl;
+          
+          tree_CCG -> Fill();
+                                                                                              
+       }
+
+       if ( isMuCCM )  
+       { 
+          cout << i << " isMuCCM" << endl; 
+          //calculate the minimum eta
+          CCMminEta = fabs(muEta[0]);
+          CCMmaxEta = fabs(muEta[0]);
+          CCMminPt  = fabs(muPt[0]);
+          CCMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < CCMminEta ) CCMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > CCMmaxEta ) CCMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < CCMminPt  ) CCMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > CCMmaxPt  ) CCMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << CCMminEta << " " << CCMmaxEta << endl;
+          //cout << CCMminPt  << " " << CCMmaxPt  << endl;
+          
+          tree_CCM -> Fill();
+                                                                                              
+       }
+
+       if ( isMuCGG )  
+       { 
+          cout << i << " isMuCGG" << endl; 
+          //calculate the minimum eta
+          CGGminEta = fabs(muEta[0]);
+          CGGmaxEta = fabs(muEta[0]);
+          CGGminPt  = fabs(muPt[0]);
+          CGGmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < CGGminEta ) CGGminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > CGGmaxEta ) CGGmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < CGGminPt  ) CGGminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > CGGmaxPt  ) CGGmaxPt  = fabs(muPt[j]);
+          }
+          //cout << CGGminEta << " " << CGGmaxEta << endl;
+          //cout << CGGminPt  << " " << CGGmaxPt  << endl;
+          
+          tree_CGG -> Fill();
+                                                                                              
+       }
+
+       if ( isMuCGM )  
+       { 
+          cout << i << " isMuCGM" << endl; 
+          //calculate the minimum eta
+          CGMminEta = fabs(muEta[0]);
+          CGMmaxEta = fabs(muEta[0]);
+          CGMminPt  = fabs(muPt[0]);
+          CGMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < CGMminEta ) CGMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > CGMmaxEta ) CGMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < CGMminPt  ) CGMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > CGMmaxPt  ) CGMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << CGMminEta << " " << CGMmaxEta << endl;
+          //cout << CGMminPt  << " " << CGMmaxPt  << endl;
+          
+          tree_CGM -> Fill();
+                                                                                              
+       }
+
+       if ( isMuCMM )  
+       { 
+          cout << i << " isMuCMM" << endl; 
+          //calculate the minimum eta
+          CMMminEta = fabs(muEta[0]);
+          CMMmaxEta = fabs(muEta[0]);
+          CMMminPt  = fabs(muPt[0]);
+          CMMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < CMMminEta ) CMMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > CMMmaxEta ) CMMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < CMMminPt  ) CMMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > CMMmaxPt  ) CMMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << CMMminEta << " " << CMMmaxEta << endl;
+          //cout << CMMminPt  << " " << CMMmaxPt  << endl;
+          
+          tree_CMM -> Fill();
+                                                                                              
+       }
+
+       if ( isMuGGG )  
+       { 
+          cout << i << " isMuGGG" << endl; 
+          //calculate the minimum eta
+          GGGminEta = fabs(muEta[0]);
+          GGGmaxEta = fabs(muEta[0]);
+          GGGminPt  = fabs(muPt[0]);
+          GGGmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < GGGminEta ) GGGminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > GGGmaxEta ) GGGmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < GGGminPt  ) GGGminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > GGGmaxPt  ) GGGmaxPt  = fabs(muPt[j]);
+          }
+          //cout << GGGminEta << " " << GGGmaxEta << endl;
+          //cout << GGGminPt  << " " << GGGmaxPt  << endl;
+          
+          tree_GGG -> Fill();
+                                                                                              
+       }
+
+       if ( isMuGGM )  
+       { 
+          cout << i << " isMuGGM" << endl; 
+          //calculate the minimum eta
+          GGMminEta = fabs(muEta[0]);
+          GGMmaxEta = fabs(muEta[0]);
+          GGMminPt  = fabs(muPt[0]);
+          GGMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < GGMminEta ) GGMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > GGMmaxEta ) GGMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < GGMminPt  ) GGMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > GGMmaxPt  ) GGMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << GGMminEta << " " << GGMmaxEta << endl;
+          //cout << GGMminPt  << " " << GGMmaxPt  << endl;
+          
+          tree_GGM -> Fill();
+                                                                                              
+       }
+
+       if ( isMuGMM )  
+       { 
+          cout << i << " isMuGMM" << endl; 
+          //calculate the minimum eta
+          GMMminEta = fabs(muEta[0]);
+          GMMmaxEta = fabs(muEta[0]);
+          GMMminPt  = fabs(muPt[0]);
+          GMMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < GMMminEta ) GMMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > GMMmaxEta ) GMMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < GMMminPt  ) GMMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > GMMmaxPt  ) GMMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << GMMminEta << " " << GMMmaxEta << endl;
+          //cout << GMMminPt  << " " << GMMmaxPt  << endl;
+          
+          tree_GMM -> Fill();
+                                                                                              
+       }
+
+       if ( isMuMMM )  
+       { 
+          cout << i << " isMuMMM" << endl; 
+          //calculate the minimum eta
+          MMMminEta = fabs(muEta[0]);
+          MMMmaxEta = fabs(muEta[0]);
+          MMMminPt  = fabs(muPt[0]);
+          MMMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < MMMminEta ) MMMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > MMMmaxEta ) MMMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < MMMminPt  ) MMMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > MMMmaxPt  ) MMMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << MMMminEta << " " << MMMmaxEta << endl;
+          //cout << MMMminPt  << " " << MMMmaxPt  << endl;
+          
+          tree_MMM -> Fill();
+                                                                                              
+       }
+
+    }
+
+
+   //Fill summary tree
+   tree_summary -> Fill();
+
+
+
+    outfile->Write();   
+
+
+
+
+
+/*   std::ofstream summaryFile ("summaryDigibased.txt");
+
+   summaryFile << "" << std::endl;
+
+   summaryFile.close();*/
+
+
+
+
+
+
+
 
 
 
