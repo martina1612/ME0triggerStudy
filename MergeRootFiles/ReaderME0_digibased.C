@@ -13,7 +13,24 @@ void ReaderME0_digibased()
    TTree *tree_event_summary = (TTree*)rfile->Get("demo/EventSummary");
    TTree *tree_event         = (TTree*)rfile->Get("demo/Event");
 
-   //TTree of the output file of this macro 
+   //TTree of the output file of this macro
+
+   TTree *tree_DDD = new TTree("DDDEvents", "DDDEvents");
+   TTree *tree_DDR = new TTree("DDREvents", "DDREvents");
+   TTree *tree_DDC = new TTree("DDCEvents", "DDCEvents");
+   TTree *tree_DDG = new TTree("DDGEvents", "DDGEvents");
+   TTree *tree_DDM = new TTree("DDMEvents", "DDMEvents");
+   TTree *tree_DRR = new TTree("DRREvents", "DRREvents");
+   TTree *tree_DRC = new TTree("DRCEvents", "DRCEvents");
+   TTree *tree_DRG = new TTree("DRGEvents", "DRGEvents");
+   TTree *tree_DRM = new TTree("DRMEvents", "DRMEvents");
+   TTree *tree_DCC = new TTree("DCCEvents", "DCCEvents");
+   TTree *tree_DCG = new TTree("DCGEvents", "DCGEvents");
+   TTree *tree_DCM = new TTree("DCMEvents", "DCMEvents");
+   TTree *tree_DGG = new TTree("DGGEvents", "DGGEvents");
+   TTree *tree_DGM = new TTree("DGMEvents", "DGMEvents");
+   TTree *tree_DMM = new TTree("DMMEvents", "DMMEvents");
+ 
    TTree *tree_RRR = new TTree("RRREvents", "RRREvents");
    TTree *tree_RRC = new TTree("RRCEvents", "RRCEvents");
    TTree *tree_RRG = new TTree("RRGEvents", "RRGEvents");
@@ -96,21 +113,21 @@ void ReaderME0_digibased()
 
    Int_t nMuN_total = 0;
 
-   Bool_t isMuRRR = 0;
-   Bool_t isMuRRC = 0;
-   Bool_t isMuRRG = 0;
-   Bool_t isMuRRM = 0;
-   Bool_t isMuRCC = 0;
-   Bool_t isMuRCG = 0;
-   Bool_t isMuRCM = 0;
-   Bool_t isMuRGG = 0;
-   Bool_t isMuRGM = 0;
-   Bool_t isMuRMM = 0;
-   Bool_t isMuCCC = 0;
-   Bool_t isMuCCG = 0;
-   Bool_t isMuCCM = 0;
-   Bool_t isMuCGG = 0;
-   Bool_t isMuCGM = 0;
+   Bool_t isMuRRR = 0;  Bool_t isMuDDD = 0; 
+   Bool_t isMuRRC = 0;  Bool_t isMuDDR = 0;
+   Bool_t isMuRRG = 0;  Bool_t isMuDDC = 0;
+   Bool_t isMuRRM = 0;  Bool_t isMuDDG = 0;
+   Bool_t isMuRCC = 0;  Bool_t isMuDDM = 0;
+   Bool_t isMuRCG = 0;  Bool_t isMuDRR = 0;
+   Bool_t isMuRCM = 0;  Bool_t isMuDRC = 0;
+   Bool_t isMuRGG = 0;  Bool_t isMuDRG = 0;
+   Bool_t isMuRGM = 0;  Bool_t isMuDRM = 0;
+   Bool_t isMuRMM = 0;  Bool_t isMuDCC = 0;
+   Bool_t isMuCCC = 0;  Bool_t isMuDCG = 0;
+   Bool_t isMuCCG = 0;  Bool_t isMuDCM = 0;
+   Bool_t isMuCCM = 0;  Bool_t isMuDGG = 0;
+   Bool_t isMuCGG = 0;  Bool_t isMuDGM = 0;
+   Bool_t isMuCGM = 0;  Bool_t isMuDMM = 0;
    Bool_t isMuCMM = 0;
    Bool_t isMuGGG = 0;
    Bool_t isMuGGM = 0;
@@ -119,6 +136,26 @@ void ReaderME0_digibased()
 
    Float_t muEta[3] = {0, 0, 0};
    Float_t muPt[3]  = {0, 0, 0};   
+
+   float DDDminEta = 0;  float DDRminEta = 0;  float DDCminEta = 0;  float DDGminEta = 0; 
+   float DDDmaxEta = 0;  float DDRmaxEta = 0;  float DDCmaxEta = 0;  float DDGmaxEta = 0;
+   float DDDminPt  = 0;  float DDRminPt  = 0;  float DDCminPt  = 0;  float DDGminPt  = 0;
+   float DDDmaxPt  = 0;  float DDRmaxPt  = 0;  float DDCmaxPt  = 0;  float DDGmaxPt  = 0;
+
+   float DDMminEta = 0;  float DRRminEta = 0;  float DRCminEta = 0;  float DRGminEta = 0; 
+   float DDMmaxEta = 0;  float DRRmaxEta = 0;  float DRCmaxEta = 0;  float DRGmaxEta = 0;
+   float DDMminPt  = 0;  float DRRminPt  = 0;  float DRCminPt  = 0;  float DRGminPt  = 0;
+   float DDMmaxPt  = 0;  float DRRmaxPt  = 0;  float DRCmaxPt  = 0;  float DRGmaxPt  = 0;
+
+   float DRMminEta = 0;  float DCCminEta = 0;  float DCGminEta = 0;  float DCMminEta = 0; 
+   float DRMmaxEta = 0;  float DCCmaxEta = 0;  float DCGmaxEta = 0;  float DCMmaxEta = 0;
+   float DRMminPt  = 0;  float DCCminPt  = 0;  float DCGminPt  = 0;  float DCMminPt  = 0;
+   float DRMmaxPt  = 0;  float DCCmaxPt  = 0;  float DCGmaxPt  = 0;  float DCMmaxPt  = 0;
+
+   float DGGminEta = 0;  float DGMminEta = 0;  float DMMminEta = 0;   
+   float DGGmaxEta = 0;  float DGMmaxEta = 0;  float DMMmaxEta = 0;  
+   float DGGminPt  = 0;  float DGMminPt  = 0;  float DMMminPt  = 0;  
+   float DGGmaxPt  = 0;  float DGMmaxPt  = 0;  float DMMmaxPt  = 0;  
 
    float RRRminEta = 0;  float RRCminEta = 0;  float RRGminEta = 0;  float RMMminEta = 0; 
    float RRRmaxEta = 0;  float RRCmaxEta = 0;  float RRGmaxEta = 0;  float RMMmaxEta = 0;
@@ -145,7 +182,45 @@ void ReaderME0_digibased()
    float GGGminPt  = 0;  float GGMminPt  = 0;  float GMMminPt  = 0;  float MMMminPt  = 0;
    float GGGmaxPt  = 0;  float GGMmaxPt  = 0;  float GMMmaxPt  = 0;  float MMMmaxPt  = 0;
 
+   float RRRrate = -1;   float DDDrate = -1; 
+   float RRCrate = -1;   float DDRrate = -1;
+   float RRGrate = -1;   float DDCrate = -1;
+   float RRMrate = -1;   float DDGrate = -1;
+   float RCCrate = -1;   float DDMrate = -1;
+   float RCGrate = -1;   float DRRrate = -1;
+   float RCMrate = -1;   float DRCrate = -1;
+   float RGGrate = -1;   float DRGrate = -1;
+   float RGMrate = -1;   float DRMrate = -1;
+   float RMMrate = -1;   float DCCrate = -1;
+   float CCCrate = -1;   float DCGrate = -1;
+   float CCGrate = -1;   float DCMrate = -1;
+   float CCMrate = -1;   float DGGrate = -1;
+   float CGGrate = -1;   float DGMrate = -1;
+   float CGMrate = -1;   float DMMrate = -1;
+   float CMMrate = -1;
+   float GGGrate = -1;
+   float GGMrate = -1;
+   float GMMrate = -1;
+   float MMMrate = -1;
+   
+
    //-------------------EVENT-----------------------------------
+   tree_event-> SetBranchAddress("isMuDDD", &isMuDDD);
+   tree_event-> SetBranchAddress("isMuDDR", &isMuDDR);
+   tree_event-> SetBranchAddress("isMuDDC", &isMuDDC);
+   tree_event-> SetBranchAddress("isMuDDG", &isMuDDG);
+   tree_event-> SetBranchAddress("isMuDDM", &isMuDDM);
+   tree_event-> SetBranchAddress("isMuDRR", &isMuDRR);
+   tree_event-> SetBranchAddress("isMuDRC", &isMuDRC);
+   tree_event-> SetBranchAddress("isMuDRG", &isMuDRG);
+   tree_event-> SetBranchAddress("isMuDRM", &isMuDRM);
+   tree_event-> SetBranchAddress("isMuDCC", &isMuDCC);
+   tree_event-> SetBranchAddress("isMuDCG", &isMuDCG);
+   tree_event-> SetBranchAddress("isMuDCM", &isMuDCM);
+   tree_event-> SetBranchAddress("isMuDGG", &isMuDGG);
+   tree_event-> SetBranchAddress("isMuDGM", &isMuDGM);
+   tree_event-> SetBranchAddress("isMuDMM", &isMuDMM);
+   
    tree_event-> SetBranchAddress("isMuRRR", &isMuRRR);
    tree_event-> SetBranchAddress("isMuRRC", &isMuRRC);
    tree_event-> SetBranchAddress("isMuRRG", &isMuRRG);
@@ -243,6 +318,81 @@ void ReaderME0_digibased()
    tree_event_summary->SetBranchAddress("nMuN",&nMuN);
 
    //Branches of trees produced by this macro 
+   tree_DDD -> Branch( "DDDminEta", &DDDminEta );
+   tree_DDD -> Branch( "DDDmaxEta", &DDDmaxEta );
+   tree_DDD -> Branch( "DDDminPt" , &DDDminPt  );
+   tree_DDD -> Branch( "DDDmaxPt" , &DDDmaxPt  );
+                                        
+   tree_DDR -> Branch( "DDRminEta", &DDRminEta );
+   tree_DDR -> Branch( "DDRmaxEta", &DDRmaxEta );
+   tree_DDR -> Branch( "DDRminPt" , &DDRminPt  );
+   tree_DDR -> Branch( "DDRmaxPt" , &DDRmaxPt  );
+                                        
+   tree_DDC -> Branch( "DDCminEta", &DDCminEta );
+   tree_DDC -> Branch( "DDCmaxEta", &DDCmaxEta );
+   tree_DDC -> Branch( "DDCminPt" , &DDCminPt  );
+   tree_DDC -> Branch( "DDCmaxPt" , &DDCmaxPt  );
+                                        
+   tree_DDG -> Branch( "DDGminEta", &DDGminEta );
+   tree_DDG -> Branch( "DDGmaxEta", &DDGmaxEta );
+   tree_DDG -> Branch( "DDGminPt" , &DDGminPt  );
+   tree_DDG -> Branch( "DDGmaxPt" , &DDGmaxPt  );
+                                        
+   tree_DDM -> Branch( "DDMminEta", &DDMminEta );
+   tree_DDM -> Branch( "DDMmaxEta", &DDMmaxEta );
+   tree_DDM -> Branch( "DDMminPt" , &DDMminPt  );
+   tree_DDM -> Branch( "DDMmaxPt" , &DDMmaxPt  );
+                                        
+   tree_DRR -> Branch( "DRRminEta", &DRRminEta );
+   tree_DRR -> Branch( "DRRmaxEta", &DRRmaxEta );
+   tree_DRR -> Branch( "DRRminPt" , &DRRminPt  );
+   tree_DRR -> Branch( "DRRmaxPt" , &DRRmaxPt  );
+                                        
+   tree_DRC -> Branch( "DRCminEta", &DRCminEta );
+   tree_DRC -> Branch( "DRCmaxEta", &DRCmaxEta );
+   tree_DRC -> Branch( "DRCminPt" , &DRCminPt  );
+   tree_DRC -> Branch( "DRCmaxPt" , &DRCmaxPt  );
+                                        
+   tree_DRG -> Branch( "DRGminEta", &DRGminEta );
+   tree_DRG -> Branch( "DRGmaxEta", &DRGmaxEta );
+   tree_DRG -> Branch( "DRGminPt" , &DRGminPt  );
+   tree_DRG -> Branch( "DRGmaxPt" , &DRGmaxPt  );
+                                        
+   tree_DRM -> Branch( "DRMminEta", &DRMminEta );
+   tree_DRM -> Branch( "DRMmaxEta", &DRMmaxEta );
+   tree_DRM -> Branch( "DRMminPt" , &DRMminPt  );
+   tree_DRM -> Branch( "DRMmaxPt" , &DRMmaxPt  );
+                                        
+   tree_DCC -> Branch( "DCCminEta", &DCCminEta );
+   tree_DCC -> Branch( "DCCmaxEta", &DCCmaxEta );
+   tree_DCC -> Branch( "DCCminPt" , &DCCminPt  );
+   tree_DCC -> Branch( "DCCmaxPt" , &DCCmaxPt  );
+                                        
+   tree_DCG -> Branch( "DCGminEta", &DCGminEta );
+   tree_DCG -> Branch( "DCGmaxEta", &DCGmaxEta );
+   tree_DCG -> Branch( "DCGminPt" , &DCGminPt  );
+   tree_DCG -> Branch( "DCGmaxPt" , &DCGmaxPt  );
+                                        
+   tree_DCM -> Branch( "DCMminEta", &DCMminEta );
+   tree_DCM -> Branch( "DCMmaxEta", &DCMmaxEta );
+   tree_DCM -> Branch( "DCMminPt" , &DCMminPt  );
+   tree_DCM -> Branch( "DCMmaxPt" , &DCMmaxPt  );
+                                        
+   tree_DGG -> Branch( "DGGminEta", &DGGminEta );
+   tree_DGG -> Branch( "DGGmaxEta", &DGGmaxEta );
+   tree_DGG -> Branch( "DGGminPt" , &DGGminPt  );
+   tree_DGG -> Branch( "DGGmaxPt" , &DGGmaxPt  );
+                                        
+   tree_DGM -> Branch( "DGMminEta", &DGMminEta );
+   tree_DGM -> Branch( "DGMmaxEta", &DGMmaxEta );
+   tree_DGM -> Branch( "DGMminPt" , &DGMminPt  );
+   tree_DGM -> Branch( "DGMmaxPt" , &DGMmaxPt  );
+                                        
+   tree_DMM -> Branch( "DMMminEta", &DMMminEta );
+   tree_DMM -> Branch( "DMMmaxEta", &DMMmaxEta );
+   tree_DMM -> Branch( "DMMminPt" , &DMMminPt  );
+   tree_DMM -> Branch( "DMMmaxPt" , &DMMmaxPt  );
+
    tree_RRR -> Branch( "RRRminEta", &RRRminEta );
    tree_RRR -> Branch( "RRRmaxEta", &RRRmaxEta );
    tree_RRR -> Branch( "RRRminPt" , &RRRminPt  );
@@ -344,6 +494,25 @@ void ReaderME0_digibased()
    tree_MMM -> Branch( "MMMmaxPt" , &MMMmaxPt  );
 
 
+   tree_summary -> Branch("lastEvent_total", &lastEvent_total);
+
+
+   tree_summary -> Branch("nMu_totalDDD", &nMuDDD_total);
+   tree_summary -> Branch("nMu_totalDDR", &nMuDDR_total);
+   tree_summary -> Branch("nMu_totalDDC", &nMuDDC_total);
+   tree_summary -> Branch("nMu_totalDDG", &nMuDDG_total);
+   tree_summary -> Branch("nMu_totalDDM", &nMuDDM_total);
+   tree_summary -> Branch("nMu_totalDRR", &nMuDRR_total);
+   tree_summary -> Branch("nMu_totalDRC", &nMuDRC_total);
+   tree_summary -> Branch("nMu_totalDRG", &nMuDRG_total);
+   tree_summary -> Branch("nMu_totalDRM", &nMuDRM_total);
+   tree_summary -> Branch("nMu_totalDCC", &nMuDCC_total);
+   tree_summary -> Branch("nMu_totalDCG", &nMuDCG_total);
+   tree_summary -> Branch("nMu_totalDCM", &nMuDCM_total);
+   tree_summary -> Branch("nMu_totalDGG", &nMuDGG_total);
+   tree_summary -> Branch("nMu_totalDGM", &nMuDGM_total);
+   tree_summary -> Branch("nMu_totalDMM", &nMuDMM_total);
+
    tree_summary -> Branch("nMuRRR_total", &nMuRRR_total);
    tree_summary -> Branch("nMuRRC_total", &nMuRRC_total);
    tree_summary -> Branch("nMuRRG_total", &nMuRRG_total);
@@ -365,6 +534,48 @@ void ReaderME0_digibased()
    tree_summary -> Branch("nMuGMM_total", &nMuGMM_total);
    tree_summary -> Branch("nMuMMM_total", &nMuMMM_total);
 
+
+   tree_summary -> Branch("DDDrate", &DDDrate);
+   tree_summary -> Branch("DDRrate", &DDRrate);
+   tree_summary -> Branch("DDCrate", &DDCrate);
+   tree_summary -> Branch("DDGrate", &DDGrate);
+   tree_summary -> Branch("DDMrate", &DDMrate);
+   tree_summary -> Branch("DRRrate", &DRRrate);
+   tree_summary -> Branch("DRCrate", &DRCrate);
+   tree_summary -> Branch("DRGrate", &DRGrate);
+   tree_summary -> Branch("DRMrate", &DRMrate);
+   tree_summary -> Branch("DCCrate", &DCCrate);
+   tree_summary -> Branch("DCGrate", &DCGrate);
+   tree_summary -> Branch("DCMrate", &DCMrate);
+   tree_summary -> Branch("DGGrate", &DGGrate);
+   tree_summary -> Branch("DGMrate", &DGMrate);
+   tree_summary -> Branch("DMMrate", &DMMrate);
+
+   tree_summary -> Branch("RRRrate", &RRRrate);
+   tree_summary -> Branch("RRCrate", &RRCrate);
+   tree_summary -> Branch("RRGrate", &RRGrate);
+   tree_summary -> Branch("RRMrate", &RRMrate);
+   tree_summary -> Branch("RCCrate", &RCCrate);
+   tree_summary -> Branch("RCGrate", &RCGrate);
+   tree_summary -> Branch("RCMrate", &RCMrate);
+   tree_summary -> Branch("RGGrate", &RGGrate);
+   tree_summary -> Branch("RGMrate", &RGMrate);
+   tree_summary -> Branch("RMMrate", &RMMrate);
+   tree_summary -> Branch("CCCrate", &CCCrate);
+   tree_summary -> Branch("CCGrate", &CCGrate);
+   tree_summary -> Branch("CCMrate", &CCMrate);
+   tree_summary -> Branch("CGGrate", &CGGrate);
+   tree_summary -> Branch("CGMrate", &CGMrate);
+   tree_summary -> Branch("CMMrate", &CMMrate);
+   tree_summary -> Branch("GGGrate", &GGGrate);
+   tree_summary -> Branch("GGMrate", &GGMrate);
+   tree_summary -> Branch("GMMrate", &GMMrate);
+   tree_summary -> Branch("MMMrate", &MMMrate);
+   
+
+   
+
+   //------------------------LET'S GO -------------------------------
 
 
 
@@ -651,8 +862,368 @@ void ReaderME0_digibased()
        cout << "Entry#" << i << endl;
        tree_event->GetEntry(i);
   
-       
+        if ( isMuDDD )                                                                              
+        {                                                                                           
+           cout << i << " isMuDDD" << endl; 
+           //calculate the minimum eta
+           DDDminEta = fabs(muEta[0]);
+           DDDmaxEta = fabs(muEta[0]);
+           DDDminPt  = fabs(muPt[0]);
+           DDDmaxPt  = fabs(muPt[0]);
+           //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+           //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+           for (int j=1; j<3; j++)
+           {
+              if ( fabs(muEta[j]) < DDDminEta ) DDDminEta = fabs(muEta[j]);
+              if ( fabs(muEta[j]) > DDDmaxEta ) DDDmaxEta = fabs(muEta[j]);
+              if ( fabs(muPt[j])  < DDDminPt  ) DDDminPt  = fabs(muPt[j]);
+              if ( fabs(muPt[j])  > DDDmaxPt  ) DDDmaxPt  = fabs(muPt[j]);
+           }
+           //cout << DDDminEta << " " << DDDmaxEta << endl;
+           //cout << DDDminPt  << " " << DDDmaxPt  << endl;
+           
+           tree_DDD -> Fill();
+ 
+        }
+
+       if ( isMuDDR )  
+       { 
+          cout << i << " isMuDDR" << endl; 
+          //calculate the minimum eta
+          DDRminEta = fabs(muEta[0]);
+          DDRmaxEta = fabs(muEta[0]);
+          DDRminPt  = fabs(muPt[0]);
+          DDRmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DDRminEta ) DDRminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DDRmaxEta ) DDRmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DDRminPt  ) DDRminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DDRmaxPt  ) DDRmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DDRminEta << " " << DDRmaxEta << endl;
+          //cout << DDRminPt  << " " << DDRmaxPt  << endl;
+          
+          tree_DDR -> Fill();
+
+       }
+
+       if ( isMuDDC )  
+       { 
+          cout << i << " isMuDDC" << endl; 
+          //calculate the minimum eta
+          DDCminEta = fabs(muEta[0]);
+          DDCmaxEta = fabs(muEta[0]);
+          DDCminPt  = fabs(muPt[0]);
+          DDCmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
         
+  for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DDCminEta ) DDCminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DDCmaxEta ) DDCmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DDCminPt  ) DDCminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DDCmaxPt  ) DDCmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DDCminEta << " " << DDCmaxEta << endl;
+          //cout << DDCminPt  << " " << DDCmaxPt  << endl;
+          
+          tree_DDC -> Fill();
+
+       }
+
+       if ( isMuDDG )  
+       { 
+          cout << i << " isMuDDG" << endl; 
+          //calculate the minimum eta
+          DDGminEta = fabs(muEta[0]);
+          DDGmaxEta = fabs(muEta[0]);
+          DDGminPt  = fabs(muPt[0]);
+          DDGmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DDGminEta ) DDGminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DDGmaxEta ) DDGmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DDGminPt  ) DDGminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DDGmaxPt  ) DDGmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DDGminEta << " " << DDGmaxEta << endl;
+          //cout << DDGminPt  << " " << DDGmaxPt  << endl;
+          
+          tree_DDG -> Fill();
+
+       }
+
+       if ( isMuDDM )  
+       { 
+          cout << i << " isMuDDM" << endl; 
+          //calculate the minimum eta
+          DDMminEta = fabs(muEta[0]);
+          DDMmaxEta = fabs(muEta[0]);
+          DDMminPt  = fabs(muPt[0]);
+          DDMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DDMminEta ) DDMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DDMmaxEta ) DDMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DDMminPt  ) DDMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DDMmaxPt  ) DDMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DDMminEta << " " << DDMmaxEta << endl;
+          //cout << DDMminPt  << " " << DDMmaxPt  << endl;
+          
+          tree_DDM -> Fill();
+
+       }
+
+       if ( isMuDRR )  
+       { 
+          cout << i << " isMuDRR" << endl; 
+          //calculate the minimum eta
+          DRRminEta = fabs(muEta[0]);
+          DRRmaxEta = fabs(muEta[0]);
+          DRRminPt  = fabs(muPt[0]);
+          DRRmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DRRminEta ) DRRminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DRRmaxEta ) DRRmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DRRminPt  ) DRRminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DRRmaxPt  ) DRRmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DRRminEta << " " << DRRmaxEta << endl;
+          //cout << DRRminPt  << " " << DRRmaxPt  << endl;
+          
+          tree_DRR -> Fill();
+
+       }
+
+       if ( isMuDRC )  
+       { 
+          cout << i << " isMuDRC" << endl; 
+          //calculate the minimum eta
+          DRCminEta = fabs(muEta[0]);
+          DRCmaxEta = fabs(muEta[0]);
+          DRCminPt  = fabs(muPt[0]);
+          DRCmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DRCminEta ) DRCminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DRCmaxEta ) DRCmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DRCminPt  ) DRCminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DRCmaxPt  ) DRCmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DRCminEta << " " << DRCmaxEta << endl;
+          //cout << DRCminPt  << " " << DRCmaxPt  << endl;
+          
+          tree_DRC -> Fill();
+
+       }
+
+       if ( isMuDRG )  
+       { 
+          cout << i << " isMuDRG" << endl; 
+          //calculate the minimum eta
+          DRGminEta = fabs(muEta[0]);
+          DRGmaxEta = fabs(muEta[0]);
+          DRGminPt  = fabs(muPt[0]);
+          DRGmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DRGminEta ) DRGminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DRGmaxEta ) DRGmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DRGminPt  ) DRGminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DRGmaxPt  ) DRGmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DRGminEta << " " << DRGmaxEta << endl;
+          //cout << DRGminPt  << " " << DRGmaxPt  << endl;
+          
+          tree_DRG -> Fill();
+
+       }
+
+       if ( isMuDRM )  
+       { 
+          cout << i << " isMuDRM" << endl; 
+          //calculate the minimum eta
+          DRMminEta = fabs(muEta[0]);
+          DRMmaxEta = fabs(muEta[0]);
+          DRMminPt  = fabs(muPt[0]);
+          DRMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DRMminEta ) DRMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DRMmaxEta ) DRMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DRMminPt  ) DRMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DRMmaxPt  ) DRMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DRMminEta << " " << DRMmaxEta << endl;
+          //cout << DRMminPt  << " " << DRMmaxPt  << endl;
+          
+          tree_DRM -> Fill();
+
+       }
+
+       if ( isMuDCC )  
+       { 
+          cout << i << " isMuDCC" << endl; 
+          //calculate the minimum eta
+          DCCminEta = fabs(muEta[0]);
+          DCCmaxEta = fabs(muEta[0]);
+          DCCminPt  = fabs(muPt[0]);
+          DCCmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DCCminEta ) DCCminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DCCmaxEta ) DCCmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DCCminPt  ) DCCminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DCCmaxPt  ) DCCmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DCCminEta << " " << DCCmaxEta << endl;
+          //cout << DCCminPt  << " " << DCCmaxPt  << endl;
+          
+          tree_DCC -> Fill();
+
+       }
+
+       if ( isMuDCG )  
+       { 
+          cout << i << " isMuDCG" << endl; 
+          //calculate the minimum eta
+          DCGminEta = fabs(muEta[0]);
+          DCGmaxEta = fabs(muEta[0]);
+          DCGminPt  = fabs(muPt[0]);
+          DCGmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DCGminEta ) DCGminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DCGmaxEta ) DCGmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DCGminPt  ) DCGminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DCGmaxPt  ) DCGmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DCGminEta << " " << DCGmaxEta << endl;
+          //cout << DCGminPt  << " " << DCGmaxPt  << endl;
+          
+          tree_DCG -> Fill();
+
+       }
+
+       if ( isMuDCM )  
+       { 
+          cout << i << " isMuDCM" << endl; 
+          //calculate the minimum eta
+          DCMminEta = fabs(muEta[0]);
+          DCMmaxEta = fabs(muEta[0]);
+          DCMminPt  = fabs(muPt[0]);
+          DCMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DCMminEta ) DCMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DCMmaxEta ) DCMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DCMminPt  ) DCMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DCMmaxPt  ) DCMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DCMminEta << " " << DCMmaxEta << endl;
+          //cout << DCMminPt  << " " << DCMmaxPt  << endl;
+          
+          tree_DCM -> Fill();
+
+       }
+
+       if ( isMuDGG )  
+       { 
+          cout << i << " isMuDGG" << endl; 
+          //calculate the minimum eta
+          DGGminEta = fabs(muEta[0]);
+          DGGmaxEta = fabs(muEta[0]);
+          DGGminPt  = fabs(muPt[0]);
+          DGGmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DGGminEta ) DGGminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DGGmaxEta ) DGGmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DGGminPt  ) DGGminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DGGmaxPt  ) DGGmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DGGminEta << " " << DGGmaxEta << endl;
+          //cout << DGGminPt  << " " << DGGmaxPt  << endl;
+          
+          tree_DGG -> Fill();
+
+       }
+
+       if ( isMuDGM )  
+       { 
+          cout << i << " isMuDGM" << endl; 
+          //calculate the minimum eta
+          DGMminEta = fabs(muEta[0]);
+          DGMmaxEta = fabs(muEta[0]);
+          DGMminPt  = fabs(muPt[0]);
+          DGMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DGMminEta ) DGMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DGMmaxEta ) DGMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DGMminPt  ) DGMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DGMmaxPt  ) DGMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DGMminEta << " " << DGMmaxEta << endl;
+          //cout << DGMminPt  << " " << DGMmaxPt  << endl;
+          
+          tree_DGM -> Fill();
+
+       }
+
+       if ( isMuDMM )  
+       { 
+          cout << i << " isMuDMM" << endl; 
+          //calculate the minimum eta
+          DMMminEta = fabs(muEta[0]);
+          DMMmaxEta = fabs(muEta[0]);
+          DMMminPt  = fabs(muPt[0]);
+          DMMmaxPt  = fabs(muPt[0]);
+          //cout << fabs(muEta[0]) << " " << fabs(muEta[1]) << " " << fabs(muEta[2]) << endl;
+          //cout << muPt[0] << " " << muPt[1] << " " << muPt[2] << endl;
+          for (int j=1; j<3; j++)
+          {
+             if ( fabs(muEta[j]) < DMMminEta ) DMMminEta = fabs(muEta[j]);
+             if ( fabs(muEta[j]) > DMMmaxEta ) DMMmaxEta = fabs(muEta[j]);
+             if ( fabs(muPt[j])  < DMMminPt  ) DMMminPt  = fabs(muPt[j]);
+             if ( fabs(muPt[j])  > DMMmaxPt  ) DMMmaxPt  = fabs(muPt[j]);
+          }
+          //cout << DMMminEta << " " << DMMmaxEta << endl;
+          //cout << DMMminPt  << " " << DMMmaxPt  << endl;
+          
+          tree_DMM -> Fill();
+
+       }
+
+
        if ( isMuRRR )  
        { 
           cout << i << " isMuRRR" << endl; 
@@ -1135,6 +1706,50 @@ void ReaderME0_digibased()
        }
 
     }
+
+
+   //-------------------END LOOP ON EVENTS-------------------------------------
+   //--------------------------------------------------------------------------
+   //------------------START ACTIONS ON SUMMARY TREE---------------------------
+ 
+   //calculate the rate
+   DDDrate = nMuDDD_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DDRrate = nMuDDR_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DDCrate = nMuDDC_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DDGrate = nMuDDG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DDMrate = nMuDDM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DRRrate = nMuDRR_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DRCrate = nMuDRC_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DRGrate = nMuDRG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DRMrate = nMuDRM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DCCrate = nMuDCC_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DCGrate = nMuDCG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DCMrate = nMuDCM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DGGrate = nMuDGG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DGMrate = nMuDGM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   DMMrate = nMuDMM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   
+
+   RRRrate = nMuRRR_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   RRCrate = nMuRRC_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   RRGrate = nMuRRG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   RRMrate = nMuRRM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   RCCrate = nMuRCC_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   RCGrate = nMuRCG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   RCMrate = nMuRCM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   RGGrate = nMuRGG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   RGMrate = nMuRGM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   RMMrate = nMuRMM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   CCCrate = nMuCCC_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   CCGrate = nMuCCG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   CCMrate = nMuCCM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   CGGrate = nMuCGG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   CGMrate = nMuCGM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   CMMrate = nMuCMM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   GGGrate = nMuGGG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   GGMrate = nMuGGM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   GMMrate = nMuGMM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   MMMrate = nMuMMM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
 
 
    //Fill summary tree
