@@ -272,6 +272,29 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
 
    TH2F * h_nMuMMM_PtVsEta;   
 
+   //declaration for lists of TH2F
+   std::vector<TH2F*> RRR_th2f_list;
+   std::vector<TH2F*> RRC_th2f_list;
+   std::vector<TH2F*> RRG_th2f_list;
+   std::vector<TH2F*> RRM_th2f_list;
+   std::vector<TH2F*> RCC_th2f_list;
+   std::vector<TH2F*> RCG_th2f_list;
+   std::vector<TH2F*> RCM_th2f_list;
+   std::vector<TH2F*> RGG_th2f_list;
+   std::vector<TH2F*> RGM_th2f_list;
+   std::vector<TH2F*> RMM_th2f_list;
+   std::vector<TH2F*> CCC_th2f_list;
+   std::vector<TH2F*> CCG_th2f_list;
+   std::vector<TH2F*> CCM_th2f_list;
+   std::vector<TH2F*> CGG_th2f_list;
+   std::vector<TH2F*> CGM_th2f_list;
+   std::vector<TH2F*> CMM_th2f_list;
+   std::vector<TH2F*> GGG_th2f_list;
+   std::vector<TH2F*> GGM_th2f_list;
+   std::vector<TH2F*> GMM_th2f_list;
+   std::vector<TH2F*> MMM_th2f_list;
+
+
 
    std::map<ME0DetId,vector<float>> deltaPhiMap;
    std::map<ME0DetId,vector<float>> alphaMap;
@@ -653,9 +676,12 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
    //nEventSel1 for the case with at least one muon in ME0 eta range coming from tau->3mu
    //nEventSel2 for the case with at least two muon in ME0 eta range coming from tau->3mu
    //nEventSel3 for the case with at least three muon in ME0 eta range coming from tau->3mu
-   Int_t nEvent = 0;  //total number of events             
-   Int_t nEventVis = 0;  //number of events visible in ME0
-   Int_t nEventSelME0 = 0;
+   Int_t nEvent = 0;  //total number of events            
+   Int_t nEventSel = 0; 
+   //Int_t nEventVis = 0;  //number of events visible in ME0
+   Int_t nEventDRCGM = 0;  
+   Int_t nEventRCGM = 0;  
+   /*Int_t nEventSelME0 = 0;
    Int_t nEventSelME01 = 0;
    Int_t nEventSelME02 = 0;
    Int_t nEventSelME03 = 0;
@@ -666,11 +692,14 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
 
    Int_t nEventSelGEM1 = 0;
    Int_t nEventSelGEM2 = 0;
-   Int_t nEventSelGEM3 = 0;
+   Int_t nEventSelGEM3 = 0;*/
 
    Int_t lastEvent = 0;
-   Int_t lastEventVis = 0;
-   Int_t lastEventSelME0 = 0;
+   Int_t lastEventSel = 0;
+   //Int_t lastEventVis = 0;
+   Int_t lastEventDRCGM = 0;
+   Int_t lastEventRCGM = 0;
+   /*Int_t lastEventSelME0 = 0;
    Int_t lastEventSelME01 = 0;
    Int_t lastEventSelME02 = 0;
    Int_t lastEventSelME03 = 0;
@@ -681,7 +710,7 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
 
    Int_t lastEventSelGEM1 = 0;
    Int_t lastEventSelGEM2 = 0;
-   Int_t lastEventSelGEM3 = 0;
+   Int_t lastEventSelGEM3 = 0;*/
    Int_t estimatedNmu = 0;
    TTree *tr;
    TTree *trSum;
@@ -883,6 +912,45 @@ class DeltaGlobalPhiAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResou
       int nMuG = 0;
       int nMuM = 0;
 
+      //put lower eta threshold in 0, 2, 4 and upper threshold in 1, 3, 5  
+      //TEN ELEMENTS IN THE ARRAY CORRESPOND TO 5 ETA INTERVALS
+      float isMuRRR_EtaThr[10] = { 0.8, 2.6, 1.0, 2.5, 1.2, 2.5, 1.4, 2.5, 1.6, 2.4 };	
+      float isMuRRC_EtaThr[10] = { 0.8, 2.7, 1.0, 2.6, 1.2, 2.5, 1.4, 2.4, 1.6, 2.4 };	
+      float isMuRRG_EtaThr[10] = { 1.0, 2.7, 1.2, 2.5, 1.4, 2.5, 1.5, 2.4, 1.6, 2.3 };	
+      float isMuRRM_EtaThr[10] = { 1.2, 3.0, 1.4, 2.8, 1.6, 2.7, 1.7, 2.6, 1.9, 2.5 };	
+      float isMuRCC_EtaThr[10] = { 0.9, 2.7, 1.1, 2.6, 1.3, 2.5, 1.4, 2.4, 1.5, 2.3 };	
+      float isMuRCG_EtaThr[10] = { 1.0, 2.7, 1.1, 2.6, 1.3, 2.5, 1.4, 2.4, 1.5, 2.3 };	
+      float isMuRCM_EtaThr[10] = { 1.0, 3.0, 1.3, 2.8, 1.5, 2.7, 1.6, 2.6, 1.7, 2.5 };
+      float isMuRGG_EtaThr[10] = { 1.0, 2.7, 1.2, 2.5, 1.3, 2.4, 1.4, 2.4, 1.5, 2.3 };
+      float isMuRGM_EtaThr[10] = { 1.0, 3.0, 1.3, 2.8, 1.4, 2.7, 1.5, 2.6, 1.6, 2.5 };
+      float isMuRMM_EtaThr[10] = { 1.3, 3.0, 1.6, 2.9, 1.7, 2.8, 1.8, 2.8, 1.9, 2.7 };
+      
+      float isMuCCC_EtaThr[10] = { 0.9, 2.6, 1.1, 2.5, 1.2, 2.4, 1.3, 2.4, 1.4, 2.3 };	
+      float isMuCCG_EtaThr[10] = { 1.0, 2.6, 1.2, 2.4, 1.3, 2.4, 1.4, 2.4, 1.5, 2.3 };	
+      float isMuCCM_EtaThr[10] = { 1.0, 3.0, 1.2, 2.8, 1.4, 2.6, 1.5, 2.5, 1.6, 2.4 };	
+      float isMuCGG_EtaThr[10] = { 1.0, 2.6, 1.2, 2.5, 1.3, 2.4, 1.4, 2.3, 1.5, 2.3 };
+      float isMuCGM_EtaThr[10] = { 1.1, 3.0, 1.2, 2.8, 1.4, 2.7, 1.5, 2.6, 1.6, 2.4 };
+      float isMuCMM_EtaThr[10] = { 1.2, 3.0, 1.5, 2.9, 1.6, 2.8, 1.7, 2.8, 1.8, 2.7 };
+
+      float isMuGGG_EtaThr[10] = { 1.1, 2.6, 1.2, 2.5, 1.4, 2.4, 1.5, 2.3, 1.6, 2.2 };
+      float isMuGGM_EtaThr[10] = { 1.1, 3.0, 1.2, 2.8, 1.4, 2.7, 1.5, 2.6, 1.6, 2.5 };
+      float isMuGMM_EtaThr[10] = { 1.2, 3.0, 1.5, 2.9, 1.6, 2.8, 1.7, 2.7, 1.8, 2.6 };
+
+      float isMuMMM_EtaThr[10] = { 1.5, 3.0, 1.6, 3.0, 1.8, 2.9, 1.9, 2.9, 1.9, 2.8 };
+
+
+      //array with booleans to recognise at each event if muons are in a certain eta range 
+      Bool_t isMuRRR_Eta[5];   Bool_t isMuCCC_Eta[5];   Bool_t isMuGGG_Eta[5];   Bool_t isMuMMM_Eta[5];
+      Bool_t isMuRRC_Eta[5];   Bool_t isMuCCG_Eta[5];   Bool_t isMuGGM_Eta[5];
+      Bool_t isMuRRG_Eta[5];   Bool_t isMuCCM_Eta[5];   Bool_t isMuGMM_Eta[5];
+      Bool_t isMuRRM_Eta[5];   Bool_t isMuCGG_Eta[5];
+      Bool_t isMuRCC_Eta[5];   Bool_t isMuCGM_Eta[5];
+      Bool_t isMuRCG_Eta[5];   Bool_t isMuCMM_Eta[5];
+      Bool_t isMuRCM_Eta[5];
+      Bool_t isMuRGG_Eta[5];
+      Bool_t isMuRGM_Eta[5];
+      Bool_t isMuRMM_Eta[5];
+      
 
       int nIsMuVisibleMoreThanOneERR =0;
 
@@ -1325,6 +1393,111 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
                                                                   
     h_nMuMMM_PtVsEta = fs->make<TH2F>("h_nMuMMM_PtVsEta","h_nMuMMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
 
+    for ( int i=0; i<5; i++ )
+    {  
+        std::string title_string = "h_nMuRRR_PtVsEta_";
+        title_string = title_string + std::to_string(isMuRRR_EtaThr[2*i]) + "_" + std::to_string(isMuRRR_EtaThr[2*i+1]);
+        RRR_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        RRR_th2f_list[i]->GetXaxis()->SetTitle("Eta"); RRR_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+ 
+        title_string = "h_nMRRC_PtVsEta_";
+        title_string = title_string + std::to_string(isMuRRC_EtaThr[2*i]) + "_" + std::to_string(isMuRRC_EtaThr[2*i+1]);
+        RRC_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        RRC_th2f_list[i]->GetXaxis()->SetTitle("Eta"); RRC_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuRRG_PtVsEta_";
+        title_string = title_string + std::to_string(isMuRRG_EtaThr[2*i]) + "_" + std::to_string(isMuRRG_EtaThr[2*i+1]);
+        RRG_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        RRG_th2f_list[i]->GetXaxis()->SetTitle("Eta"); RRG_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuRRM_PtVsEta_";
+        title_string = title_string + std::to_string(isMuRRM_EtaThr[2*i]) + "_" + std::to_string(isMuRRM_EtaThr[2*i+1]);
+        RRM_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        RRM_th2f_list[i]->GetXaxis()->SetTitle("Eta"); RRM_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuRCC_PtVsEta_";
+        title_string = title_string + std::to_string(isMuRCC_EtaThr[2*i]) + "_" + std::to_string(isMuRCC_EtaThr[2*i+1]);
+        RCC_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        RCC_th2f_list[i]->GetXaxis()->SetTitle("Eta"); RCC_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuRCG_PtVsEta_";
+        title_string = title_string + std::to_string(isMuRCG_EtaThr[2*i]) + "_" + std::to_string(isMuRCG_EtaThr[2*i+1]);
+        RCG_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        RCG_th2f_list[i]->GetXaxis()->SetTitle("Eta"); RCG_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuRCM_PtVsEta_";
+        title_string = title_string + std::to_string(isMuRCM_EtaThr[2*i]) + "_" + std::to_string(isMuRCM_EtaThr[2*i+1]);
+        RCM_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        RCM_th2f_list[i]->GetXaxis()->SetTitle("Eta"); RCM_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuRGG_PtVsEta_";
+        title_string = title_string + std::to_string(isMuRGG_EtaThr[2*i]) + "_" + std::to_string(isMuRGG_EtaThr[2*i+1]);
+        RGG_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        RGG_th2f_list[i]->GetXaxis()->SetTitle("Eta"); RGG_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuRGM_PtVsEta_";
+        title_string = title_string + std::to_string(isMuRGM_EtaThr[2*i]) + "_" + std::to_string(isMuRGM_EtaThr[2*i+1]);
+        RGM_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        RGM_th2f_list[i]->GetXaxis()->SetTitle("Eta"); RGM_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuRMM_PtVsEta_";
+        title_string = title_string + std::to_string(isMuRMM_EtaThr[2*i]) + "_" + std::to_string(isMuRMM_EtaThr[2*i+1]);
+        RMM_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        RMM_th2f_list[i]->GetXaxis()->SetTitle("Eta"); RMM_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuCCC_PtVsEta_";
+        title_string = title_string + std::to_string(isMuCCC_EtaThr[2*i]) + "_" + std::to_string(isMuCCC_EtaThr[2*i+1]);
+        CCC_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        CCC_th2f_list[i]->GetXaxis()->SetTitle("Eta"); CCC_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuCCG_PtVsEta_";
+        title_string = title_string + std::to_string(isMuCCG_EtaThr[2*i]) + "_" + std::to_string(isMuCCG_EtaThr[2*i+1]);
+        CCG_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        CCG_th2f_list[i]->GetXaxis()->SetTitle("Eta"); CCG_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuCCM_PtVsEta_";
+        title_string = title_string + std::to_string(isMuCCM_EtaThr[2*i]) + "_" + std::to_string(isMuCCM_EtaThr[2*i+1]);
+        CCM_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        CCM_th2f_list[i]->GetXaxis()->SetTitle("Eta"); CCM_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuCGG_PtVsEta_";
+        title_string = title_string + std::to_string(isMuCGG_EtaThr[2*i]) + "_" + std::to_string(isMuCGG_EtaThr[2*i+1]);
+        CGG_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        CGG_th2f_list[i]->GetXaxis()->SetTitle("Eta"); CGG_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuCGM_PtVsEta_";
+        title_string = title_string + std::to_string(isMuCGM_EtaThr[2*i]) + "_" + std::to_string(isMuCGM_EtaThr[2*i+1]);
+        CGM_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        CGM_th2f_list[i]->GetXaxis()->SetTitle("Eta"); CGM_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuCMM_PtVsEta_";
+        title_string = title_string + std::to_string(isMuCMM_EtaThr[2*i]) + "_" + std::to_string(isMuCMM_EtaThr[2*i+1]);
+        CMM_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        CMM_th2f_list[i]->GetXaxis()->SetTitle("Eta"); CMM_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuGGG_PtVsEta_";
+        title_string = title_string + std::to_string(isMuGGG_EtaThr[2*i]) + "_" + std::to_string(isMuGGG_EtaThr[2*i+1]);
+        GGG_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        GGG_th2f_list[i]->GetXaxis()->SetTitle("Eta"); GGG_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuGGM_PtVsEta_";
+        title_string = title_string + std::to_string(isMuGGM_EtaThr[2*i]) + "_" + std::to_string(isMuGGM_EtaThr[2*i+1]);
+        GGM_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        GGM_th2f_list[i]->GetXaxis()->SetTitle("Eta"); GGM_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuGMM_PtVsEta_";
+        title_string = title_string + std::to_string(isMuGMM_EtaThr[2*i]) + "_" + std::to_string(isMuGMM_EtaThr[2*i+1]);
+        GMM_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        GMM_th2f_list[i]->GetXaxis()->SetTitle("Eta"); GMM_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+
+        title_string = "h_nMuMMM_PtVsEta_";
+        title_string = title_string + std::to_string(isMuMMM_EtaThr[2*i]) + "_" + std::to_string(isMuMMM_EtaThr[2*i+1]);
+        MMM_th2f_list.push_back( fs->make<TH2F>(title_string.c_str(), title_string.c_str(), etaBins, etaEdges, ptBins, ptEdges) ); 
+        MMM_th2f_list[i]->GetXaxis()->SetTitle("Eta"); MMM_th2f_list[i]->GetYaxis()->SetTitle("Pt");
+    }
+
+
     h_nMuNNN_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNNN_PtVsEta->GetYaxis()->SetTitle("Pt");
     h_nMuNND_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNND_PtVsEta->GetYaxis()->SetTitle("Pt");
     h_nMuNNR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNNR_PtVsEta->GetYaxis()->SetTitle("Pt");
@@ -1482,7 +1655,8 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    tr->Branch("nBarrel"  ,	&nBarrel,	"nBarrel/I"	);
    tr->Branch("nOverlap"  ,	&nOverlap,	"nOverlap/I"	);
    tr->Branch("nEndcap"  ,	&nEndcap,	"nEndcap/I"	);
-   tr->Branch("nForward"  ,	&nForward,	"nForward/I"	);
+   tr->Branch("nEndcapME0"  ,	&nEndcapME0,	"nEndcapME0/I"	);
+   //tr->Branch("nForward"  ,	&nForward,	"nForward/I"	);
    trSum->Branch("nBBB"  ,	&nBBB,	"nBBB/I"	);
    trSum->Branch("nBBO"  ,	&nBBO,	"nBBO/I"	);
    trSum->Branch("nBBE"  ,	&nBBE,	"nBBE/I"	);
@@ -1723,9 +1897,12 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    //tr->Branch("muPx"     ,	&muPx    );
    //tr->Branch("muPy"     ,	&muPy    );
    //tr->Branch("muPz"     ,	&muPz    );
-   tr->Branch("nEvent"     ,	&nEvent	, "nEvent/I"    );  //, 	"theta"     );
-   tr->Branch("nEventVis"     ,	&nEventVis	, "nEventVis/I"    );  //, 	"theta"     );
-   tr->Branch("nEventSelME0"     ,	&nEventSelME0	, "nEventSelME0/I"    );  //, 	"theta"     );
+   //tr->Branch("nEvent"     ,	&nEvent	, "nEvent/I"    );  //, 	"theta"     );
+   //tr->Branch("nEventSel"     ,	&nEventSel	, "nEventSel/I"    );  //, 	"theta"     );
+   //tr->Branch("nEventVis"     ,	&nEventVis	, "nEventVis/I"    );  //, 	"theta"     );
+   //tr->Branch("nEventDRCGM"     ,	&nEventDRCGM	, "nEventDRCGM/I"    );  //, 	"theta"     );
+   //tr->Branch("nEventRCGM"     ,	&nEventRCGM	, "nEventRCGM/I"    );  //, 	"theta"     );
+   /*tr->Branch("nEventSelME0"     ,	&nEventSelME0	, "nEventSelME0/I"    );  //, 	"theta"     );
    tr->Branch("nEventSelME01"     ,	&nEventSelME01	, "nEventSelME01/I"    );  //, 	"theta"     );
    tr->Branch("nEventSelME02"  ,        &nEventSelME02  , "nEventSelME02/I"    );  //,     "theta"     );
    tr->Branch("nEventSelME03"  ,        &nEventSelME03  , "nEventSelME03/I"    );  //,     "theta"     );
@@ -1734,13 +1911,16 @@ DeltaGlobalPhiAnalyzer::DeltaGlobalPhiAnalyzer(const edm::ParameterSet& iConfig)
    tr->Branch("nEventSelCSC3"     ,     &nEventSelCSC3  , "nEventSelCSC3/I"    );  //,     "theta"     );
    tr->Branch("nEventSelGEM1"     ,	&nEventSelGEM1	, "nEventSelGEM1/I"    );  //, 	"theta"     );
    tr->Branch("nEventSelGEM2"     ,     &nEventSelGEM2  , "nEventSelGEM2/I"    );  //,     "theta"     );
-   tr->Branch("nEventSelGEM3"     ,     &nEventSelGEM3  , "nEventSelGEM3/I"    );  //,     "theta"     );
+   tr->Branch("nEventSelGEM3"     ,     &nEventSelGEM3  , "nEventSelGEM3/I"    );  //,     "theta"     );*/
    trSum->Branch("lastEvent"     ,	&lastEvent	, "lastEvent/I"    );  //, 	"theta"     );
-   trSum->Branch("lastEventVis"     ,	&lastEventVis	, "lastEventVis/I"    );  //, 	"theta"     );
-   trSum->Branch("lastEventSelME0"     ,    &lastEventSelME0  , "lastEventSelME0/I"    );  //, 	"theta"     );
+   trSum->Branch("lastEventSel"     ,	&lastEventSel	, "lastEventSel/I"    );  //, 	"theta"     );
+   //trSum->Branch("lastEventVis"     ,	&lastEventVis	, "lastEventVis/I"    );  //, 	"theta"     );
+   trSum->Branch("lastEventDRCGM"     ,	&lastEventDRCGM	, "lastEventDRCGM/I"    );  //, 	"theta"     );
+   trSum->Branch("lastEventRCGM"     ,	&lastEventRCGM	, "lastEventRCGM/I"    );  //, 	"theta"     );
+   /*trSum->Branch("lastEventSelME0"     ,    &lastEventSelME0  , "lastEventSelME0/I"    );  //, 	"theta"     );
    trSum->Branch("lastEventSelME01"     ,   &lastEventSelME01 , "lastEventSelME01/I"    );  //, 	"theta"     );
    trSum->Branch("lastEventSelME02"     ,   &lastEventSelME02 , "lastEventSelME02/I"    );  //,   "theta"     );
-   trSum->Branch("lastEventSelME03"     ,   &lastEventSelME03 , "lastEventSelME03/I"    );  //,   "theta"     );
+   trSum->Branch("lastEventSelME03"     ,   &lastEventSelME03 , "lastEventSelME03/I"    );  //,   "theta"     );*/
    tr->Branch("nSegments"     ,	&nSegments	, "nSegments/I"    );  //, 	"theta"     );
    tr->Branch("segmentNrecHits"     ,	&nSegmRecHitList ); //	, "etaPartList/I"    );  //, 	"theta"     );
    tr->Branch("segmentQuality"     ,	&qualityList ); // q=0 if nRH=4, q=1 if nRH=5, q=2 if nRH=6
@@ -2999,7 +3179,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 
       }      
 
-      if ( nEndcapME0 == 3 ) nEEEME0++; 
+      if ( nEndcapME0 == 3 ) nEEEME0++;
       
       //check eta particle
        
@@ -3019,6 +3199,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
       cout << "nFFF:" << nFFF << endl;
 
       cout << "nEEEME0:" << nEEEME0 << endl;*/
+
 
 
 //h_PtVsEta	->Draw("COLZ");
@@ -3361,6 +3542,25 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
    {
       cout << matrixIsMuVisible[i*6] << matrixIsMuVisible[i*6+1] << matrixIsMuVisible[i*6+2] << matrixIsMuVisible[i*6+3] << matrixIsMuVisible[i*6+4] << matrixIsMuVisible[i*6+5] << endl;
    }
+
+   //loop to count all events apart from NONE: count DRCGM events (DT+RPC+CSC+GEM+ME0)
+   bool isMuDRCGM = 1;
+   for ( int i=0; i<3; i++ )
+   {
+      if ( isMuVisibleNONE[i]==1 ) isMuDRCGM = 0;
+   }
+   
+   if ( isMuDRCGM == 1 ) nEventDRCGM++;
+
+   //loop to count all events apart NONE and DT: count RCGM events (RPC+CSC+GEM+ME0)
+   bool isMuRCGM = 1;
+   for ( int i=0; i<3; i++ )
+   {
+      if ( isMuVisibleNONE[i]==1 || isMuVisibleDT[i]==1 ) isMuRCGM = 0;
+   }
+
+   if ( isMuRCGM == 1 ) nEventRCGM++;
+
 
    //turn to zero all isMuXXX isMuXX isMuX variables
    isMuNNN = 0; isMuNND = 0; isMuNNR = 0; isMuNNC = 0; isMuNNG = 0; isMuNNM = 0; 
@@ -3708,6 +3908,315 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 
    cout << "nMuMMM:" << nMuMMM << endl;*/
 
+   //determine if the XXX muons are in a certain eta range
+   for (int i=0; i<5; i++)
+   {
+      //RRR
+      if ( isMuRRR == 1 ) 
+      {
+         isMuRRR_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuRRR_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuRRR_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuRRR_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuRRR_Eta[i] = 0;
+
+      //RRC
+      if ( isMuRRC == 1 )
+      {                                                                                                                  
+         isMuRRC_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )                                                                                       
+         {
+            if ( fabs( muEtalocal[j] ) < isMuRRC_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuRRC_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuRRC_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuRRC_Eta[i] = 0;
+
+      //RRG
+      if ( isMuRRG == 1 ) 
+      {
+         isMuRRG_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuRRG_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuRRG_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuRRG_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuRRG_Eta[i] = 0;
+
+      //RRM
+      if ( isMuRRM == 1 ) 
+      {
+         isMuRRM_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuRRM_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuRRM_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuRRM_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuRRM_Eta[i] = 0;
+
+      //RCC
+      if ( isMuRCC == 1 ) 
+      {
+         isMuRCC_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuRCC_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuRCC_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuRCC_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuRCC_Eta[i] = 0;
+
+      //RCG
+      if ( isMuRCG == 1 ) 
+      {
+         isMuRCG_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuRCG_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuRCG_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuRCG_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuRCG_Eta[i] = 0;
+      
+      //RCM
+      if ( isMuRCM == 1 ) 
+      {
+         isMuRCM_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuRCM_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuRCM_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuRCM_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuRCM_Eta[i] = 0;
+
+      //RGG
+      if ( isMuRGG == 1 ) 
+      {
+         isMuRGG_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuRGG_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuRGG_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuRGG_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuRGG_Eta[i] = 0;
+
+      //RGM
+      if ( isMuRGM == 1 ) 
+      {
+         isMuRGM_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuRGM_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuRGM_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuRGM_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuRGM_Eta[i] = 0;
+     
+      //RMM
+      if ( isMuRMM == 1 ) 
+      {
+         isMuRMM_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuRMM_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuRMM_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuRMM_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuRMM_Eta[i] = 0;
+        
+      //CCC 
+      if ( isMuCCC == 1 ) 
+      {
+         isMuCCC_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuCCC_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuCCC_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuCCC_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuCCC_Eta[i] = 0;
+
+      //CCG
+      if ( isMuCCG == 1 )
+      {
+         isMuCCG_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuCCG_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuCCG_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuCCG_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuCCG_Eta[i] = 0;
+
+      //CCM
+      if ( isMuCCM == 1 )
+      {
+         isMuCCM_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuCCM_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuCCM_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuCCM_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuCCM_Eta[i] = 0;
+
+      //CGG
+      if ( isMuCGG == 1 )
+      {
+         isMuCGG_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuCGG_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuCGG_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuCGG_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuCGG_Eta[i] = 0;
+
+      //CGM
+      if ( isMuCGM == 1 )
+      {
+         isMuCGM_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuCGM_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuCGM_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuCGM_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuCGM_Eta[i] = 0;
+      
+      //CMM
+      if ( isMuCMM == 1 ) 
+      {
+         isMuCMM_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuCMM_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuCMM_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuCMM_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuCMM_Eta[i] = 0;
+
+      //GGG
+      if ( isMuGGG == 1 ) 
+      {
+         isMuGGG_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuGGG_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuGGG_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuGGG_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuGGG_Eta[i] = 0;
+
+      //GGM
+      if ( isMuGGM == 1 ) 
+      {
+         isMuGGM_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuGGM_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuGGM_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuGGM_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuGGM_Eta[i] = 0;
+
+      //GMM
+      if ( isMuGMM == 1 ) 
+      {
+         isMuGMM_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuGMM_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuGMM_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuGMM_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuGMM_Eta[i] = 0;
+
+      //MMM
+      if ( isMuMMM == 1 )
+      {
+         isMuMMM_Eta[i] = 1;
+         for ( int j=0; j<3; j++ )
+         {
+            if ( fabs( muEtalocal[j] ) < isMuMMM_EtaThr[2*i] || fabs( muEtalocal[j] ) > isMuMMM_EtaThr[2*i+1] ) //muon out of eta limits
+            {
+               isMuMMM_Eta[i] = 0;
+            }
+         }
+      }
+      else isMuMMM_Eta[i] = 0;
+   }
+
+   /*for (int i=0; i<5; i++)
+   {
+      cout << "isMuRRR_Eta["<<i<<"]=" << isMuRRR_Eta[i]<<endl;
+      cout << "isMuRRC_Eta["<<i<<"]=" << isMuRRC_Eta[i]<<endl;
+      cout << "isMuRRG_Eta["<<i<<"]=" << isMuRRG_Eta[i]<<endl;
+      cout << "isMuRRM_Eta["<<i<<"]=" << isMuRRM_Eta[i]<<endl;
+      cout << "isMuRCC_Eta["<<i<<"]=" << isMuRCC_Eta[i]<<endl;
+      cout << "isMuRCG_Eta["<<i<<"]=" << isMuRCG_Eta[i]<<endl;
+      cout << "isMuRCM_Eta["<<i<<"]=" << isMuRCM_Eta[i]<<endl;
+      cout << "isMuRGG_Eta["<<i<<"]=" << isMuRGG_Eta[i]<<endl;
+      cout << "isMuRGM_Eta["<<i<<"]=" << isMuRGM_Eta[i]<<endl;
+      cout << "isMuRMM_Eta["<<i<<"]=" << isMuRMM_Eta[i]<<endl;
+      cout << "isMuCCC_Eta["<<i<<"]=" << isMuCCC_Eta[i]<<endl;
+      cout << "isMuCCG_Eta["<<i<<"]=" << isMuCCG_Eta[i]<<endl;
+      cout << "isMuCCM_Eta["<<i<<"]=" << isMuCCM_Eta[i]<<endl;
+      cout << "isMuCGG_Eta["<<i<<"]=" << isMuCGG_Eta[i]<<endl;
+      cout << "isMuCGM_Eta["<<i<<"]=" << isMuCGM_Eta[i]<<endl;
+      cout << "isMuCMM_Eta["<<i<<"]=" << isMuCMM_Eta[i]<<endl;
+      cout << "isMuGGG_Eta["<<i<<"]=" << isMuGGG_Eta[i]<<endl;
+      cout << "isMuGGM_Eta["<<i<<"]=" << isMuGGM_Eta[i]<<endl;
+      cout << "isMuGMM_Eta["<<i<<"]=" << isMuGMM_Eta[i]<<endl;
+      cout << "isMuMMM_Eta["<<i<<"]=" << isMuMMM_Eta[i]<<endl;
+
+   }*/
+
    //fill pt vs eta histograms
    for ( int i=0; i<3; i++ )
    {
@@ -3775,9 +4284,39 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 
    }
 
+   //do a plot for each of the Eta cutted triplets
+   //fill plots 
+   for ( int i=0; i<5; i++ ) //5 are the eta thresolds, 3 the muons of the triplet
+   {  
+      for ( int j=0; j<3; j++ )
+      {
+         if ( isMuRRR_Eta[i] ) RRR_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuRRC_Eta[i] ) RRC_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuRRG_Eta[i] ) RRG_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuRRM_Eta[i] ) RRM_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuRCC_Eta[i] ) RCC_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuRCG_Eta[i] ) RCG_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuRCM_Eta[i] ) RCM_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuRGG_Eta[i] ) RGG_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuRGM_Eta[i] ) RGM_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuRMM_Eta[i] ) RMM_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuCCC_Eta[i] ) CCC_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuCCG_Eta[i] ) CCG_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuCCM_Eta[i] ) CCM_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuCGG_Eta[i] ) CGG_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuCGM_Eta[i] ) CGM_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuCMM_Eta[i] ) CMM_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuGGG_Eta[i] ) GGG_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuGGM_Eta[i] ) GGM_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuGMM_Eta[i] ) GMM_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+         if ( isMuMMM_Eta[i] ) MMM_th2f_list[i]->Fill( muEtalocal[j], muPtlocal[j] );
+      }
+   }
 
-   //pt cuts
-   vector<int> ptThr{ 0, 1, 2, 3, 5, 10, 20, 50 };
+
+
+   //pt thresholds
+   vector<int> ptThr{ 2, 1, 2, 3, 5, 10, 20, 50 };
    int ptThrSize = ptThr.size();
    //cout << "ptThr" << endl;   
 
@@ -4044,7 +4583,8 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
    nSegments = 0;
 
    nEvent++;
-   if ( nVisibleMuME0>0) nEventVis++;
+   if ( nME0>0 ) nEventSel++;
+   /*if ( nVisibleMuME0>0) nEventVis++;
    if ( nVisibleMuME0>0) nEventSelME0++;
    if ( nVisibleMuME0>0) nEventSelME01++;
    if ( nVisibleMuME0>1) nEventSelME02++;
@@ -4056,7 +4596,7 @@ cout << "Size of GenParticles: " << genParticles->size() << endl;
 
    if ( nVisibleMuGEM>0) nEventSelGEM1++;
    if ( nVisibleMuGEM>1) nEventSelGEM2++;
-   if ( nVisibleMuGEM>2) nEventSelGEM3++;
+   if ( nVisibleMuGEM>2) nEventSelGEM3++;*/
 
    //bool is_singleME0[5], is_doubleME0[15];
    for ( int i=0; i<5; i++)	
@@ -4481,7 +5021,6 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 
         for ( int pt_ind = 0; pt_ind < 5 ; pt_ind++)
           {
-          if ( nVisibleMuME0<1 ) continue;
 	  if ( fabs(sgDeltaGlobalPhi) < thr[pt_ind] )	
 	    {
             
@@ -4553,10 +5092,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	      }
 	    //cout << "deltaPhi = " << *dp << "   found_double1 = " << found_double1 << "   found_double2 = " << found_double2 << endl;
 	    }
-          if ( found_double1 && found_double2 )
-          {
-            if ( nVisibleMuME0>1) 	is_doubleME0[mixed_ind] = true;
-          }
+          if ( found_double1 && found_double2 ) is_doubleME0[mixed_ind] = true;
 
 
 	  //cout << "result: is_doubleME0 = " << is_doubleME0[mixed_ind] << endl;
@@ -4586,10 +5122,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	        }
 	      //cout << "deltaPhi = " << *dp << "   found_triple3 = " << found_triple3 << "   found_triple2 = " << found_triple2 << "   found_triple1 = " << found_triple1 << endl;
   	      }
-            if ( found_triple1 && found_triple2 && found_triple3 )
-            {	
-              if ( nVisibleMuME0>2 ) is_tripleME0[triple_ind] = true;
-            }
+            if ( found_triple1 && found_triple2 && found_triple3 )  is_tripleME0[triple_ind] = true;
   	    //cout << "result: is_tripleME0 = " << is_tripleME0[triple_ind] << endl;
   
 	    //cout << "triple_ind =" << triple_ind << endl;
@@ -4605,8 +5138,6 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 
       //Trigger WITH chamber vicinity request (doubles)
       
-      if ( nVisibleMuME0 > 1 )
-      {
         if ( (*deltaGlobalPhiLayer21List).size() > 1 )
         {
         mixed_ind = 0;
@@ -4646,13 +5177,10 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    } //loop over pt2_ind (2nd thr value)
  	  } //loop over pt1_ind (1st thr value)
         } //if there are at least 2 segments
-      }
 
       cout << "Starting to evaluate triple triggers with vicinity request" << endl;
 
       //Trigger WITH chamber vicinity request (triples)
-      if ( nVisibleMuME0 > 2 )
-      {
         if ( (*deltaGlobalPhiLayer21List).size() > 2 )
         {
           triple_ind = 0;
@@ -4705,12 +5233,9 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    } //loop over pt2_ind (2nd thr value)
 	  } //loop over pt1_ind (1st thr value)
         } // if there are at least 3 segments
-      }//if nVisibleMuME0 > 2
 
       //Trigger WITH eta partition vicinity request (doubles)
 
-      if ( nVisibleMuME0 > 1 )
-      {
         if ( (*deltaGlobalPhiLayer21List).size() > 1 )
         {
           mixed_ind = 0;
@@ -4752,13 +5277,10 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    } //loop over pt2_ind (2nd thr value)
 	  } //loop over pt1_ind (1st thr value)
         } //if there are at least 2 segments
-      }//if nVisibleMuME0 > 1
 
       cout << "Starting to evaluate triple triggers with vicinity request" << endl;
 
       //Trigger WITH eta partition vicinity request (triples)
-      if ( nVisibleMuME0 > 2 )
-      {
         if ( (*deltaGlobalPhiLayer21List).size() > 2 )
         {
           triple_ind = 0;
@@ -4817,14 +5339,11 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    } //loop over pt2_ind (2nd thr value)
 	   } //loop over pt1_ind (1st thr value)
          } // if there are at least 3 segments
-      }//if nVisibleMuME0 > 2 
 
 
 
       //Trigger WITH chamber vicinity and Quality request (doubles)
 
-      if (nVisibleMuME0 > 1 )
-      {
         if ( (*deltaGlobalPhiLayer21List).size() > 1 )
         {
           mixed_ind = 0;
@@ -4928,13 +5447,10 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    } //loop over pt2_ind (2nd thr value)
 	  } //loop over pt1_ind (1st thr value)
         } //if there are at least 2 segments
-      }//if nVisibleMuME0 > 1
 
       cout << "Starting to evaluate triple triggers with vicinity and quality request" << endl;
 
       //Trigger WITH chamber vicinity and Quality request (triples)
-      if ( nVisibleMuME0 > 2 )
-      {
         if ( (*deltaGlobalPhiLayer21List).size() > 2 )
         {
           triple_ind = 0;
@@ -5052,7 +5568,6 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	    } //loop over pt2_ind (2nd thr value)
 	  } //loop over pt1_ind (1st thr value)
         } // if there are at least 3 segments
-     }//if nVisibleMuME0 > 2
 
 
      
@@ -5148,7 +5663,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 
 }
 
-//CSC loop on RegionalMuonCand
+//RegionalMuonCand
 /*using namespace l1t;
 BXVector<l1t::RegionalMuonCand>::const_iterator l1t_sg_it;
 
@@ -5160,11 +5675,11 @@ for ( l1t_sg_it = l1tsegmentH->begin(); l1t_sg_it !=l1tsegmentH->end(); ++l1t_sg
    {
      nBarrel++;
    }     
-   else if ( (*l1t_sg_it).trackFinderType() == omtf_neg || (*l1t_sg_it).trackFinderType() == omtf_pos )
+   if ( (*l1t_sg_it).trackFinderType() == omtf_neg || (*l1t_sg_it).trackFinderType() == omtf_pos )
    {
      nOverlap++;
    }
-   else if ( (*l1t_sg_it).trackFinderType() == emtf_neg || (*l1t_sg_it).trackFinderType() == emtf_pos )
+   if ( (*l1t_sg_it).trackFinderType() == emtf_neg || (*l1t_sg_it).trackFinderType() == emtf_pos )
    {
      nEndcap++;
      if ( fabs((*l1t_sg_it).hwEta()*0.010875) < 3.0 && fabs((*l1t_sg_it).hwEta()*0.010875) > 1.8  )
@@ -5177,23 +5692,23 @@ for ( l1t_sg_it = l1tsegmentH->begin(); l1t_sg_it !=l1tsegmentH->end(); ++l1t_sg
    cout << "TRACKFINDER ERROR" << endl;
    } 
 
-if ( nBarrel + nOverlap + nEndcap == 3 )//only for triple mu
-{
-  if      ( nBarrel == 3 )					 nBBB++;
-  else if ( nBarrel == 2 && nOverlap == 1 )	 		 nBBO++;			
-  else if ( nBarrel == 2 && nEndcap == 1 ) 			 nBBE++;
-  else if ( nBarrel == 1 && nOverlap == 2 ) 			 nBOO++;
-  else if ( nBarrel == 1 && nOverlap == 1 && nEndcap == 1 )	 nBBE++;
-  else if ( nBarrel == 1 && nEndcap == 2 ) 			 nBEE++;
-  else if ( nOverlap == 3 )					 nOOO++;
-  else if ( nOverlap == 2 && nEndcap == 1 ) 			 nOOE++;
-  else if ( nOverlap == 1 && nEndcap == 2 ) 			 nOEE++;
-  else if ( nEndcap == 3 )					 nEEE++;
-  else {cout << "ERROR emtf-bmtf-omtf" << endl;}
+   if ( nBarrel + nOverlap + nEndcap == 3 )//only for triple mu
+   {
+      if      ( nBarrel == 3 )					 nBBB++;
+      else if ( nBarrel == 2 && nOverlap == 1 )	 		 nBBO++;			
+      else if ( nBarrel == 2 && nEndcap == 1 ) 			 nBBE++;
+      else if ( nBarrel == 1 && nOverlap == 2 ) 		 nBOO++;
+      else if ( nBarrel == 1 && nOverlap == 1 && nEndcap == 1 )	 nBBE++;
+      else if ( nBarrel == 1 && nEndcap == 2 ) 			 nBEE++;
+      else if ( nOverlap == 3 )					 nOOO++;
+      else if ( nOverlap == 2 && nEndcap == 1 ) 		 nOOE++;
+      else if ( nOverlap == 1 && nEndcap == 2 ) 		 nOEE++;
+      else if ( nEndcap == 3 )					 nEEE++;
+      else {cout << "ERROR emtf-bmtf-omtf" << endl;}
 
-}      
+   }       
 
-if ( nEndcapME0 == 3 ) nEEEME0++;
+   if ( nEndcapME0 == 3 ) nEEEME0++;
  
     if ( fabs((*l1t_sg_it).hwEta())*0.010875 < ptVal[i] ) //Get compressed pT (returned int * 0.5 = pT (GeV))
     {
@@ -5279,17 +5794,20 @@ void
 DeltaGlobalPhiAnalyzer::endJob() 
 {
  cout << "EndJob started:" << endl;
- lastEvent=nEvent;
- lastEventVis=nEventVis; //for the rate I have to use the total number of events, also the invisibles
- lastEventSelME0=nEventSelME0;
- lastEventSelME01=nEventSelME01;
- lastEventSelME02=nEventSelME02;
- lastEventSelME03=nEventSelME03;
+ lastEvent= nEvent;
+ lastEventSel = nEventSel;
+ //lastEventVis= nEventVis; //for the rate I have to use the total number of events, also the invisibles
+ lastEventDRCGM = nEventDRCGM;
+ lastEventRCGM  = nEventRCGM; 
+ /*lastEventSelME0 =  nEventSelME0;
+ lastEventSelME01 = nEventSelME01;
+ lastEventSelME02 = nEventSelME02;
+ lastEventSelME03 = nEventSelME03;*/
 
  Int_t denom=-1;
- Int_t denom1=-1;
+ /*Int_t denom1=-1;
  Int_t denom2=-1;
- Int_t denom3=-1;
+ Int_t denom3=-1;*/
 
  //count the couples of detector that aare activated by the three canditdate muons
  //sum the triplets
@@ -5335,7 +5853,7 @@ DeltaGlobalPhiAnalyzer::endJob()
  cout << "nBBB:" << nBBB << " nBBO:" << nBBO << " nBBE:" << nBBE << " nBOO:" << nBOO << " nBOE:" << nBOE << endl;
  cout << "nBEE:" << nBEE << " nOOO:" << nOOO << " nOOE:" << nOOE << " nOEE:" << nOEE << " nEEE:" << nEEE << " nEEEME0:" << nEEEME0 << endl; 
 
- for ( int i=0; i<120; i++)
+/* for ( int i=0; i<120; i++)
  {
     cout << "nMuNNNpt[" << i << "]: " << nMuNNNpt[i] << endl;
     cout << "nMuNNDpt[" << i << "]: " << nMuNNDpt[i] << endl;
@@ -5410,7 +5928,7 @@ DeltaGlobalPhiAnalyzer::endJob()
     cout << "nMuMMMpt[" << i << "]: " << nMuMMMpt[i] << endl;
 
     cout << endl;
- }
+ }*/
 
 
  //mME0 is only the number of muons that are generate din eta region of ME0
@@ -5422,24 +5940,10 @@ DeltaGlobalPhiAnalyzer::endJob()
  //if (nME0>2 && nVisibleMuME0>2 && signal)  denom3=lastEventSel3;
  //if (nME0>0 && nVisibleMuME0>0 && signal)  denom=lastEventSel;
  
- //I have to do in this way because the nME0 seen in the endjob is only that of the last event
- //same for nVisibleMuME0  
- if ( signal ) 
- {
-   //to make efficiencies with the total of visibles
-   /*denom1   = lastEventVis;
-   denom2   = lastEventVis;
-   denom3   = lastEventVis;*/
-   
-   //to make efficiencies with single visibles, double visibles, triple visibles
-   denom1 = lastEventSelME01;
-   denom2 = lastEventSelME02;
-   denom3 = lastEventSelME03;
- }
- 
+ if ( nME0>0 && signal ) denom = lastEventSel;
  if ( signal ) denom=lastEvent;//run trigger analysis only if there is at least one mu from the tau decay in the eta range 1.8<|eta!|<3
 
- cout << "lastEventSelME01=" << lastEventSelME01 << " lastEventSelME02=" << lastEventSelME02 << " lastEventSelME03=" << lastEventSelME03 << endl;
+// cout << "lastEventSelME01=" << lastEventSelME01 << " lastEventSelME02=" << lastEventSelME02 << " lastEventSelME03=" << lastEventSelME03 << endl;
 
  
  cout << "Calculating rates and efficiencies (triggers without vicinity)" << endl;
@@ -5447,13 +5951,13 @@ DeltaGlobalPhiAnalyzer::endJob()
  for (int kk=0; kk<15; kk++)   	doubleME0rate[kk] = doubleME0count[kk]/(denom*25.0*1e-9);  //Hz
  for (int kk=0; kk<35; kk++)   	tripleME0rate[kk] = tripleME0count[kk]/(denom*25.0*1e-9);  //Hz
 
- for (int kk=0; kk<5; kk++)	singleME0efficiency[kk] = singleME0count[kk]*1.0/(denom1); //Hz
- for (int kk=0; kk<15; kk++)   	doubleME0efficiency[kk] = doubleME0count[kk]*1.0/(denom2);  //Hz
- for (int kk=0; kk<35; kk++)   	tripleME0efficiency[kk] = tripleME0count[kk]*1.0/(denom3);  //Hz
+ for (int kk=0; kk<5; kk++)	singleME0efficiency[kk] = singleME0count[kk]*1.0/(denom); //Hz
+ for (int kk=0; kk<15; kk++)   	doubleME0efficiency[kk] = doubleME0count[kk]*1.0/(denom);  //Hz
+ for (int kk=0; kk<35; kk++)   	tripleME0efficiency[kk] = tripleME0count[kk]*1.0/(denom);  //Hz
 
- for (int kk=0; kk<5; kk++)	singleME0efficiencyErr[kk] = TMath::Sqrt(singleME0efficiency[kk]*(1.0-singleME0efficiency[kk])/(denom1*1.0)); //Hz
- for (int kk=0; kk<15; kk++)   	doubleME0efficiencyErr[kk] = TMath::Sqrt(doubleME0efficiency[kk]*(1.0-doubleME0efficiency[kk])/(denom2*1.0));  //Hz
- for (int kk=0; kk<35; kk++)   	tripleME0efficiencyErr[kk] = TMath::Sqrt(tripleME0efficiency[kk]*(1.0-tripleME0efficiency[kk])/(denom3*1.0));  //Hz
+ for (int kk=0; kk<5; kk++)	singleME0efficiencyErr[kk] = TMath::Sqrt(singleME0efficiency[kk]*(1.0-singleME0efficiency[kk])/(denom*1.0)); //Hz
+ for (int kk=0; kk<15; kk++)   	doubleME0efficiencyErr[kk] = TMath::Sqrt(doubleME0efficiency[kk]*(1.0-doubleME0efficiency[kk])/(denom*1.0));  //Hz
+ for (int kk=0; kk<35; kk++)   	tripleME0efficiencyErr[kk] = TMath::Sqrt(tripleME0efficiency[kk]*(1.0-tripleME0efficiency[kk])/(denom*1.0));  //Hz
 
  for (int kk=0; kk<5; kk++)	singleME0rateError[kk] = singleME0efficiencyErr[kk]/(25.0*1e-9); //Hz
  for (int kk=0; kk<15; kk++)   	doubleME0rateError[kk] = doubleME0efficiencyErr[kk]/(25.0*1e-9);  //Hz
@@ -5463,11 +5967,11 @@ DeltaGlobalPhiAnalyzer::endJob()
  for (int kk=0; kk<15; kk++)   	doubleME0nearrate[kk] = doubleME0nearcount[kk]/(denom*25.0*1e-9);  //Hz
  for (int kk=0; kk<35; kk++)   	tripleME0nearrate[kk] = tripleME0nearcount[kk]/(denom*25.0*1e-9);  //Hz
 
- for (int kk=0; kk<15; kk++)   	doubleME0nearefficiency[kk] = doubleME0nearcount[kk]*1.0/(denom2);  //Hz
- for (int kk=0; kk<35; kk++)   	tripleME0nearefficiency[kk] = tripleME0nearcount[kk]*1.0/(denom3);  //Hz
+ for (int kk=0; kk<15; kk++)   	doubleME0nearefficiency[kk] = doubleME0nearcount[kk]*1.0/(denom);  //Hz
+ for (int kk=0; kk<35; kk++)   	tripleME0nearefficiency[kk] = tripleME0nearcount[kk]*1.0/(denom);  //Hz
 
- for (int kk=0; kk<15; kk++)   	doubleME0nearefficiencyErr[kk] = TMath::Sqrt(doubleME0nearefficiency[kk]*(1.0-doubleME0nearefficiency[kk])/(denom2*1.0));  //Hz
- for (int kk=0; kk<35; kk++)   	tripleME0nearefficiencyErr[kk] = TMath::Sqrt(tripleME0nearefficiency[kk]*(1.0-tripleME0nearefficiency[kk])/(denom3*1.0));  //Hz
+ for (int kk=0; kk<15; kk++)   	doubleME0nearefficiencyErr[kk] = TMath::Sqrt(doubleME0nearefficiency[kk]*(1.0-doubleME0nearefficiency[kk])/(denom*1.0));  //Hz
+ for (int kk=0; kk<35; kk++)   	tripleME0nearefficiencyErr[kk] = TMath::Sqrt(tripleME0nearefficiency[kk]*(1.0-tripleME0nearefficiency[kk])/(denom*1.0));  //Hz
 
  for (int kk=0; kk<15; kk++)   	doubleME0nearrateError[kk] = doubleME0nearefficiencyErr[kk]/(25.0*1e-9);  //Hz
  for (int kk=0; kk<35; kk++)   	tripleME0nearrateError[kk] = tripleME0nearefficiencyErr[kk]/(25.0*1e-9);  //Hz
@@ -5476,11 +5980,11 @@ DeltaGlobalPhiAnalyzer::endJob()
  for (int kk=0; kk<15; kk++)   	doubleME0closerate[kk] = doubleME0closecount[kk]/(denom*25.0*1e-9);  //Hz
  for (int kk=0; kk<35; kk++)   	tripleME0closerate[kk] = tripleME0closecount[kk]/(denom*25.0*1e-9);  //Hz
 
- for (int kk=0; kk<15; kk++)   	doubleME0closeefficiency[kk] = doubleME0closecount[kk]*1.0/(denom2);  //Hz
- for (int kk=0; kk<35; kk++)   	tripleME0closeefficiency[kk] = tripleME0closecount[kk]*1.0/(denom3);  //Hz
+ for (int kk=0; kk<15; kk++)   	doubleME0closeefficiency[kk] = doubleME0closecount[kk]*1.0/(denom);  //Hz
+ for (int kk=0; kk<35; kk++)   	tripleME0closeefficiency[kk] = tripleME0closecount[kk]*1.0/(denom);  //Hz
 
- for (int kk=0; kk<15; kk++)   	doubleME0closeefficiencyErr[kk] = TMath::Sqrt(doubleME0closeefficiency[kk]*(1.0-doubleME0closeefficiency[kk])/(1.0*denom2));  //Hz
- for (int kk=0; kk<35; kk++)   	tripleME0closeefficiencyErr[kk] = TMath::Sqrt(tripleME0closeefficiency[kk]*(1.0-tripleME0closeefficiency[kk])/(1.0*denom3));  //Hz
+ for (int kk=0; kk<15; kk++)   	doubleME0closeefficiencyErr[kk] = TMath::Sqrt(doubleME0closeefficiency[kk]*(1.0-doubleME0closeefficiency[kk])/(1.0*denom));  //Hz
+ for (int kk=0; kk<35; kk++)   	tripleME0closeefficiencyErr[kk] = TMath::Sqrt(tripleME0closeefficiency[kk]*(1.0-tripleME0closeefficiency[kk])/(1.0*denom));  //Hz
 
  for (int kk=0; kk<15; kk++)   	doubleME0closerateError[kk] = doubleME0closeefficiencyErr[kk]/(25.0*1e-9);  //Hz
  for (int kk=0; kk<35; kk++)   	tripleME0closerateError[kk] = tripleME0closeefficiencyErr[kk]/(25.0*1e-9);  //Hz
@@ -5555,141 +6059,141 @@ DeltaGlobalPhiAnalyzer::endJob()
 
  for (int kk=0; kk<5; kk++)	
    {
-   singleME0Quality0efficiency[kk] = singleME0Quality0count[kk]*1.0/(denom1); //Hz
-   singleME0Quality1efficiency[kk] = singleME0Quality1count[kk]*1.0/(denom1); //Hz
-   singleME0Quality2efficiency[kk] = singleME0Quality2count[kk]*1.0/(denom1); //Hz
+   singleME0Quality0efficiency[kk] = singleME0Quality0count[kk]*1.0/(denom); //Hz
+   singleME0Quality1efficiency[kk] = singleME0Quality1count[kk]*1.0/(denom); //Hz
+   singleME0Quality2efficiency[kk] = singleME0Quality2count[kk]*1.0/(denom); //Hz
 
-   singleME0Quality0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0efficiency[kk]*(1.0-singleME0Quality0efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1efficiency[kk]*(1.0-singleME0Quality1efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2efficiency[kk]*(1.0-singleME0Quality2efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0efficiency[kk]*(1.0-singleME0Quality0efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1efficiency[kk]*(1.0-singleME0Quality1efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2efficiency[kk]*(1.0-singleME0Quality2efficiency[kk])/(1.0*denom)); //Hz
 
-   singleME0Veto0efficiency[kk] = singleME0Veto0count[kk]*1.0/(denom1); //Hz
-   singleME0Veto1efficiency[kk] = singleME0Veto1count[kk]*1.0/(denom1); //Hz
-   singleME0Veto2efficiency[kk] = singleME0Veto2count[kk]*1.0/(denom1); //Hz
-   singleME0Veto3efficiency[kk] = singleME0Veto3count[kk]*1.0/(denom1); //Hz
+   singleME0Veto0efficiency[kk] = singleME0Veto0count[kk]*1.0/(denom); //Hz
+   singleME0Veto1efficiency[kk] = singleME0Veto1count[kk]*1.0/(denom); //Hz
+   singleME0Veto2efficiency[kk] = singleME0Veto2count[kk]*1.0/(denom); //Hz
+   singleME0Veto3efficiency[kk] = singleME0Veto3count[kk]*1.0/(denom); //Hz
 
-   singleME0Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Veto0efficiency[kk]*(1.0-singleME0Veto0efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Veto1efficiency[kk]*(1.0-singleME0Veto1efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Veto2efficiency[kk]*(1.0-singleME0Veto2efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Veto3efficiency[kk]*(1.0-singleME0Veto3efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Veto0efficiency[kk]*(1.0-singleME0Veto0efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Veto1efficiency[kk]*(1.0-singleME0Veto1efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Veto2efficiency[kk]*(1.0-singleME0Veto2efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Veto3efficiency[kk]*(1.0-singleME0Veto3efficiency[kk])/(1.0*denom)); //Hz
 
-   singleME0Quality0Veto0efficiency[kk] = singleME0Quality0Veto0count[kk]*1.0/(denom1); //Hz
-   singleME0Quality0Veto1efficiency[kk] = singleME0Quality0Veto1count[kk]*1.0/(denom1); //Hz
-   singleME0Quality0Veto2efficiency[kk] = singleME0Quality0Veto2count[kk]*1.0/(denom1); //Hz
-   singleME0Quality0Veto3efficiency[kk] = singleME0Quality0Veto3count[kk]*1.0/(denom1); //Hz
-   singleME0Quality1Veto0efficiency[kk] = singleME0Quality1Veto0count[kk]*1.0/(denom1); //Hz
-   singleME0Quality1Veto1efficiency[kk] = singleME0Quality1Veto1count[kk]*1.0/(denom1); //Hz
-   singleME0Quality1Veto2efficiency[kk] = singleME0Quality1Veto2count[kk]*1.0/(denom1); //Hz
-   singleME0Quality1Veto3efficiency[kk] = singleME0Quality1Veto3count[kk]*1.0/(denom1); //Hz
-   singleME0Quality2Veto0efficiency[kk] = singleME0Quality2Veto0count[kk]*1.0/(denom1); //Hz
-   singleME0Quality2Veto1efficiency[kk] = singleME0Quality2Veto1count[kk]*1.0/(denom1); //Hz
-   singleME0Quality2Veto2efficiency[kk] = singleME0Quality2Veto2count[kk]*1.0/(denom1); //Hz
-   singleME0Quality2Veto3efficiency[kk] = singleME0Quality2Veto3count[kk]*1.0/(denom1); //Hz
+   singleME0Quality0Veto0efficiency[kk] = singleME0Quality0Veto0count[kk]*1.0/(denom); //Hz
+   singleME0Quality0Veto1efficiency[kk] = singleME0Quality0Veto1count[kk]*1.0/(denom); //Hz
+   singleME0Quality0Veto2efficiency[kk] = singleME0Quality0Veto2count[kk]*1.0/(denom); //Hz
+   singleME0Quality0Veto3efficiency[kk] = singleME0Quality0Veto3count[kk]*1.0/(denom); //Hz
+   singleME0Quality1Veto0efficiency[kk] = singleME0Quality1Veto0count[kk]*1.0/(denom); //Hz
+   singleME0Quality1Veto1efficiency[kk] = singleME0Quality1Veto1count[kk]*1.0/(denom); //Hz
+   singleME0Quality1Veto2efficiency[kk] = singleME0Quality1Veto2count[kk]*1.0/(denom); //Hz
+   singleME0Quality1Veto3efficiency[kk] = singleME0Quality1Veto3count[kk]*1.0/(denom); //Hz
+   singleME0Quality2Veto0efficiency[kk] = singleME0Quality2Veto0count[kk]*1.0/(denom); //Hz
+   singleME0Quality2Veto1efficiency[kk] = singleME0Quality2Veto1count[kk]*1.0/(denom); //Hz
+   singleME0Quality2Veto2efficiency[kk] = singleME0Quality2Veto2count[kk]*1.0/(denom); //Hz
+   singleME0Quality2Veto3efficiency[kk] = singleME0Quality2Veto3count[kk]*1.0/(denom); //Hz
 
-   singleME0Quality0Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto0efficiency[kk]*(1.0-singleME0Quality0Veto0efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality0Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto1efficiency[kk]*(1.0-singleME0Quality0Veto1efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality0Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto2efficiency[kk]*(1.0-singleME0Quality0Veto2efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality0Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto3efficiency[kk]*(1.0-singleME0Quality0Veto3efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality1Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto0efficiency[kk]*(1.0-singleME0Quality1Veto0efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality1Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto1efficiency[kk]*(1.0-singleME0Quality1Veto1efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality1Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto2efficiency[kk]*(1.0-singleME0Quality1Veto2efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality1Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto3efficiency[kk]*(1.0-singleME0Quality1Veto3efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality2Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto0efficiency[kk]*(1.0-singleME0Quality2Veto0efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality2Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto1efficiency[kk]*(1.0-singleME0Quality2Veto1efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality2Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto2efficiency[kk]*(1.0-singleME0Quality2Veto2efficiency[kk])/(1.0*denom1)); //Hz
-   singleME0Quality2Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto3efficiency[kk]*(1.0-singleME0Quality2Veto3efficiency[kk])/(1.0*denom1)); //Hz
+   singleME0Quality0Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto0efficiency[kk]*(1.0-singleME0Quality0Veto0efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality0Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto1efficiency[kk]*(1.0-singleME0Quality0Veto1efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality0Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto2efficiency[kk]*(1.0-singleME0Quality0Veto2efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality0Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Quality0Veto3efficiency[kk]*(1.0-singleME0Quality0Veto3efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality1Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto0efficiency[kk]*(1.0-singleME0Quality1Veto0efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality1Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto1efficiency[kk]*(1.0-singleME0Quality1Veto1efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality1Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto2efficiency[kk]*(1.0-singleME0Quality1Veto2efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality1Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Quality1Veto3efficiency[kk]*(1.0-singleME0Quality1Veto3efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality2Veto0efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto0efficiency[kk]*(1.0-singleME0Quality2Veto0efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality2Veto1efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto1efficiency[kk]*(1.0-singleME0Quality2Veto1efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality2Veto2efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto2efficiency[kk]*(1.0-singleME0Quality2Veto2efficiency[kk])/(1.0*denom)); //Hz
+   singleME0Quality2Veto3efficiencyErr[kk] = TMath::Sqrt(singleME0Quality2Veto3efficiency[kk]*(1.0-singleME0Quality2Veto3efficiency[kk])/(1.0*denom)); //Hz
    }
  for (int kk=0; kk<15; kk++)   	
    {
-   doubleME0nearQuality0efficiency[kk] = doubleME0nearQuality0count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality1efficiency[kk] = doubleME0nearQuality1count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality2efficiency[kk] = doubleME0nearQuality2count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality0efficiency[kk] = doubleME0nearQuality0count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality1efficiency[kk] = doubleME0nearQuality1count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality2efficiency[kk] = doubleME0nearQuality2count[kk]*1.0/(denom);  //Hz
 
-   doubleME0nearQuality0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0efficiency[kk]*(1.0-doubleME0nearQuality0efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1efficiency[kk]*(1.0-doubleME0nearQuality1efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2efficiency[kk]*(1.0-doubleME0nearQuality2efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0efficiency[kk]*(1.0-doubleME0nearQuality0efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1efficiency[kk]*(1.0-doubleME0nearQuality1efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2efficiency[kk]*(1.0-doubleME0nearQuality2efficiency[kk])/(1.0*denom));  //Hz
 
-   doubleME0nearVeto0efficiency[kk] = doubleME0nearVeto0count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearVeto1efficiency[kk] = doubleME0nearVeto1count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearVeto2efficiency[kk] = doubleME0nearVeto2count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearVeto3efficiency[kk] = doubleME0nearVeto3count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearVeto0efficiency[kk] = doubleME0nearVeto0count[kk]*1.0/(denom);  //Hz
+   doubleME0nearVeto1efficiency[kk] = doubleME0nearVeto1count[kk]*1.0/(denom);  //Hz
+   doubleME0nearVeto2efficiency[kk] = doubleME0nearVeto2count[kk]*1.0/(denom);  //Hz
+   doubleME0nearVeto3efficiency[kk] = doubleME0nearVeto3count[kk]*1.0/(denom);  //Hz
 
-   doubleME0nearVeto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto0efficiency[kk]*(1.0-doubleME0nearVeto0efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearVeto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto1efficiency[kk]*(1.0-doubleME0nearVeto1efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearVeto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto2efficiency[kk]*(1.0-doubleME0nearVeto2efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearVeto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto3efficiency[kk]*(1.0-doubleME0nearVeto3efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearVeto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto0efficiency[kk]*(1.0-doubleME0nearVeto0efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearVeto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto1efficiency[kk]*(1.0-doubleME0nearVeto1efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearVeto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto2efficiency[kk]*(1.0-doubleME0nearVeto2efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearVeto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearVeto3efficiency[kk]*(1.0-doubleME0nearVeto3efficiency[kk])/(1.0*denom));  //Hz
 
-   doubleME0nearQuality0Veto0efficiency[kk] = doubleME0nearQuality0Veto0count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality0Veto1efficiency[kk] = doubleME0nearQuality0Veto1count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality0Veto2efficiency[kk] = doubleME0nearQuality0Veto2count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality0Veto3efficiency[kk] = doubleME0nearQuality0Veto3count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality1Veto0efficiency[kk] = doubleME0nearQuality1Veto0count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality1Veto1efficiency[kk] = doubleME0nearQuality1Veto1count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality1Veto2efficiency[kk] = doubleME0nearQuality1Veto2count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality1Veto3efficiency[kk] = doubleME0nearQuality1Veto3count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality2Veto0efficiency[kk] = doubleME0nearQuality2Veto0count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality2Veto1efficiency[kk] = doubleME0nearQuality2Veto1count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality2Veto2efficiency[kk] = doubleME0nearQuality2Veto2count[kk]*1.0/(denom2);  //Hz
-   doubleME0nearQuality2Veto3efficiency[kk] = doubleME0nearQuality2Veto3count[kk]*1.0/(denom2);  //Hz
+   doubleME0nearQuality0Veto0efficiency[kk] = doubleME0nearQuality0Veto0count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality0Veto1efficiency[kk] = doubleME0nearQuality0Veto1count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality0Veto2efficiency[kk] = doubleME0nearQuality0Veto2count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality0Veto3efficiency[kk] = doubleME0nearQuality0Veto3count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality1Veto0efficiency[kk] = doubleME0nearQuality1Veto0count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality1Veto1efficiency[kk] = doubleME0nearQuality1Veto1count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality1Veto2efficiency[kk] = doubleME0nearQuality1Veto2count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality1Veto3efficiency[kk] = doubleME0nearQuality1Veto3count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality2Veto0efficiency[kk] = doubleME0nearQuality2Veto0count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality2Veto1efficiency[kk] = doubleME0nearQuality2Veto1count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality2Veto2efficiency[kk] = doubleME0nearQuality2Veto2count[kk]*1.0/(denom);  //Hz
+   doubleME0nearQuality2Veto3efficiency[kk] = doubleME0nearQuality2Veto3count[kk]*1.0/(denom);  //Hz
 
-   doubleME0nearQuality0Veto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto0efficiency[kk]*(1.0-doubleME0nearQuality0Veto0efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality0Veto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto1efficiency[kk]*(1.0-doubleME0nearQuality0Veto1efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality0Veto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto2efficiency[kk]*(1.0-doubleME0nearQuality0Veto2efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality0Veto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto3efficiency[kk]*(1.0-doubleME0nearQuality0Veto3efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality1Veto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto0efficiency[kk]*(1.0-doubleME0nearQuality1Veto0efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality1Veto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto1efficiency[kk]*(1.0-doubleME0nearQuality1Veto1efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality1Veto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto2efficiency[kk]*(1.0-doubleME0nearQuality1Veto2efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality1Veto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto3efficiency[kk]*(1.0-doubleME0nearQuality1Veto3efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality2Veto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto0efficiency[kk]*(1.0-doubleME0nearQuality2Veto0efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality2Veto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto1efficiency[kk]*(1.0-doubleME0nearQuality2Veto1efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality2Veto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto2efficiency[kk]*(1.0-doubleME0nearQuality2Veto2efficiency[kk])/(1.0*denom2));  //Hz
-   doubleME0nearQuality2Veto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto3efficiency[kk]*(1.0-doubleME0nearQuality2Veto3efficiency[kk])/(1.0*denom2));  //Hz
+   doubleME0nearQuality0Veto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto0efficiency[kk]*(1.0-doubleME0nearQuality0Veto0efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality0Veto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto1efficiency[kk]*(1.0-doubleME0nearQuality0Veto1efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality0Veto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto2efficiency[kk]*(1.0-doubleME0nearQuality0Veto2efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality0Veto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality0Veto3efficiency[kk]*(1.0-doubleME0nearQuality0Veto3efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality1Veto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto0efficiency[kk]*(1.0-doubleME0nearQuality1Veto0efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality1Veto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto1efficiency[kk]*(1.0-doubleME0nearQuality1Veto1efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality1Veto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto2efficiency[kk]*(1.0-doubleME0nearQuality1Veto2efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality1Veto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality1Veto3efficiency[kk]*(1.0-doubleME0nearQuality1Veto3efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality2Veto0efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto0efficiency[kk]*(1.0-doubleME0nearQuality2Veto0efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality2Veto1efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto1efficiency[kk]*(1.0-doubleME0nearQuality2Veto1efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality2Veto2efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto2efficiency[kk]*(1.0-doubleME0nearQuality2Veto2efficiency[kk])/(1.0*denom));  //Hz
+   doubleME0nearQuality2Veto3efficiencyErr[kk] = TMath::Sqrt(doubleME0nearQuality2Veto3efficiency[kk]*(1.0-doubleME0nearQuality2Veto3efficiency[kk])/(1.0*denom));  //Hz
    }
  for (int kk=0; kk<35; kk++)   	
    {
-   tripleME0nearQuality0efficiency[kk] = tripleME0nearQuality0count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality1efficiency[kk] = tripleME0nearQuality1count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality2efficiency[kk] = tripleME0nearQuality2count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality0efficiency[kk] = tripleME0nearQuality0count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality1efficiency[kk] = tripleME0nearQuality1count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality2efficiency[kk] = tripleME0nearQuality2count[kk]*1.0/(denom);  //Hz
 
-   tripleME0nearQuality0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0efficiency[kk]*(1.0-tripleME0nearQuality0efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1efficiency[kk]*(1.0-tripleME0nearQuality1efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2efficiency[kk]*(1.0-tripleME0nearQuality2efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0efficiency[kk]*(1.0-tripleME0nearQuality0efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1efficiency[kk]*(1.0-tripleME0nearQuality1efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2efficiency[kk]*(1.0-tripleME0nearQuality2efficiency[kk])/(1.0*denom));  //Hz
 
-   tripleME0nearVeto0efficiency[kk] = tripleME0nearVeto0count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearVeto1efficiency[kk] = tripleME0nearVeto1count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearVeto2efficiency[kk] = tripleME0nearVeto2count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearVeto3efficiency[kk] = tripleME0nearVeto3count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearVeto0efficiency[kk] = tripleME0nearVeto0count[kk]*1.0/(denom);  //Hz
+   tripleME0nearVeto1efficiency[kk] = tripleME0nearVeto1count[kk]*1.0/(denom);  //Hz
+   tripleME0nearVeto2efficiency[kk] = tripleME0nearVeto2count[kk]*1.0/(denom);  //Hz
+   tripleME0nearVeto3efficiency[kk] = tripleME0nearVeto3count[kk]*1.0/(denom);  //Hz
 
-   tripleME0nearVeto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto0efficiency[kk]*(1.0-tripleME0nearVeto0efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearVeto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto1efficiency[kk]*(1.0-tripleME0nearVeto1efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearVeto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto2efficiency[kk]*(1.0-tripleME0nearVeto2efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearVeto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto3efficiency[kk]*(1.0-tripleME0nearVeto3efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearVeto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto0efficiency[kk]*(1.0-tripleME0nearVeto0efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearVeto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto1efficiency[kk]*(1.0-tripleME0nearVeto1efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearVeto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto2efficiency[kk]*(1.0-tripleME0nearVeto2efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearVeto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearVeto3efficiency[kk]*(1.0-tripleME0nearVeto3efficiency[kk])/(1.0*denom));  //Hz
 
-   tripleME0nearQuality0Veto0efficiency[kk] = tripleME0nearQuality0Veto0count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality0Veto1efficiency[kk] = tripleME0nearQuality0Veto1count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality0Veto2efficiency[kk] = tripleME0nearQuality0Veto2count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality0Veto3efficiency[kk] = tripleME0nearQuality0Veto3count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality1Veto0efficiency[kk] = tripleME0nearQuality1Veto0count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality1Veto1efficiency[kk] = tripleME0nearQuality1Veto1count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality1Veto2efficiency[kk] = tripleME0nearQuality1Veto2count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality1Veto3efficiency[kk] = tripleME0nearQuality1Veto3count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality2Veto0efficiency[kk] = tripleME0nearQuality2Veto0count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality2Veto1efficiency[kk] = tripleME0nearQuality2Veto1count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality2Veto2efficiency[kk] = tripleME0nearQuality2Veto2count[kk]*1.0/(denom3);  //Hz
-   tripleME0nearQuality2Veto3efficiency[kk] = tripleME0nearQuality2Veto3count[kk]*1.0/(denom3);  //Hz
+   tripleME0nearQuality0Veto0efficiency[kk] = tripleME0nearQuality0Veto0count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality0Veto1efficiency[kk] = tripleME0nearQuality0Veto1count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality0Veto2efficiency[kk] = tripleME0nearQuality0Veto2count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality0Veto3efficiency[kk] = tripleME0nearQuality0Veto3count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality1Veto0efficiency[kk] = tripleME0nearQuality1Veto0count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality1Veto1efficiency[kk] = tripleME0nearQuality1Veto1count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality1Veto2efficiency[kk] = tripleME0nearQuality1Veto2count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality1Veto3efficiency[kk] = tripleME0nearQuality1Veto3count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality2Veto0efficiency[kk] = tripleME0nearQuality2Veto0count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality2Veto1efficiency[kk] = tripleME0nearQuality2Veto1count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality2Veto2efficiency[kk] = tripleME0nearQuality2Veto2count[kk]*1.0/(denom);  //Hz
+   tripleME0nearQuality2Veto3efficiency[kk] = tripleME0nearQuality2Veto3count[kk]*1.0/(denom);  //Hz
 
-   tripleME0nearQuality0Veto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto0efficiency[kk]*(1.0-tripleME0nearQuality0Veto0efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality0Veto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto1efficiency[kk]*(1.0-tripleME0nearQuality0Veto1efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality0Veto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto2efficiency[kk]*(1.0-tripleME0nearQuality0Veto2efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality0Veto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto3efficiency[kk]*(1.0-tripleME0nearQuality0Veto3efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality1Veto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto0efficiency[kk]*(1.0-tripleME0nearQuality1Veto0efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality1Veto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto1efficiency[kk]*(1.0-tripleME0nearQuality1Veto1efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality1Veto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto2efficiency[kk]*(1.0-tripleME0nearQuality1Veto2efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality1Veto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto3efficiency[kk]*(1.0-tripleME0nearQuality1Veto3efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality2Veto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto0efficiency[kk]*(1.0-tripleME0nearQuality2Veto0efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality2Veto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto1efficiency[kk]*(1.0-tripleME0nearQuality2Veto1efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality2Veto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto2efficiency[kk]*(1.0-tripleME0nearQuality2Veto2efficiency[kk])/(1.0*denom3));  //Hz
-   tripleME0nearQuality2Veto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto3efficiency[kk]*(1.0-tripleME0nearQuality2Veto3efficiency[kk])/(1.0*denom3));  //Hz
+   tripleME0nearQuality0Veto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto0efficiency[kk]*(1.0-tripleME0nearQuality0Veto0efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality0Veto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto1efficiency[kk]*(1.0-tripleME0nearQuality0Veto1efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality0Veto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto2efficiency[kk]*(1.0-tripleME0nearQuality0Veto2efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality0Veto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality0Veto3efficiency[kk]*(1.0-tripleME0nearQuality0Veto3efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality1Veto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto0efficiency[kk]*(1.0-tripleME0nearQuality1Veto0efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality1Veto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto1efficiency[kk]*(1.0-tripleME0nearQuality1Veto1efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality1Veto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto2efficiency[kk]*(1.0-tripleME0nearQuality1Veto2efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality1Veto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality1Veto3efficiency[kk]*(1.0-tripleME0nearQuality1Veto3efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality2Veto0efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto0efficiency[kk]*(1.0-tripleME0nearQuality2Veto0efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality2Veto1efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto1efficiency[kk]*(1.0-tripleME0nearQuality2Veto1efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality2Veto2efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto2efficiency[kk]*(1.0-tripleME0nearQuality2Veto2efficiency[kk])/(1.0*denom));  //Hz
+   tripleME0nearQuality2Veto3efficiencyErr[kk] = TMath::Sqrt(tripleME0nearQuality2Veto3efficiency[kk]*(1.0-tripleME0nearQuality2Veto3efficiency[kk])/(1.0*denom));  //Hz
 
    }
 
