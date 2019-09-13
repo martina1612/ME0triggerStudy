@@ -1,0 +1,9 @@
+1256  cd ../../../DeltaGlobalPhiAnalyzer_Ds_filterME0_padbased_1kperJob_DetectorComb_ptCut__HiStat8/190629_103247/0000/
+ 1257  ls
+ 1258  ls -p | grep -v / | tr '\n' ' ' > merge.sh
+ 1259  ls
+ 1260  vim merge.sh 
+ 1261  ls
+ 1262  vim merge.sh 
+ 1263  chmod +x merge.sh 
+ 1264  ./merge.sh

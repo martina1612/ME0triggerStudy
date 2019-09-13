@@ -307,7 +307,7 @@ void ReaderME0_padbased()
    tripleMuTopology->GetHistogram()->GetXaxis()->Set(56,x1,x2);
    tripleMuTopology->GetHistogram()->GetYaxis()->SetTitle("Tau->3 Mu [%]");
    tripleMuTopology->GetHistogram()->GetXaxis()->SetLabelSize(0.04);
-   tripleMuTopology->SetTitle("Tau->3 Mu Topology in CMS");
+   tripleMuTopology->SetTitle("Tau->3 Mu Topology in CMS (Padbased)");
 
    for(Int_t k=0;k<numchains;k++){
    tripleMuTopology->GetHistogram()->GetXaxis()->SetBinLabel(k+1,names[k].c_str());   
@@ -398,7 +398,7 @@ void ReaderME0_padbased()
     tripleMuTopology_allThreeSeen->GetHistogram()->GetXaxis()->Set(35,x3,x4);
     tripleMuTopology_allThreeSeen->GetHistogram()->GetYaxis()->SetTitle("Tau->3 Mu [%]");
     tripleMuTopology_allThreeSeen->GetHistogram()->GetXaxis()->SetLabelSize(0.04);
-    tripleMuTopology_allThreeSeen->SetTitle("Tau->3 Mu Topology in CMS (all 3 muons seen)");
+    tripleMuTopology_allThreeSeen->SetTitle("Tau->3 Mu Topology in CMS (all 3 muons seen)(Padbased)");
                                                                                                                     
     for(Int_t k=0;k<numchains_2;k++){
     tripleMuTopology_allThreeSeen->GetHistogram()->GetXaxis()->SetBinLabel(k+1,names_2[k].c_str());   
@@ -408,6 +408,9 @@ void ReaderME0_padbased()
     tripleMuTopology_allThreeSeen->SetMarkerSize(0.8);
     tripleMuTopology_allThreeSeen->Draw("");
 
+
+   c1->SaveAs("topology_padbased_all.png");
+   c2->SaveAs("topology_padbased_onlyVisible.png");
 
 
 

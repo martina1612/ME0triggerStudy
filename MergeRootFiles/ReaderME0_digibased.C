@@ -1,6 +1,9 @@
+#include <TH2F.h>
+
 void ReaderME0_digibased()
 {
    using namespace std;
+   using namespace edm;
   
    TFile *rfile = new TFile("out_digibased_both.root");
    //TFile *rfile = new TFile("out_DeltaGlobalPhiAnalyzer_1.root");
@@ -182,29 +185,116 @@ void ReaderME0_digibased()
    float GGGminPt  = 0;  float GGMminPt  = 0;  float GMMminPt  = 0;  float MMMminPt  = 0;
    float GGGmaxPt  = 0;  float GGMmaxPt  = 0;  float GMMmaxPt  = 0;  float MMMmaxPt  = 0;
 
-   float RRRrate = -1;   float DDDrate = -1; 
-   float RRCrate = -1;   float DDRrate = -1;
-   float RRGrate = -1;   float DDCrate = -1;
-   float RRMrate = -1;   float DDGrate = -1;
-   float RCCrate = -1;   float DDMrate = -1;
-   float RCGrate = -1;   float DRRrate = -1;
-   float RCMrate = -1;   float DRCrate = -1;
-   float RGGrate = -1;   float DRGrate = -1;
-   float RGMrate = -1;   float DRMrate = -1;
-   float RMMrate = -1;   float DCCrate = -1;
-   float CCCrate = -1;   float DCGrate = -1;
-   float CCGrate = -1;   float DCMrate = -1;
-   float CCMrate = -1;   float DGGrate = -1;
-   float CGGrate = -1;   float DGMrate = -1;
-   float CGMrate = -1;   float DMMrate = -1;
-   float CMMrate = -1;
-   float GGGrate = -1;
-   float GGMrate = -1;
-   float GMMrate = -1;
-   float MMMrate = -1;
+   float RRRefficiency = -1;   float DDDefficiency = -1; 
+   float RRCefficiency = -1;   float DDRefficiency = -1;
+   float RRGefficiency = -1;   float DDCefficiency = -1;
+   float RRMefficiency = -1;   float DDGefficiency = -1;
+   float RCCefficiency = -1;   float DDMefficiency = -1;
+   float RCGefficiency = -1;   float DRRefficiency = -1;
+   float RCMefficiency = -1;   float DRCefficiency = -1;
+   float RGGefficiency = -1;   float DRGefficiency = -1;
+   float RGMefficiency = -1;   float DRMefficiency = -1;
+   float RMMefficiency = -1;   float DCCefficiency = -1;
+   float CCCefficiency = -1;   float DCGefficiency = -1;
+   float CCGefficiency = -1;   float DCMefficiency = -1;
+   float CCMefficiency = -1;   float DGGefficiency = -1;
+   float CGGefficiency = -1;   float DGMefficiency = -1;
+   float CGMefficiency = -1;   float DMMefficiency = -1;
+   float CMMefficiency = -1;
+   float GGGefficiency = -1;
+   float GGMefficiency = -1;
+   float GMMefficiency = -1;
+   float MMMefficiency = -1;
+
+   Int_t nBBB =0;
+   Int_t nBBO =0;
+   Int_t nBBE =0;
+   Int_t nBOO =0;
+   Int_t nBOE =0;
+   Int_t nBEE =0;
+   Int_t nOOO =0;
+   Int_t nOOE =0;
+   Int_t nOEE =0;
+   Int_t nEEE =0;
+
+   float BBBxsect =0;  float BBBxsectErr =0; 
+   float BBOxsect =0;  float BBOxsectErr =0;
+   float BBExsect =0;  float BBExsectErr =0;
+   float BOOxsect =0;  float BOOxsectErr =0;
+   float BOExsect =0;  float BOExsectErr =0;
+   float BEExsect =0;  float BEExsectErr =0;
+   float OOOxsect =0;  float OOOxsectErr =0;
+   float OOExsect =0;  float OOExsectErr =0;
+   float OEExsect =0;  float OEExsectErr =0;
+   float EEExsect =0;  float EEExsectErr =0;
+   float TripleME0xsect =0;  float TripleME0xsectErr =0;
+
+   float BBBxsectRescaled =0;  float BBBxsectRescaledErr =0;
+   float BBOxsectRescaled =0;  float BBOxsectRescaledErr =0;
+   float BBExsectRescaled =0;  float BBExsectRescaledErr =0;
+   float BOOxsectRescaled =0;  float BOOxsectRescaledErr =0;
+   float BOExsectRescaled =0;  float BOExsectRescaledErr =0;
+   float BEExsectRescaled =0;  float BEExsectRescaledErr =0;
+   float OOOxsectRescaled =0;  float OOOxsectRescaledErr =0;
+   float OOExsectRescaled =0;  float OOExsectRescaledErr =0;
+   float OEExsectRescaled =0;  float OEExsectRescaledErr =0;
+   float EEExsectRescaled =0;  float EEExsectRescaledErr =0;
+   float TripleME0xsectRescaled =0;  float TripleME0xsectRescaledErr =0;
+
+
+ 
+   float BBBefficiency = -1;
+   float BBOefficiency = -1;
+   float BBEefficiency = -1;
+   float BOOefficiency = -1;
+   float BOEefficiency = -1;
+   float BEEefficiency = -1;
+   float OOOefficiency = -1;
+   float OOEefficiency = -1;
+   float OEEefficiency = -1;
+   float EEEefficiency = -1;
+   float TripleME0efficiency = -1;
+
+
+
+
+  
+   bool  isMuVisible[3] = {0, 0, 0};
+   Int_t nMuTripleVisible = 0;
+
+   float ptEdges[70];
+   float etaEdges[50];
+   const Int_t ptBins = 70;
+   const Int_t etaBins = 50;
+   //pt from 0 to 70 GeV/c with 1 GeV/c step
+   for( int i=0; i<71; i++ )
+   {
+      ptEdges[i] = i;
+   }
+                                              
+   //eta from 0 to 5 with 0.1 step
+   for( int i=0; i<51; i++ )
+   {
+      etaEdges[i] = 0.1*i;
+   }
+
+   //now do what ever initialization is needed
+   //usesResource("TFileService");
+   //Service<TFileService> fs;
+
+   TH2F  *h_PtVsEta_TripleVisible = new TH2F("h_PtVsEta_TripleVisible","h_PtVsEta_TripleVisible", etaBins, etaEdges, ptBins, ptEdges);
    
+   h_PtVsEta_TripleVisible->GetXaxis()->SetTitle("Eta");  h_PtVsEta_TripleVisible->GetYaxis()->SetTitle("Pt");
+
+
+ 
 
    //-------------------EVENT-----------------------------------
+   tree_event-> SetBranchAddress("isMuVisible", &isMuVisible[0]);
+
+   tree_event-> SetBranchAddress("muPt", &muPt[0]);
+   tree_event-> SetBranchAddress("muEta", &muEta[0]);
+
    tree_event-> SetBranchAddress("isMuDDD", &isMuDDD);
    tree_event-> SetBranchAddress("isMuDDR", &isMuDDR);
    tree_event-> SetBranchAddress("isMuDDC", &isMuDDC);
@@ -242,9 +332,6 @@ void ReaderME0_digibased()
    tree_event-> SetBranchAddress("isMuGMM", &isMuGMM);
    tree_event-> SetBranchAddress("isMuMMM", &isMuMMM);
    
-   tree_event-> SetBranchAddress("muEta", &muEta[0]);
-   tree_event-> SetBranchAddress("muPt", &muPt[0]);
-
 
 
 
@@ -252,7 +339,7 @@ void ReaderME0_digibased()
    //tree_event_summary->Print();
  
    tree_event_summary->SetBranchAddress("lastEvent",&lastEvent);
-
+   
    tree_event_summary->SetBranchAddress("nMuNNN",&nMuNNN);
    tree_event_summary->SetBranchAddress("nMuNND",&nMuNND);
    tree_event_summary->SetBranchAddress("nMuNNR",&nMuNNR);
@@ -316,6 +403,18 @@ void ReaderME0_digibased()
    tree_event_summary->SetBranchAddress("nMuMMM",&nMuMMM);
    
    tree_event_summary->SetBranchAddress("nMuN",&nMuN);
+
+   tree_event_summary->SetBranchAddress("nBBB",&nBBB);
+   tree_event_summary->SetBranchAddress("nBBO",&nBBO);
+   tree_event_summary->SetBranchAddress("nBBE",&nBBE);
+   tree_event_summary->SetBranchAddress("nBOO",&nBOO);
+   tree_event_summary->SetBranchAddress("nBOE",&nBOE);
+   tree_event_summary->SetBranchAddress("nBEE",&nBEE);
+   tree_event_summary->SetBranchAddress("nOOO",&nOOO);
+   tree_event_summary->SetBranchAddress("nOOE",&nOOE);
+   tree_event_summary->SetBranchAddress("nOEE",&nOEE);
+   tree_event_summary->SetBranchAddress("nEEE",&nEEE);
+
 
    //Branches of trees produced by this macro 
    tree_DDD -> Branch( "DDDminEta", &DDDminEta );
@@ -495,7 +594,7 @@ void ReaderME0_digibased()
 
 
    tree_summary -> Branch("lastEvent_total", &lastEvent_total);
-
+   tree_summary -> Branch("nMuTripleVisible", &nMuTripleVisible);
 
    tree_summary -> Branch("nMu_totalDDD", &nMuDDD_total);
    tree_summary -> Branch("nMu_totalDDR", &nMuDDR_total);
@@ -535,48 +634,106 @@ void ReaderME0_digibased()
    tree_summary -> Branch("nMuMMM_total", &nMuMMM_total);
 
 
-   tree_summary -> Branch("DDDrate", &DDDrate);
-   tree_summary -> Branch("DDRrate", &DDRrate);
-   tree_summary -> Branch("DDCrate", &DDCrate);
-   tree_summary -> Branch("DDGrate", &DDGrate);
-   tree_summary -> Branch("DDMrate", &DDMrate);
-   tree_summary -> Branch("DRRrate", &DRRrate);
-   tree_summary -> Branch("DRCrate", &DRCrate);
-   tree_summary -> Branch("DRGrate", &DRGrate);
-   tree_summary -> Branch("DRMrate", &DRMrate);
-   tree_summary -> Branch("DCCrate", &DCCrate);
-   tree_summary -> Branch("DCGrate", &DCGrate);
-   tree_summary -> Branch("DCMrate", &DCMrate);
-   tree_summary -> Branch("DGGrate", &DGGrate);
-   tree_summary -> Branch("DGMrate", &DGMrate);
-   tree_summary -> Branch("DMMrate", &DMMrate);
+   tree_summary -> Branch("DDDefficiency", &DDDefficiency);
+   tree_summary -> Branch("DDRefficiency", &DDRefficiency);
+   tree_summary -> Branch("DDCefficiency", &DDCefficiency);
+   tree_summary -> Branch("DDGefficiency", &DDGefficiency);
+   tree_summary -> Branch("DDMefficiency", &DDMefficiency);
+   tree_summary -> Branch("DRRefficiency", &DRRefficiency);
+   tree_summary -> Branch("DRCefficiency", &DRCefficiency);
+   tree_summary -> Branch("DRGefficiency", &DRGefficiency);
+   tree_summary -> Branch("DRMefficiency", &DRMefficiency);
+   tree_summary -> Branch("DCCefficiency", &DCCefficiency);
+   tree_summary -> Branch("DCGefficiency", &DCGefficiency);
+   tree_summary -> Branch("DCMefficiency", &DCMefficiency);
+   tree_summary -> Branch("DGGefficiency", &DGGefficiency);
+   tree_summary -> Branch("DGMefficiency", &DGMefficiency);
+   tree_summary -> Branch("DMMefficiency", &DMMefficiency);
+                                                         
+   tree_summary -> Branch("RRRefficiency", &RRRefficiency);
+   tree_summary -> Branch("RRCefficiency", &RRCefficiency);
+   tree_summary -> Branch("RRGefficiency", &RRGefficiency);
+   tree_summary -> Branch("RRMefficiency", &RRMefficiency);
+   tree_summary -> Branch("RCCefficiency", &RCCefficiency);
+   tree_summary -> Branch("RCGefficiency", &RCGefficiency);
+   tree_summary -> Branch("RCMefficiency", &RCMefficiency);
+   tree_summary -> Branch("RGGefficiency", &RGGefficiency);
+   tree_summary -> Branch("RGMefficiency", &RGMefficiency);
+   tree_summary -> Branch("RMMefficiency", &RMMefficiency);
+   tree_summary -> Branch("CCCefficiency", &CCCefficiency);
+   tree_summary -> Branch("CCGefficiency", &CCGefficiency);
+   tree_summary -> Branch("CCMefficiency", &CCMefficiency);
+   tree_summary -> Branch("CGGefficiency", &CGGefficiency);
+   tree_summary -> Branch("CGMefficiency", &CGMefficiency);
+   tree_summary -> Branch("CMMefficiency", &CMMefficiency);
+   tree_summary -> Branch("GGGefficiency", &GGGefficiency);
+   tree_summary -> Branch("GGMefficiency", &GGMefficiency);
+   tree_summary -> Branch("GMMefficiency", &GMMefficiency);
+   tree_summary -> Branch("MMMefficiency", &MMMefficiency);
+  
+   tree_summary -> Branch("BBBefficiency", &BBBefficiency);
+   tree_summary -> Branch("BBOefficiency", &BBOefficiency);
+   tree_summary -> Branch("BBEefficiency", &BBEefficiency);
+   tree_summary -> Branch("BOOefficiency", &BOOefficiency);
+   tree_summary -> Branch("BOEefficiency", &BOEefficiency);
+   tree_summary -> Branch("BEEefficiency", &BEEefficiency);
+   tree_summary -> Branch("OOOefficiency", &OOOefficiency);
+   tree_summary -> Branch("OOEefficiency", &OOEefficiency);
+   tree_summary -> Branch("OEEefficiency", &OEEefficiency);
+   tree_summary -> Branch("EEEefficiency", &EEEefficiency);
+   tree_summary -> Branch("TripleME0efficiency", &TripleME0efficiency);
 
-   tree_summary -> Branch("RRRrate", &RRRrate);
-   tree_summary -> Branch("RRCrate", &RRCrate);
-   tree_summary -> Branch("RRGrate", &RRGrate);
-   tree_summary -> Branch("RRMrate", &RRMrate);
-   tree_summary -> Branch("RCCrate", &RCCrate);
-   tree_summary -> Branch("RCGrate", &RCGrate);
-   tree_summary -> Branch("RCMrate", &RCMrate);
-   tree_summary -> Branch("RGGrate", &RGGrate);
-   tree_summary -> Branch("RGMrate", &RGMrate);
-   tree_summary -> Branch("RMMrate", &RMMrate);
-   tree_summary -> Branch("CCCrate", &CCCrate);
-   tree_summary -> Branch("CCGrate", &CCGrate);
-   tree_summary -> Branch("CCMrate", &CCMrate);
-   tree_summary -> Branch("CGGrate", &CGGrate);
-   tree_summary -> Branch("CGMrate", &CGMrate);
-   tree_summary -> Branch("CMMrate", &CMMrate);
-   tree_summary -> Branch("GGGrate", &GGGrate);
-   tree_summary -> Branch("GGMrate", &GGMrate);
-   tree_summary -> Branch("GMMrate", &GMMrate);
-   tree_summary -> Branch("MMMrate", &MMMrate);
-   
-
-   
+   tree_summary -> Branch("BBBxsect", &BBBxsect);
+   tree_summary -> Branch("BBOxsect", &BBOxsect);
+   tree_summary -> Branch("BBExsect", &BBExsect);
+   tree_summary -> Branch("BOOxsect", &BOOxsect);
+   tree_summary -> Branch("BOExsect", &BOExsect);
+   tree_summary -> Branch("BEExsect", &BEExsect);
+   tree_summary -> Branch("OOOxsect", &OOOxsect);
+   tree_summary -> Branch("OOExsect", &OOExsect);
+   tree_summary -> Branch("OEExsect", &OEExsect);
+   tree_summary -> Branch("EEExsect", &EEExsect);
+   tree_summary -> Branch("EEExsect", &EEExsect);
+   tree_summary -> Branch("TripleME0xsect", &TripleME0xsect);
+                                                                     
+   tree_summary -> Branch("BBBxsectErr", &BBBxsectErr);
+   tree_summary -> Branch("BBOxsectErr", &BBOxsectErr);
+   tree_summary -> Branch("BBExsectErr", &BBExsectErr);
+   tree_summary -> Branch("BOOxsectErr", &BOOxsectErr);
+   tree_summary -> Branch("BOExsectErr", &BOExsectErr);
+   tree_summary -> Branch("BEExsectErr", &BEExsectErr);
+   tree_summary -> Branch("OOOxsectErr", &OOOxsectErr);
+   tree_summary -> Branch("OOExsectErr", &OOExsectErr);
+   tree_summary -> Branch("OEExsectErr", &OEExsectErr);
+   tree_summary -> Branch("EEExsectErr", &EEExsectErr);
+   tree_summary -> Branch("TripleME0xsectErr", &TripleME0xsectErr);
+                                                                     
+   tree_summary -> Branch("BBBxsectRescaled", &BBBxsectRescaled);
+   tree_summary -> Branch("BBOxsectRescaled", &BBOxsectRescaled);
+   tree_summary -> Branch("BBExsectRescaled", &BBExsectRescaled);
+   tree_summary -> Branch("BOOxsectRescaled", &BOOxsectRescaled);
+   tree_summary -> Branch("BOExsectRescaled", &BOExsectRescaled);
+   tree_summary -> Branch("BEExsectRescaled", &BEExsectRescaled);
+   tree_summary -> Branch("OOOxsectRescaled", &OOOxsectRescaled);
+   tree_summary -> Branch("OOExsectRescaled", &OOExsectRescaled);
+   tree_summary -> Branch("OEExsectRescaled", &OEExsectRescaled);
+   tree_summary -> Branch("EEExsectRescaled", &EEExsectRescaled);
+   tree_summary -> Branch("TripleME0xsectRescaled", &TripleME0xsectRescaled);
+                                                                     
+   tree_summary -> Branch("BBBxsectRescaledErr", &BBBxsectRescaledErr);
+   tree_summary -> Branch("BBOxsectRescaledErr", &BBOxsectRescaledErr);
+   tree_summary -> Branch("BBExsectRescaledErr", &BBExsectRescaledErr);
+   tree_summary -> Branch("BOOxsectRescaledErr", &BOOxsectRescaledErr);
+   tree_summary -> Branch("BOExsectRescaledErr", &BOExsectRescaledErr);
+   tree_summary -> Branch("BEExsectRescaledErr", &BEExsectRescaledErr);
+   tree_summary -> Branch("OOOxsectRescaledErr", &OOOxsectRescaledErr);
+   tree_summary -> Branch("OOExsectRescaledErr", &OOExsectRescaledErr);
+   tree_summary -> Branch("OEExsectRescaledErr", &OEExsectRescaledErr);
+   tree_summary -> Branch("EEExsectRescaledErr", &EEExsectRescaledErr);
+   tree_summary -> Branch("TripleME0xsectRescaledErr", &TripleME0xsectRescaledErr);
+ 
 
    //------------------------LET'S GO -------------------------------
-
 
 
    Int_t summaryEntries = (Int_t)tree_event_summary -> GetEntries();
@@ -619,10 +776,11 @@ void ReaderME0_digibased()
 
       nMuN_total = nMuN_total + nMuN;
 
-
    }
 
-   cout << "lastEvent_total:" << lastEvent_total << endl;
+
+
+   cout<< "lastEvent_total:" << lastEvent_total << endl;
 
    cout << "nMuNNN_total: " << nMuNNN_total << " nMuDDD_total: " << nMuDDD_total << "nMuRRR_total: " << nMuRRR_total << endl; 
    cout << "nMuNND_total: " << nMuNND_total << " nMuDDR_total: " << nMuDDR_total << "nMuRRC_total: " << nMuRRC_total << endl;      
@@ -751,7 +909,7 @@ void ReaderME0_digibased()
    tripleMuTopology->GetHistogram()->GetXaxis()->Set(56,x1,x2);
    tripleMuTopology->GetHistogram()->GetYaxis()->SetTitle("Tau->3 Mu [%]");
    tripleMuTopology->GetHistogram()->GetXaxis()->SetLabelSize(0.04);
-   tripleMuTopology->SetTitle("Tau->3 Mu Topology in CMS");
+   tripleMuTopology->SetTitle("Tau->3 Mu Topology in CMS (Digibased)");
 
    for(Int_t k=0;k<numchains;k++){
    tripleMuTopology->GetHistogram()->GetXaxis()->SetBinLabel(k+1,names[k].c_str());   
@@ -843,10 +1001,10 @@ void ReaderME0_digibased()
     tripleMuTopology_allThreeSeen->GetHistogram()->GetXaxis()->Set(35,x3,x4);
     tripleMuTopology_allThreeSeen->GetHistogram()->GetYaxis()->SetTitle("Tau->3 Mu [%]");
     tripleMuTopology_allThreeSeen->GetHistogram()->GetXaxis()->SetLabelSize(0.04);
-    tripleMuTopology_allThreeSeen->SetTitle("Tau->3 Mu Topology in CMS (all 3 muons seen)");
+    tripleMuTopology_allThreeSeen->SetTitle("Tau->3 Mu Topology in CMS (all 3 muons seen)(Digibased)");
                                                                                                                     
     for(Int_t k=0;k<numchains_2;k++){
-    tripleMuTopology_allThreeSeen->GetHistogram()->GetXaxis()->SetBinLabel(k+1,names_2[k].c_str());   
+tripleMuTopology_allThreeSeen->GetHistogram()->GetXaxis()->SetBinLabel(k+1,names_2[k].c_str());   
     } 
                                                                                                                     
     tripleMuTopology_allThreeSeen->SetMarkerStyle(21);
@@ -854,17 +1012,54 @@ void ReaderME0_digibased()
     tripleMuTopology_allThreeSeen->Draw("");
 
     //check the Delta Eta and Delta pt of muons
-    //
+
+
     cout << "eventEntries:" << eventEntries << endl;
+
 
     for ( Int_t i=0; i < eventEntries; i++ ) 
     {
-       cout << "Entry#" << i << endl;
+       
+       if (i%10000==0)cout << "Entry#" << i << "/" << eventEntries << endl;
        tree_event->GetEntry(i);
-  
+
+       int nBarrel = 0;
+       int nOverlap = 0;
+       int nEndcap = 0;
+ 
+       //evaluate total number of visibles
+       if (isMuVisible[0] && isMuVisible[1] && isMuVisible[2] )
+       {
+          nMuTripleVisible++;      
+          for (int j=0; j<3; j++)
+          {
+             h_PtVsEta_TripleVisible->Fill( muEta[j], muPt[j] );
+             if (muEta[j]<0.85) nBarrel++;
+             if (muEta[j]>=0.85 && muEta[j]<=1.25) nOverlap++;
+             if (muEta[j]>1.25 && muEta[j]<3.0) nEndcap++;
+          }
+
+          if ( nBarrel + nOverlap + nEndcap == 3 )
+          {
+             if      ( nBarrel == 3 )                                       nBBB++;                                 
+             else if ( nBarrel == 2 && nOverlap == 1 )                      nBBO++;                        
+             else if ( nBarrel == 2 && nEndcap == 1 )                       nBBE++;
+             else if ( nBarrel == 1 && nOverlap == 2 )                      nBOO++;
+             else if ( nBarrel == 1 && nOverlap == 1 && nEndcap == 1 )      nBOE++;
+             else if ( nBarrel == 1 && nEndcap == 2 )                       nBEE++;
+             else if ( nOverlap == 3 )                                      nOOO++;
+             else if ( nOverlap == 2 && nEndcap == 1 )                      nOOE++;
+             else if ( nOverlap == 1 && nEndcap == 2 )                      nOEE++;
+             else if ( nEndcap == 3 )                                       nEEE++;
+          }
+
+
+       }
+      
+ 
         if ( isMuDDD )                                                                              
         {                                                                                           
-           cout << i << " isMuDDD" << endl; 
+           //cout << i << " isMuDDD" << endl; 
            //calculate the minimum eta
            DDDminEta = fabs(muEta[0]);
            DDDmaxEta = fabs(muEta[0]);
@@ -888,7 +1083,7 @@ void ReaderME0_digibased()
 
        if ( isMuDDR )  
        { 
-          cout << i << " isMuDDR" << endl; 
+          //cout << i << " isMuDDR" << endl; 
           //calculate the minimum eta
           DDRminEta = fabs(muEta[0]);
           DDRmaxEta = fabs(muEta[0]);
@@ -912,7 +1107,7 @@ void ReaderME0_digibased()
 
        if ( isMuDDC )  
        { 
-          cout << i << " isMuDDC" << endl; 
+          //cout << i << " isMuDDC" << endl; 
           //calculate the minimum eta
           DDCminEta = fabs(muEta[0]);
           DDCmaxEta = fabs(muEta[0]);
@@ -937,7 +1132,7 @@ void ReaderME0_digibased()
 
        if ( isMuDDG )  
        { 
-          cout << i << " isMuDDG" << endl; 
+          //cout << i << " isMuDDG" << endl; 
           //calculate the minimum eta
           DDGminEta = fabs(muEta[0]);
           DDGmaxEta = fabs(muEta[0]);
@@ -961,7 +1156,7 @@ void ReaderME0_digibased()
 
        if ( isMuDDM )  
        { 
-          cout << i << " isMuDDM" << endl; 
+          //cout << i << " isMuDDM" << endl; 
           //calculate the minimum eta
           DDMminEta = fabs(muEta[0]);
           DDMmaxEta = fabs(muEta[0]);
@@ -985,7 +1180,7 @@ void ReaderME0_digibased()
 
        if ( isMuDRR )  
        { 
-          cout << i << " isMuDRR" << endl; 
+          //cout << i << " isMuDRR" << endl; 
           //calculate the minimum eta
           DRRminEta = fabs(muEta[0]);
           DRRmaxEta = fabs(muEta[0]);
@@ -1009,7 +1204,7 @@ void ReaderME0_digibased()
 
        if ( isMuDRC )  
        { 
-          cout << i << " isMuDRC" << endl; 
+          //cout << i << " isMuDRC" << endl; 
           //calculate the minimum eta
           DRCminEta = fabs(muEta[0]);
           DRCmaxEta = fabs(muEta[0]);
@@ -1033,7 +1228,7 @@ void ReaderME0_digibased()
 
        if ( isMuDRG )  
        { 
-          cout << i << " isMuDRG" << endl; 
+          //cout << i << " isMuDRG" << endl; 
           //calculate the minimum eta
           DRGminEta = fabs(muEta[0]);
           DRGmaxEta = fabs(muEta[0]);
@@ -1057,7 +1252,7 @@ void ReaderME0_digibased()
 
        if ( isMuDRM )  
        { 
-          cout << i << " isMuDRM" << endl; 
+          //cout << i << " isMuDRM" << endl; 
           //calculate the minimum eta
           DRMminEta = fabs(muEta[0]);
           DRMmaxEta = fabs(muEta[0]);
@@ -1081,7 +1276,7 @@ void ReaderME0_digibased()
 
        if ( isMuDCC )  
        { 
-          cout << i << " isMuDCC" << endl; 
+          //cout << i << " isMuDCC" << endl; 
           //calculate the minimum eta
           DCCminEta = fabs(muEta[0]);
           DCCmaxEta = fabs(muEta[0]);
@@ -1105,7 +1300,7 @@ void ReaderME0_digibased()
 
        if ( isMuDCG )  
        { 
-          cout << i << " isMuDCG" << endl; 
+          //cout << i << " isMuDCG" << endl; 
           //calculate the minimum eta
           DCGminEta = fabs(muEta[0]);
           DCGmaxEta = fabs(muEta[0]);
@@ -1129,7 +1324,7 @@ void ReaderME0_digibased()
 
        if ( isMuDCM )  
        { 
-          cout << i << " isMuDCM" << endl; 
+          //cout << i << " isMuDCM" << endl; 
           //calculate the minimum eta
           DCMminEta = fabs(muEta[0]);
           DCMmaxEta = fabs(muEta[0]);
@@ -1153,7 +1348,7 @@ void ReaderME0_digibased()
 
        if ( isMuDGG )  
        { 
-          cout << i << " isMuDGG" << endl; 
+          //cout << i << " isMuDGG" << endl; 
           //calculate the minimum eta
           DGGminEta = fabs(muEta[0]);
           DGGmaxEta = fabs(muEta[0]);
@@ -1177,7 +1372,7 @@ void ReaderME0_digibased()
 
        if ( isMuDGM )  
        { 
-          cout << i << " isMuDGM" << endl; 
+          //cout << i << " isMuDGM" << endl; 
           //calculate the minimum eta
           DGMminEta = fabs(muEta[0]);
           DGMmaxEta = fabs(muEta[0]);
@@ -1201,7 +1396,7 @@ void ReaderME0_digibased()
 
        if ( isMuDMM )  
        { 
-          cout << i << " isMuDMM" << endl; 
+          //cout << i << " isMuDMM" << endl; 
           //calculate the minimum eta
           DMMminEta = fabs(muEta[0]);
           DMMmaxEta = fabs(muEta[0]);
@@ -1226,7 +1421,7 @@ void ReaderME0_digibased()
 
        if ( isMuRRR )  
        { 
-          cout << i << " isMuRRR" << endl; 
+          //cout << i << " isMuRRR" << endl; 
           //calculate the minimum eta
           RRRminEta = fabs(muEta[0]);
           RRRmaxEta = fabs(muEta[0]);
@@ -1250,7 +1445,7 @@ void ReaderME0_digibased()
 
        if ( isMuRRC )  
        { 
-          cout << i << " isMuRRC" << endl; 
+          //cout << i << " isMuRRC" << endl; 
           //calculate the minimum eta
           RRCminEta = fabs(muEta[0]);
           RRCmaxEta = fabs(muEta[0]);
@@ -1274,7 +1469,7 @@ void ReaderME0_digibased()
 
        if ( isMuRRG )                                                                              
        { 
-          cout << i << " isMuRRG" << endl; 
+          //cout << i << " isMuRRG" << endl; 
           //calculate the minimum eta
           RRGminEta = fabs(muEta[0]);
           RRGmaxEta = fabs(muEta[0]);
@@ -1298,7 +1493,7 @@ void ReaderME0_digibased()
 
        if ( isMuRRM )  
        { 
-          cout << i << " isMuRRM" << endl; 
+          //cout << i << " isMuRRM" << endl; 
           //calculate the minimum eta
           RRMminEta = fabs(muEta[0]);
           RRMmaxEta = fabs(muEta[0]);
@@ -1322,7 +1517,7 @@ void ReaderME0_digibased()
 
        if ( isMuRCC )  
        { 
-          cout << i << " isMuRCC" << endl; 
+          //cout << i << " isMuRCC" << endl; 
           //calculate the minimum eta
           RCCminEta = fabs(muEta[0]);
           RCCmaxEta = fabs(muEta[0]);
@@ -1346,7 +1541,7 @@ void ReaderME0_digibased()
 
        if ( isMuRCG )  
        { 
-          cout << i << " isMuRCG" << endl; 
+          //cout << i << " isMuRCG" << endl; 
           //calculate the minimum eta
           RCGminEta = fabs(muEta[0]);
           RCGmaxEta = fabs(muEta[0]);
@@ -1370,7 +1565,7 @@ void ReaderME0_digibased()
 
        if ( isMuRCM )  
        { 
-          cout << i << " isMuRCM" << endl;                                                     
+          //cout << i << " isMuRCM" << endl;                                                     
           //calculate the minimum eta
           RCMminEta = fabs(muEta[0]);
           RCMmaxEta = fabs(muEta[0]);
@@ -1394,7 +1589,7 @@ void ReaderME0_digibased()
 
        if ( isMuRGG )  
        { 
-          cout << i << " isMuRGG" << endl; 
+          //cout << i << " isMuRGG" << endl; 
           //calculate the minimum eta
           RGGminEta = fabs(muEta[0]);
           RGGmaxEta = fabs(muEta[0]);
@@ -1419,7 +1614,7 @@ void ReaderME0_digibased()
 
        if ( isMuRGM )  
        { 
-          cout << i << " isMuRGM" << endl; 
+          //cout << i << " isMuRGM" << endl; 
           //calculate the minimum eta
           RGMminEta = fabs(muEta[0]);
           RGMmaxEta = fabs(muEta[0]);
@@ -1443,7 +1638,7 @@ void ReaderME0_digibased()
 
        if ( isMuRMM )  
        { 
-          cout << i << " isMuRMM" << endl; 
+          //cout << i << " isMuRMM" << endl; 
           //calculate the minimum eta
           RMMminEta = fabs(muEta[0]);
           RMMmaxEta = fabs(muEta[0]);
@@ -1467,7 +1662,7 @@ void ReaderME0_digibased()
 
        if ( isMuCCC )  
        { 
-          cout << i << " isMuCCC" << endl; 
+          //cout << i << " isMuCCC" << endl; 
           //calculate the minimum eta
           CCCminEta = fabs(muEta[0]);
           CCCmaxEta = fabs(muEta[0]);
@@ -1491,7 +1686,7 @@ void ReaderME0_digibased()
 
        if ( isMuCCG )  
        { 
-          cout << i << " isMuCCG" << endl; 
+          //cout << i << " isMuCCG" << endl; 
           //calculate the minimum eta
           CCGminEta = fabs(muEta[0]);
           CCGmaxEta = fabs(muEta[0]);
@@ -1515,7 +1710,7 @@ void ReaderME0_digibased()
 
        if ( isMuCCM )  
        { 
-          cout << i << " isMuCCM" << endl; 
+          //cout << i << " isMuCCM" << endl; 
           //calculate the minimum eta
           CCMminEta = fabs(muEta[0]);
           CCMmaxEta = fabs(muEta[0]);
@@ -1539,7 +1734,7 @@ void ReaderME0_digibased()
 
        if ( isMuCGG )  
        { 
-          cout << i << " isMuCGG" << endl; 
+          //cout << i << " isMuCGG" << endl; 
           //calculate the minimum eta
           CGGminEta = fabs(muEta[0]);
           CGGmaxEta = fabs(muEta[0]);
@@ -1563,7 +1758,7 @@ void ReaderME0_digibased()
 
        if ( isMuCGM )  
        { 
-          cout << i << " isMuCGM" << endl; 
+          //cout << i << " isMuCGM" << endl; 
           //calculate the minimum eta
           CGMminEta = fabs(muEta[0]);
           CGMmaxEta = fabs(muEta[0]);
@@ -1587,7 +1782,7 @@ void ReaderME0_digibased()
 
        if ( isMuCMM )  
        { 
-          cout << i << " isMuCMM" << endl; 
+          //cout << i << " isMuCMM" << endl; 
           //calculate the minimum eta
           CMMminEta = fabs(muEta[0]);
           CMMmaxEta = fabs(muEta[0]);
@@ -1611,7 +1806,7 @@ void ReaderME0_digibased()
 
        if ( isMuGGG )  
        { 
-          cout << i << " isMuGGG" << endl; 
+          //cout << i << " isMuGGG" << endl; 
           //calculate the minimum eta
           GGGminEta = fabs(muEta[0]);
           GGGmaxEta = fabs(muEta[0]);
@@ -1635,7 +1830,7 @@ void ReaderME0_digibased()
 
        if ( isMuGGM )  
        { 
-          cout << i << " isMuGGM" << endl; 
+          //cout << i << " isMuGGM" << endl; 
           //calculate the minimum eta
           GGMminEta = fabs(muEta[0]);
           GGMmaxEta = fabs(muEta[0]);
@@ -1659,7 +1854,7 @@ void ReaderME0_digibased()
 
        if ( isMuGMM )  
        { 
-          cout << i << " isMuGMM" << endl; 
+          //cout << i << " isMuGMM" << endl; 
           //calculate the minimum eta
           GMMminEta = fabs(muEta[0]);
           GMMmaxEta = fabs(muEta[0]);
@@ -1683,7 +1878,7 @@ void ReaderME0_digibased()
 
        if ( isMuMMM )  
        { 
-          cout << i << " isMuMMM" << endl; 
+          //cout << i << " isMuMMM" << endl; 
           //calculate the minimum eta
           MMMminEta = fabs(muEta[0]);
           MMMmaxEta = fabs(muEta[0]);
@@ -1707,49 +1902,153 @@ void ReaderME0_digibased()
 
     }
 
+   TCanvas *c3 = new TCanvas("c3", "c3",15,49,1051,500);   
+   
+   h_PtVsEta_TripleVisible->SetTitle("Triple Mu Visible (Digibased)");
+   h_PtVsEta_TripleVisible->Draw("COLZ");
 
    //-------------------END LOOP ON EVENTS-------------------------------------
    //--------------------------------------------------------------------------
    //------------------START ACTIONS ON SUMMARY TREE---------------------------
  
-   //calculate the rate
-   DDDrate = nMuDDD_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DDRrate = nMuDDR_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DDCrate = nMuDDC_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DDGrate = nMuDDG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DDMrate = nMuDDM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DRRrate = nMuDRR_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DRCrate = nMuDRC_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DRGrate = nMuDRG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DRMrate = nMuDRM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DCCrate = nMuDCC_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DCGrate = nMuDCG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DCMrate = nMuDCM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DGGrate = nMuDGG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DGMrate = nMuDGM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   DMMrate = nMuDMM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   //calculate the efficiency
+   DDDefficiency = float(nMuDDD_total)/float( lastEvent_total );
+   DDRefficiency = float(nMuDDR_total)/float( lastEvent_total );
+   DDCefficiency = float(nMuDDC_total)/float( lastEvent_total );
+   DDGefficiency = float(nMuDDG_total)/float( lastEvent_total );
+   DDMefficiency = float(nMuDDM_total)/float( lastEvent_total );
+   DRRefficiency = float(nMuDRR_total)/float( lastEvent_total );
+   DRCefficiency = float(nMuDRC_total)/float( lastEvent_total );
+   DRGefficiency = float(nMuDRG_total)/float( lastEvent_total );
+   DRMefficiency = float(nMuDRM_total)/float( lastEvent_total );
+   DCCefficiency = float(nMuDCC_total)/float( lastEvent_total );
+   DCGefficiency = float(nMuDCG_total)/float( lastEvent_total );
+   DCMefficiency = float(nMuDCM_total)/float( lastEvent_total );
+   DGGefficiency = float(nMuDGG_total)/float( lastEvent_total );
+   DGMefficiency = float(nMuDGM_total)/float( lastEvent_total );
+   DMMefficiency = float(nMuDMM_total)/float( lastEvent_total );
    
 
-   RRRrate = nMuRRR_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   RRCrate = nMuRRC_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   RRGrate = nMuRRG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   RRMrate = nMuRRM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   RCCrate = nMuRCC_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   RCGrate = nMuRCG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   RCMrate = nMuRCM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   RGGrate = nMuRGG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   RGMrate = nMuRGM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   RMMrate = nMuRMM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   CCCrate = nMuCCC_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   CCGrate = nMuCCG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   CCMrate = nMuCCM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   CGGrate = nMuCGG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   CGMrate = nMuCGM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   CMMrate = nMuCMM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   GGGrate = nMuGGG_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   GGMrate = nMuGGM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   GMMrate = nMuGMM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
-   MMMrate = nMuMMM_total/( lastEvent_total * 25.0 * 1e-9 ); //Hz
+   RRRefficiency = float(nMuRRR_total)/float( lastEvent_total );
+   RRCefficiency = float(nMuRRC_total)/float( lastEvent_total );
+   RRGefficiency = float(nMuRRG_total)/float( lastEvent_total );
+   RRMefficiency = float(nMuRRM_total)/float( lastEvent_total );
+   RCCefficiency = float(nMuRCC_total)/float( lastEvent_total );
+   RCGefficiency = float(nMuRCG_total)/float( lastEvent_total );
+   RCMefficiency = float(nMuRCM_total)/float( lastEvent_total );
+   RGGefficiency = float(nMuRGG_total)/float( lastEvent_total );
+   RGMefficiency = float(nMuRGM_total)/float( lastEvent_total );
+   RMMefficiency = float(nMuRMM_total)/float( lastEvent_total );
+   CCCefficiency = float(nMuCCC_total)/float( lastEvent_total );
+   CCGefficiency = float(nMuCCG_total)/float( lastEvent_total );
+   CCMefficiency = float(nMuCCM_total)/float( lastEvent_total );
+   CGGefficiency = float(nMuCGG_total)/float( lastEvent_total );
+   CGMefficiency = float(nMuCGM_total)/float( lastEvent_total );
+   CMMefficiency = float(nMuCMM_total)/float( lastEvent_total );
+   GGGefficiency = float(nMuGGG_total)/float( lastEvent_total );
+   GGMefficiency = float(nMuGGM_total)/float( lastEvent_total );
+   GMMefficiency = float(nMuGMM_total)/float( lastEvent_total );
+   MMMefficiency = float(nMuMMM_total)/float( lastEvent_total );
+
+   BBBefficiency = float(nBBB)/float(nMuTripleVisible);
+   BBOefficiency = float(nBBO)/float(nMuTripleVisible);
+   BBEefficiency = float(nBBE)/float(nMuTripleVisible);
+   BOOefficiency = float(nBOO)/float(nMuTripleVisible);
+   BOEefficiency = float(nBOE)/float(nMuTripleVisible);
+   BEEefficiency = float(nBEE)/float(nMuTripleVisible);
+   OOOefficiency = float(nOOO)/float(nMuTripleVisible);
+   OOEefficiency = float(nOOE)/float(nMuTripleVisible);
+   OEEefficiency = float(nOEE)/float(nMuTripleVisible);
+   EEEefficiency = float(nEEE)/float(nMuTripleVisible);
+   TripleME0efficiency = float(nMuMMM_total)/float(nMuTripleVisible);
+
+   cout << "Normalised on visible triplets: " << nMuTripleVisible << endl;
+   cout << "BBBefficiency: " << BBBefficiency << endl;
+   cout << "BBOefficiency: " << BBOefficiency << endl;
+   cout << "BBEefficiency: " << BBEefficiency << endl;
+   cout << "BOOefficiency: " << BOOefficiency << endl;
+   cout << "BOEefficiency: " << BOEefficiency << endl;
+   cout << "BEEefficiency: " << BEEefficiency << endl;
+   cout << "OOOefficiency: " << OOOefficiency << endl;
+   cout << "OOEefficiency: " << OOEefficiency << endl;
+   cout << "OEEefficiency: " << OEEefficiency << endl;
+   cout << "EEEefficiency: " << EEEefficiency << endl;
+   cout << "TripleME0efficiency: " << TripleME0efficiency << endl;
+
+   BBBxsect = 4.568e+8*float(nBBB)/float(lastEvent_total);
+   BBOxsect = 4.568e+8*float(nBBO)/float(lastEvent_total);
+   BBExsect = 4.568e+8*float(nBBE)/float(lastEvent_total);
+   BOOxsect = 4.568e+8*float(nBOO)/float(lastEvent_total);
+   BOExsect = 4.568e+8*float(nBOE)/float(lastEvent_total);
+   BEExsect = 4.568e+8*float(nBEE)/float(lastEvent_total);
+   OOOxsect = 4.568e+8*float(nOOO)/float(lastEvent_total);
+   OOExsect = 4.568e+8*float(nOOE)/float(lastEvent_total);
+   OEExsect = 4.568e+8*float(nOEE)/float(lastEvent_total);
+   EEExsect = 4.568e+8*float(nEEE)/float(lastEvent_total);
+   TripleME0xsect = 4.568e+8*float(nMuMMM_total)/float(lastEvent_total);
+
+   BBBxsectErr = sqrt( pow( float(nBBB)/float(lastEvent_total), 2)*pow( 5.19e+7 , 2) + pow( float(BBBxsect)/float(lastEvent_total) , 2)*float(nBBB) );
+   BBOxsectErr = sqrt( pow( float(nBBO)/float(lastEvent_total), 2)*pow( 5.19e+7 , 2) + pow( float(BBOxsect)/float(lastEvent_total) , 2)*float(nBBO) );
+   BBExsectErr = sqrt( pow( float(nBBE)/float(lastEvent_total), 2)*pow( 5.19e+7 , 2) + pow( float(BBExsect)/float(lastEvent_total) , 2)*float(nBBE) );
+   BOOxsectErr = sqrt( pow( float(nBOO)/float(lastEvent_total), 2)*pow( 5.19e+7 , 2) + pow( float(BOOxsect)/float(lastEvent_total) , 2)*float(nBOO) );
+   BOExsectErr = sqrt( pow( float(nBOE)/float(lastEvent_total), 2)*pow( 5.19e+7 , 2) + pow( float(BOExsect)/float(lastEvent_total) , 2)*float(nBOE) );
+   BEExsectErr = sqrt( pow( float(nBEE)/float(lastEvent_total), 2)*pow( 5.19e+7 , 2) + pow( float(BEExsect)/float(lastEvent_total) , 2)*float(nBEE) );
+   OOOxsectErr = sqrt( pow( float(nOOO)/float(lastEvent_total), 2)*pow( 5.19e+7 , 2) + pow( float(OOOxsect)/float(lastEvent_total) , 2)*float(nOOO) );
+   OOExsectErr = sqrt( pow( float(nOOE)/float(lastEvent_total), 2)*pow( 5.19e+7 , 2) + pow( float(OOExsect)/float(lastEvent_total) , 2)*float(nOOE) );
+   OEExsectErr = sqrt( pow( float(nOEE)/float(lastEvent_total), 2)*pow( 5.19e+7 , 2) + pow( float(OEExsect)/float(lastEvent_total) , 2)*float(nOEE) );
+   EEExsectErr = sqrt( pow( float(nEEE)/float(lastEvent_total), 2)*pow( 5.19e+7 , 2) + pow( float(EEExsect)/float(lastEvent_total) , 2)*float(nEEE) );
+   TripleME0xsectErr = sqrt( pow( float(nMuMMM_total)/float(lastEvent_total), 2)*pow( 5.19e+7 , 2) + pow( float(nMuMMM_total)/float(lastEvent_total) , 2)*float(nMuMMM_total) );
+
+   cout << "BBBxsect: " << BBBxsect << " +- " << BBBxsectErr << " pb" << endl;
+   cout << "BBOxsect: " << BBOxsect << " +- " << BBOxsectErr << " pb" << endl;
+   cout << "BBExsect: " << BBExsect << " +- " << BBExsectErr << " pb" << endl;
+   cout << "BOOxsect: " << BOOxsect << " +- " << BOOxsectErr << " pb" << endl;
+   cout << "BOExsect: " << BOExsect << " +- " << BOExsectErr << " pb" << endl;
+   cout << "BEExsect: " << BEExsect << " +- " << BEExsectErr << " pb" << endl;
+   cout << "OOOxsect: " << OOOxsect << " +- " << OOOxsectErr << " pb" << endl;
+   cout << "OOExsect: " << OOExsect << " +- " << OOExsectErr << " pb" << endl;
+   cout << "OEExsect: " << OEExsect << " +- " << OEExsectErr << " pb" << endl;
+   cout << "EEExsect: " << EEExsect << " +- " << EEExsectErr << " pb" << endl;
+   cout << "TripleME0xsect: " << TripleME0xsect << " +- " << TripleME0xsectErr << " pb" << endl;
+
+   float scaleFactorBRB0andDs = 0.0366466688397; 
+   float scaleFactorBRB0andDsErr = 0.00238463893285;
+
+   BBBxsectRescaled = BBBxsect*scaleFactorBRB0andDs;
+   BBOxsectRescaled = BBOxsect*scaleFactorBRB0andDs;
+   BBExsectRescaled = BBExsect*scaleFactorBRB0andDs;
+   BOOxsectRescaled = BOOxsect*scaleFactorBRB0andDs;
+   BOExsectRescaled = BOExsect*scaleFactorBRB0andDs;
+   BEExsectRescaled = BEExsect*scaleFactorBRB0andDs;
+   OOOxsectRescaled = OOOxsect*scaleFactorBRB0andDs;
+   OOExsectRescaled = OOExsect*scaleFactorBRB0andDs;
+   OEExsectRescaled = OEExsect*scaleFactorBRB0andDs;
+   EEExsectRescaled = EEExsect*scaleFactorBRB0andDs;
+   TripleME0xsectRescaled = TripleME0xsect*scaleFactorBRB0andDs;
+
+   BBBxsectRescaledErr = sqrt( pow( (BBBxsectErr*scaleFactorBRB0andDs),2) + pow( (BBBxsect*scaleFactorBRB0andDsErr),2) );
+   BBOxsectRescaledErr = sqrt( pow( (BBOxsectErr*scaleFactorBRB0andDs),2) + pow( (BBOxsect*scaleFactorBRB0andDsErr),2) );
+   BBExsectRescaledErr = sqrt( pow( (BBExsectErr*scaleFactorBRB0andDs),2) + pow( (BBExsect*scaleFactorBRB0andDsErr),2) );
+   BOOxsectRescaledErr = sqrt( pow( (BOOxsectErr*scaleFactorBRB0andDs),2) + pow( (BOOxsect*scaleFactorBRB0andDsErr),2) );
+   BOExsectRescaledErr = sqrt( pow( (BOExsectErr*scaleFactorBRB0andDs),2) + pow( (BOExsect*scaleFactorBRB0andDsErr),2) );
+   BEExsectRescaledErr = sqrt( pow( (BEExsectErr*scaleFactorBRB0andDs),2) + pow( (BEExsect*scaleFactorBRB0andDsErr),2) );
+   OOOxsectRescaledErr = sqrt( pow( (OOOxsectErr*scaleFactorBRB0andDs),2) + pow( (OOOxsect*scaleFactorBRB0andDsErr),2) );
+   OOExsectRescaledErr = sqrt( pow( (OOExsectErr*scaleFactorBRB0andDs),2) + pow( (OOExsect*scaleFactorBRB0andDsErr),2) );
+   OEExsectRescaledErr = sqrt( pow( (OEExsectErr*scaleFactorBRB0andDs),2) + pow( (OEExsect*scaleFactorBRB0andDsErr),2) );
+   EEExsectRescaledErr = sqrt( pow( (EEExsectErr*scaleFactorBRB0andDs),2) + pow( (EEExsect*scaleFactorBRB0andDsErr),2) );
+   TripleME0xsectRescaledErr = sqrt( pow( (TripleME0xsectErr*scaleFactorBRB0andDs),2) + pow( (TripleME0xsect*scaleFactorBRB0andDsErr),2) );
+
+   cout << "BBBxsectRescaled: " << BBBxsectRescaled << " +- " << BBBxsectRescaledErr << " pb" << endl;
+   cout << "BBOxsectRescaled: " << BBOxsectRescaled << " +- " << BBOxsectRescaledErr << " pb" << endl;
+   cout << "BBExsectRescaled: " << BBExsectRescaled << " +- " << BBExsectRescaledErr << " pb" << endl;
+   cout << "BOOxsectRescaled: " << BOOxsectRescaled << " +- " << BOOxsectRescaledErr << " pb" << endl;
+   cout << "BOExsectRescaled: " << BOExsectRescaled << " +- " << BOExsectRescaledErr << " pb" << endl;
+   cout << "BEExsectRescaled: " << BEExsectRescaled << " +- " << BEExsectRescaledErr << " pb" << endl;
+   cout << "OOOxsectRescaled: " << OOOxsectRescaled << " +- " << OOOxsectRescaledErr << " pb" << endl;
+   cout << "OOExsectRescaled: " << OOExsectRescaled << " +- " << OOExsectRescaledErr << " pb" << endl;
+   cout << "OEExsectRescaled: " << OEExsectRescaled << " +- " << OEExsectRescaledErr << " pb" << endl;
+   cout << "EEExsectRescaled: " << EEExsectRescaled << " +- " << EEExsectRescaledErr << " pb" << endl;
+   cout << "TripleME0xsectRescaled: " << TripleME0xsectRescaled << " +- " << TripleME0xsectRescaledErr << " pb" << endl;
 
 
    //Fill summary tree
@@ -1757,10 +2056,7 @@ void ReaderME0_digibased()
 
 
 
-    outfile->Write();   
-
-
-
+   outfile->Write();   
 
 
 /*   std::ofstream summaryFile ("summaryDigibased.txt");
@@ -1772,8 +2068,9 @@ void ReaderME0_digibased()
 
 
 
-
-
+   c1->SaveAs("topology_digibased_all.png");
+   c2->SaveAs("topology_digibased_onlyVisible.png");
+   c3->SaveAs("allMuFromTau3Mu_PtVsEta_digibased.png");
 
 
 
