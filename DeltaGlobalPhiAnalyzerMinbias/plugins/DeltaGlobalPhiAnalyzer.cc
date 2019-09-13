@@ -43,12 +43,21 @@
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "Geometry/GEMGeometry/interface/ME0Geometry.h"
+#include "Geometry/CSCGeometry/interface/CSCGeometry.h"
+#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
+#include "Geometry/DTGeometry/interface/DTGeometry.h"
+#include "Geometry/RPCGeometry/interface/RPCGeometry.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/GEMDigi/interface/ME0Digi.h"
 #include "DataFormats/GEMRecHit/interface/ME0SegmentCollection.h"
 #include "DataFormats/GEMRecHit/interface/ME0Segment.h"
+#include "DataFormats/GEMRecHit/interface/GEMSegmentCollection.h"
+#include "DataFormats/GEMRecHit/interface/GEMSegment.h"
+#include "DataFormats/CSCRecHit/interface/CSCSegmentCollection.h"
+#include "DataFormats/CSCRecHit/interface/CSCSegment.h"
 #include "DataFormats/MuonData/interface/MuonDigiCollection.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
 #include "Geometry/GEMGeometry/interface/ME0EtaPartitionSpecs.h"
 #include "Geometry/GEMGeometry/interface/ME0EtaPartition.h"
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
@@ -59,8 +68,13 @@
 #include "DataFormats/GEMDigi/interface/ME0PadDigi.h"
 #include "DataFormats/GEMDigi/interface/ME0PadDigiCluster.h"
 #include "DataFormats/GEMDigi/interface/ME0PadDigiClusterCollection.h"
+#include "DataFormats/L1Trigger/interface/BXVector.h"
+#include "DataFormats/L1TMuon/interface/RegionalMuonCand.h"
+#include "DataFormats/L1TMuon/interface/RegionalMuonCandFwd.h"
+
 //#include "RecoLocalMuon/GEMSegment/plugins/GEMSegmentAlgorithm.h"
 #include "SimDataFormats/TrackingHit/interface/PSimHit.h"
+#include "SimDataFormats/Track/interface/SimTrackContainer.h"
 
 //#include "typedefs.h"
 
@@ -145,11 +159,19 @@ class DeltaGlobalPhiAnalyzerMinbias : public edm::one::EDAnalyzer<edm::one::Shar
 
       // ----------member data ---------------------------
       edm::EDGetTokenT<ME0SegmentCollection> ME0SegmentToken_;
+      edm::EDGetTokenT<CSCSegmentCollection> CSCSegmentToken_;
+      edm::EDGetTokenT<GEMSegmentCollection> GEMSegmentToken_;
       edm::EDGetTokenT<GenParticleCollection> genToken_;
       edm::EDGetTokenT<MuonDigiCollection<ME0DetId,ME0Digi>> ME0DigiToken_;
       edm::EDGetTokenT<MuonDigiCollection<ME0DetId,ME0PadDigi>> ME0PadDigiToken_;
       edm::EDGetTokenT<MuonDigiCollection<ME0DetId,ME0PadDigiCluster>> ME0PadDigiClusterToken_;
       edm::EDGetTokenT<vector<PSimHit>> ME0SimHitToken_;
+      edm::EDGetTokenT<vector<PSimHit>> CSCSimHitToken_;
+      edm::EDGetTokenT<vector<PSimHit>> GEMSimHitToken_;
+      edm::EDGetTokenT<vector<PSimHit>> RPCSimHitToken_;
+      edm::EDGetTokenT<vector<PSimHit>> DTSimHitToken_;
+      edm::EDGetTokenT<vector<SimTrack>> simTrackToken_;
+      edm::EDGetTokenT<BXVector<l1t::RegionalMuonCand>> L1TSegmentToken_;
 
       bool v = 1 ; //verbose initialization
       bool reco = 1; //reco initialization (to digi based)
@@ -164,6 +186,92 @@ class DeltaGlobalPhiAnalyzerMinbias : public edm::one::EDAnalyzer<edm::one::Shar
       TH2F * h_Pt2D_max	;
       TH2F * h_Pt2D_min	;
       TH3F * h_Pt3D	;
+      TH2F * h_xy_strange;
+      TH2F * h_xy_strangeEP1;
+      TH2F * h_xy_strangeEP2;
+      TH2F * h_xy_strangeEP3;
+      TH2F * h_xy_strangeEP4;
+      TH2F * h_xy_strangeEP5;
+      TH2F * h_xy_strangeEP6;
+      TH2F * h_xy_strangeEP7;
+      TH2F * h_xy_strangeEP8;
+      TH1F * h_z_strange;
+      TH1F * h_z_strangeEP1;
+      TH1F * h_z_strangeEP2;
+      TH1F * h_z_strangeEP3;
+      TH1F * h_z_strangeEP4;
+      TH1F * h_z_strangeEP5;
+      TH1F * h_z_strangeEP6;
+      TH1F * h_z_strangeEP7;
+      TH1F * h_z_strangeEP8;
+
+   //histograms muons tau->3mu
+   const Int_t ptBins = 70;
+   const Int_t etaBins = 50;
+   Double_t ptEdges[ 71 ];
+   Double_t etaEdges[ 51 ]; 
+   TH2F * h_nMuNNN_PtVsEta;   
+   TH2F * h_nMuNND_PtVsEta;   
+   TH2F * h_nMuNNR_PtVsEta;   
+   TH2F * h_nMuNNC_PtVsEta;   
+   TH2F * h_nMuNNG_PtVsEta;   
+   TH2F * h_nMuNNM_PtVsEta;   
+   TH2F * h_nMuNDD_PtVsEta;   
+   TH2F * h_nMuNDR_PtVsEta;   
+   TH2F * h_nMuNDC_PtVsEta;   
+   TH2F * h_nMuNDG_PtVsEta;   
+   TH2F * h_nMuNDM_PtVsEta;   
+   TH2F * h_nMuNRR_PtVsEta;   
+   TH2F * h_nMuNRC_PtVsEta;   
+   TH2F * h_nMuNRG_PtVsEta;   
+   TH2F * h_nMuNRM_PtVsEta;   
+   TH2F * h_nMuNCC_PtVsEta;   
+   TH2F * h_nMuNCG_PtVsEta;   
+   TH2F * h_nMuNCM_PtVsEta;   
+   TH2F * h_nMuNGG_PtVsEta;   
+   TH2F * h_nMuNGM_PtVsEta;   
+   TH2F * h_nMuNMM_PtVsEta; 
+  
+   TH2F * h_nMuDDD_PtVsEta;   
+   TH2F * h_nMuDDR_PtVsEta;   
+   TH2F * h_nMuDDC_PtVsEta;   
+   TH2F * h_nMuDDG_PtVsEta;   
+   TH2F * h_nMuDDM_PtVsEta;   
+   TH2F * h_nMuDRR_PtVsEta;   
+   TH2F * h_nMuDRC_PtVsEta;   
+   TH2F * h_nMuDRG_PtVsEta;   
+   TH2F * h_nMuDRM_PtVsEta;   
+   TH2F * h_nMuDCC_PtVsEta;   
+   TH2F * h_nMuDCG_PtVsEta;   
+   TH2F * h_nMuDCM_PtVsEta;   
+   TH2F * h_nMuDGG_PtVsEta;   
+   TH2F * h_nMuDGM_PtVsEta;   
+   TH2F * h_nMuDMM_PtVsEta;   
+
+   TH2F * h_nMuRRR_PtVsEta;   
+   TH2F * h_nMuRRC_PtVsEta;   
+   TH2F * h_nMuRRG_PtVsEta;   
+   TH2F * h_nMuRRM_PtVsEta;   
+   TH2F * h_nMuRCC_PtVsEta;   
+   TH2F * h_nMuRCG_PtVsEta;   
+   TH2F * h_nMuRCM_PtVsEta;   
+   TH2F * h_nMuRGG_PtVsEta;   
+   TH2F * h_nMuRGM_PtVsEta;   
+   TH2F * h_nMuRMM_PtVsEta;   
+
+   TH2F * h_nMuCCC_PtVsEta;   
+   TH2F * h_nMuCCG_PtVsEta;   
+   TH2F * h_nMuCCM_PtVsEta;   
+   TH2F * h_nMuCGG_PtVsEta;   
+   TH2F * h_nMuCGM_PtVsEta;   
+   TH2F * h_nMuCMM_PtVsEta;   
+
+   TH2F * h_nMuGGG_PtVsEta;   
+   TH2F * h_nMuGGM_PtVsEta;   
+   TH2F * h_nMuGMM_PtVsEta;   
+
+   TH2F * h_nMuMMM_PtVsEta;   
+
 
    std::map<ME0DetId,vector<float>> deltaPhiMap;
    std::map<ME0DetId,vector<float>> alphaMap;
@@ -235,7 +343,9 @@ class DeltaGlobalPhiAnalyzerMinbias : public edm::one::EDAnalyzer<edm::one::Shar
    Int_t doubleME0nearQuality2Veto2count[15], tripleME0nearQuality2Veto2count[35];
    Int_t doubleME0nearQuality2Veto3count[15], tripleME0nearQuality2Veto3count[35];
    Int_t doubleME0closecount[15], tripleME0closecount[35];
-   Int_t multiplicity[5];
+   Int_t multiplicityME0[5];
+   Int_t multiplicityCSC[5];
+   Int_t multiplicityGEM[5];
    Float_t singleME0rate[5];
    Float_t singleME0Quality0rate[5];
    Float_t singleME0Quality1rate[5];
@@ -449,10 +559,138 @@ class DeltaGlobalPhiAnalyzerMinbias : public edm::one::EDAnalyzer<edm::one::Shar
    Bool_t is_doubleME0nearQuality2Veto2[15], is_tripleME0nearQuality2Veto2[35];
    Bool_t is_doubleME0nearQuality2Veto3[15], is_tripleME0nearQuality2Veto3[35];
    Bool_t is_doubleME0close[15], is_tripleME0close[35];
-   Int_t nEvent = 0;
+  
+   //CSC
+   Bool_t is_singleCSC[5];
+   Bool_t is_singleCSCQuality0[5];
+   Bool_t is_singleCSCQuality1[5];
+   Bool_t is_singleCSCQuality2[5];
+   Bool_t is_singleCSCVeto0[5];
+   Bool_t is_singleCSCVeto1[5];
+   Bool_t is_singleCSCVeto2[5];
+   Bool_t is_singleCSCVeto3[5];
+   Bool_t is_singleCSCQuality0Veto0[5];
+   Bool_t is_singleCSCQuality0Veto1[5];
+   Bool_t is_singleCSCQuality0Veto2[5];
+   Bool_t is_singleCSCQuality0Veto3[5];
+   Bool_t is_singleCSCQuality1Veto0[5];
+   Bool_t is_singleCSCQuality1Veto1[5];
+   Bool_t is_singleCSCQuality1Veto2[5];
+   Bool_t is_singleCSCQuality1Veto3[5];
+   Bool_t is_singleCSCQuality2Veto0[5];
+   Bool_t is_singleCSCQuality2Veto1[5];
+   Bool_t is_singleCSCQuality2Veto2[5];
+   Bool_t is_singleCSCQuality2Veto3[5];
+   Bool_t is_doubleCSC[15], is_tripleCSC[35];
+   Bool_t is_doubleCSCnear[15], is_tripleCSCnear[35];
+   Bool_t is_doubleCSCnearQuality0[15], is_tripleCSCnearQuality0[35];
+   Bool_t is_doubleCSCnearQuality1[15], is_tripleCSCnearQuality1[35];
+   Bool_t is_doubleCSCnearQuality2[15], is_tripleCSCnearQuality2[35];
+   Bool_t is_doubleCSCnearVeto0[15], is_tripleCSCnearVeto0[35];
+   Bool_t is_doubleCSCnearVeto1[15], is_tripleCSCnearVeto1[35];
+   Bool_t is_doubleCSCnearVeto2[15], is_tripleCSCnearVeto2[35];
+   Bool_t is_doubleCSCnearVeto3[15], is_tripleCSCnearVeto3[35];
+   Bool_t is_doubleCSCnearQuality0Veto0[15], is_tripleCSCnearQuality0Veto0[35];
+   Bool_t is_doubleCSCnearQuality0Veto1[15], is_tripleCSCnearQuality0Veto1[35];
+   Bool_t is_doubleCSCnearQuality0Veto2[15], is_tripleCSCnearQuality0Veto2[35];
+   Bool_t is_doubleCSCnearQuality0Veto3[15], is_tripleCSCnearQuality0Veto3[35];
+   Bool_t is_doubleCSCnearQuality1Veto0[15], is_tripleCSCnearQuality1Veto0[35];
+   Bool_t is_doubleCSCnearQuality1Veto1[15], is_tripleCSCnearQuality1Veto1[35];
+   Bool_t is_doubleCSCnearQuality1Veto2[15], is_tripleCSCnearQuality1Veto2[35];
+   Bool_t is_doubleCSCnearQuality1Veto3[15], is_tripleCSCnearQuality1Veto3[35];
+   Bool_t is_doubleCSCnearQuality2Veto0[15], is_tripleCSCnearQuality2Veto0[35];
+   Bool_t is_doubleCSCnearQuality2Veto1[15], is_tripleCSCnearQuality2Veto1[35];
+   Bool_t is_doubleCSCnearQuality2Veto2[15], is_tripleCSCnearQuality2Veto2[35];
+   Bool_t is_doubleCSCnearQuality2Veto3[15], is_tripleCSCnearQuality2Veto3[35];
+   Bool_t is_doubleCSCclose[15], is_tripleCSCclose[35];
+
+   //GEM
+   Bool_t is_singleGEM[5];
+   Bool_t is_singleGEMQuality0[5];
+   Bool_t is_singleGEMQuality1[5];
+   Bool_t is_singleGEMQuality2[5];
+   Bool_t is_singleGEMVeto0[5];
+   Bool_t is_singleGEMVeto1[5];
+   Bool_t is_singleGEMVeto2[5];
+   Bool_t is_singleGEMVeto3[5];
+   Bool_t is_singleGEMQuality0Veto0[5];
+   Bool_t is_singleGEMQuality0Veto1[5];
+   Bool_t is_singleGEMQuality0Veto2[5];
+   Bool_t is_singleGEMQuality0Veto3[5];
+   Bool_t is_singleGEMQuality1Veto0[5];
+   Bool_t is_singleGEMQuality1Veto1[5];
+   Bool_t is_singleGEMQuality1Veto2[5];
+   Bool_t is_singleGEMQuality1Veto3[5];
+   Bool_t is_singleGEMQuality2Veto0[5];
+   Bool_t is_singleGEMQuality2Veto1[5];
+   Bool_t is_singleGEMQuality2Veto2[5];
+   Bool_t is_singleGEMQuality2Veto3[5];
+   Bool_t is_doubleGEM[15], is_tripleGEM[35];
+   Bool_t is_doubleGEMnear[15], is_tripleGEMnear[35];
+   Bool_t is_doubleGEMnearQuality0[15], is_tripleGEMnearQuality0[35];
+   Bool_t is_doubleGEMnearQuality1[15], is_tripleGEMnearQuality1[35];
+   Bool_t is_doubleGEMnearQuality2[15], is_tripleGEMnearQuality2[35];
+   Bool_t is_doubleGEMnearVeto0[15], is_tripleGEMnearVeto0[35];
+   Bool_t is_doubleGEMnearVeto1[15], is_tripleGEMnearVeto1[35];
+   Bool_t is_doubleGEMnearVeto2[15], is_tripleGEMnearVeto2[35];
+   Bool_t is_doubleGEMnearVeto3[15], is_tripleGEMnearVeto3[35];
+   Bool_t is_doubleGEMnearQuality0Veto0[15], is_tripleGEMnearQuality0Veto0[35];
+   Bool_t is_doubleGEMnearQuality0Veto1[15], is_tripleGEMnearQuality0Veto1[35];
+   Bool_t is_doubleGEMnearQuality0Veto2[15], is_tripleGEMnearQuality0Veto2[35];
+   Bool_t is_doubleGEMnearQuality0Veto3[15], is_tripleGEMnearQuality0Veto3[35];
+   Bool_t is_doubleGEMnearQuality1Veto0[15], is_tripleGEMnearQuality1Veto0[35];
+   Bool_t is_doubleGEMnearQuality1Veto1[15], is_tripleGEMnearQuality1Veto1[35];
+   Bool_t is_doubleGEMnearQuality1Veto2[15], is_tripleGEMnearQuality1Veto2[35];
+   Bool_t is_doubleGEMnearQuality1Veto3[15], is_tripleGEMnearQuality1Veto3[35];
+   Bool_t is_doubleGEMnearQuality2Veto0[15], is_tripleGEMnearQuality2Veto0[35];
+   Bool_t is_doubleGEMnearQuality2Veto1[15], is_tripleGEMnearQuality2Veto1[35];
+   Bool_t is_doubleGEMnearQuality2Veto2[15], is_tripleGEMnearQuality2Veto2[35];
+   Bool_t is_doubleGEMnearQuality2Veto3[15], is_tripleGEMnearQuality2Veto3[35];
+   Bool_t is_doubleGEMclose[15], is_tripleGEMclose[35];
+
+
+   //define three different counters 
+   //nEventSel1 for the case with at least one muon in ME0 eta range coming from tau->3mu
+   //nEventSel2 for the case with at least two muon in ME0 eta range coming from tau->3mu
+   //nEventSel3 for the case with at least three muon in ME0 eta range coming from tau->3mu
+   Int_t nEvent = 0;  //total number of events             
    Int_t nEventSel = 0;
+
+   Int_t nEventDRCGM = 0;  
+   Int_t nEventRCGM = 0;  
+   /*Int_t nEventVis = 0;  //number of events visible in ME0
+   Int_t nEventSelME0 = 0;
+   Int_t nEventSelME01 = 0;
+   Int_t nEventSelME02 = 0;
+   Int_t nEventSelME03 = 0;
+   
+   Int_t nEventSelCSC1 = 0;
+   Int_t nEventSelCSC2 = 0;
+   Int_t nEventSelCSC3 = 0;
+
+   Int_t nEventSelGEM1 = 0;
+   Int_t nEventSelGEM2 = 0;
+   Int_t nEventSelGEM3 = 0;*/
+
    Int_t lastEvent = 0;
    Int_t lastEventSel = 0;
+
+   Int_t lastEventDRCGM = 0;
+   Int_t lastEventRCGM = 0;
+
+   /*Int_t lastEventVis = 0;
+   Int_t lastEventSelME0 = 0;
+   Int_t lastEventSelME01 = 0;
+   Int_t lastEventSelME02 = 0;
+   Int_t lastEventSelME03 = 0;
+
+   Int_t lastEventSelCSC1 = 0;  
+   Int_t lastEventSelCSC2 = 0;
+   Int_t lastEventSelCSC3 = 0;
+
+   Int_t lastEventSelGEM1 = 0;
+   Int_t lastEventSelGEM2 = 0;
+   Int_t lastEventSelGEM3 = 0;*/
    Int_t estimatedNmu = 0;
    TTree *tr;
    TTree *trSum;
@@ -498,6 +736,8 @@ class DeltaGlobalPhiAnalyzerMinbias : public edm::one::EDAnalyzer<edm::one::Shar
       float muPt[3]	;
       float muEta[3]	;
       float muP[3]	;
+      int muIdx[3];
+      int muTrackId[3];
       float muVxDeath[3]	;
       float muVyDeath[3]	;
       float muVzDeath[3]	;
@@ -507,6 +747,19 @@ class DeltaGlobalPhiAnalyzerMinbias : public edm::one::EDAnalyzer<edm::one::Shar
       float muPx[3]	;
       float muPy[3]	;
       float muPz[3]	;
+      bool isMuVisible[3]; //whether each muon is visibile by one of the detectors considered (i.e. has produced ME0SimHits)
+      bool isMuVisibleME0[3]; //whether each muon is visibile by ME0 
+      bool isMuVisibleCSC[3]; //whether each muon is visibile by CSC
+      bool isMuVisibleGEM[3]; //whether each muon is visibile by GEM 
+      bool isMuVisibleRPC[3]; //whether each muon is visibile by RPC 
+      bool isMuVisibleDT[3];  //whether each muon is visibile by DT
+      bool isMuVisibleNONE[3]; //the muon is seen by neither ME0, CSC, GEM, RPC, DT
+      int nVisibleMu;    //number of muons visible by all detectors considered (from 0 to 3)
+      int nVisibleMuME0;
+      int nVisibleMuCSC;
+      int nVisibleMuGEM;
+      int nVisibleMuRPC;
+      int nVisibleMuDT;
       int muStatus[3]	;
       float tauPt = 0	;
       float tauEta = 0	;
@@ -532,7 +785,164 @@ class DeltaGlobalPhiAnalyzerMinbias : public edm::one::EDAnalyzer<edm::one::Shar
       float mesonVxDeath = 0;
       float mesonVyDeath = 0;
       float mesonVzDeath = 0;
+
+      int nBarrel  = 0;                      
+      int nOverlap = 0;
+      int nEndcap  = 0;
+      int nEndcapME0  = 0;
+      int nForward   = 0;
+      int nBBB     = 0; // ten combiantions
+      int nBBO     = 0;                        
+      int nBBE     = 0;
+      int nBBF     = 0;
+      int nBOO     = 0;
+      int nBOE     = 0;
+      int nBOF     = 0;
+      int nBEE     = 0;
+      int nBEF     = 0;
+      int nBFF     = 0;
+
+      int nOOO     = 0;
+      int nOOE     = 0;
+      int nOOF     = 0;
+      int nOEE     = 0;
+      int nOEF     = 0;
+      int nOFF     = 0;
       
+      int nEEE     = 0;
+      int nEEF     = 0;
+      int nEFF     = 0;
+      
+      int nFFF     = 0;
+
+      int nEEEME0  = 0;
+
+      //Detectors combinations
+      Bool_t isMuNNN = 0;       Bool_t isMuDDD = 0;      Bool_t isMuRRR = 0;      Bool_t isMuCCC = 0;       
+      Bool_t isMuNND = 0;       Bool_t isMuDDR = 0;      Bool_t isMuRRC = 0;      Bool_t isMuCCG = 0;
+      Bool_t isMuNNR = 0;       Bool_t isMuDDC = 0;      Bool_t isMuRRG = 0;      Bool_t isMuCCM = 0;
+      Bool_t isMuNNC = 0;       Bool_t isMuDDG = 0;      Bool_t isMuRRM = 0;      Bool_t isMuCGG = 0;
+      Bool_t isMuNNG = 0;       Bool_t isMuDDM = 0;      Bool_t isMuRCC = 0;      Bool_t isMuCGM = 0;
+      Bool_t isMuNNM = 0;       Bool_t isMuDRR = 0;      Bool_t isMuRCG = 0;      Bool_t isMuCMM = 0;
+      Bool_t isMuNDD = 0;       Bool_t isMuDRC = 0;      Bool_t isMuRCM = 0;      
+      Bool_t isMuNDR = 0;       Bool_t isMuDRG = 0;      Bool_t isMuRGG = 0;      Bool_t isMuGGG = 0; 
+      Bool_t isMuNDC = 0;       Bool_t isMuDRM = 0;      Bool_t isMuRGM = 0;      Bool_t isMuGGM = 0;
+      Bool_t isMuNDG = 0;       Bool_t isMuDCC = 0;      Bool_t isMuRMM = 0;      Bool_t isMuGMM = 0;
+      Bool_t isMuNDM = 0;       Bool_t isMuDCG = 0;
+      Bool_t isMuNRR = 0;       Bool_t isMuDCM = 0;                               Bool_t isMuMMM = 0;
+      Bool_t isMuNRC = 0;       Bool_t isMuDGG = 0;
+      Bool_t isMuNRG = 0;       Bool_t isMuDGM = 0;
+      Bool_t isMuNRM = 0;       Bool_t isMuDMM = 0;
+      Bool_t isMuNCC = 0;
+      Bool_t isMuNCG = 0;
+      Bool_t isMuNCM = 0;
+      Bool_t isMuNGG = 0;
+      Bool_t isMuNGM = 0;
+      Bool_t isMuNMM = 0;
+
+      Bool_t isMuNN = 0;	Bool_t isMuDD = 0;   Bool_t isMuRR = 0;   Bool_t isMuCC = 0;    Bool_t isMuGG = 0;
+      Bool_t isMuND = 0;	Bool_t isMuDR = 0;   Bool_t isMuRC = 0;   Bool_t isMuCG = 0;    Bool_t isMuGM = 0;
+      Bool_t isMuNR = 0;	Bool_t isMuDC = 0;   Bool_t isMuRG = 0;   Bool_t isMuCM = 0;   
+      Bool_t isMuNC = 0;	Bool_t isMuDG = 0;   Bool_t isMuRM = 0;                         Bool_t isMuMM = 0;
+      Bool_t isMuNG = 0;	Bool_t isMuDM = 0;
+      Bool_t isMuNM = 0;
+
+      Bool_t isMuN = 0;
+      Bool_t isMuD = 0;
+      Bool_t isMuR = 0;
+      Bool_t isMuC = 0;
+      Bool_t isMuG = 0;
+      Bool_t isMuM = 0;
+
+
+      //Detector combinations summary
+      int nMuNNN = 0;       int nMuDDD = 0;      int nMuRRR = 0;      int nMuCCC = 0;       
+      int nMuNND = 0;       int nMuDDR = 0;      int nMuRRC = 0;      int nMuCCG = 0;
+      int nMuNNR = 0;       int nMuDDC = 0;      int nMuRRG = 0;      int nMuCCM = 0;
+      int nMuNNC = 0;       int nMuDDG = 0;      int nMuRRM = 0;      int nMuCGG = 0;
+      int nMuNNG = 0;       int nMuDDM = 0;      int nMuRCC = 0;      int nMuCGM = 0;
+      int nMuNNM = 0;       int nMuDRR = 0;      int nMuRCG = 0;      int nMuCMM = 0;
+      int nMuNDD = 0;       int nMuDRC = 0;      int nMuRCM = 0;
+      int nMuNDR = 0;       int nMuDRG = 0;      int nMuRGG = 0;      int nMuGGG = 0; 
+      int nMuNDC = 0;       int nMuDRM = 0;      int nMuRGM = 0;      int nMuGGM = 0;
+      int nMuNDG = 0;       int nMuDCC = 0;      int nMuRMM = 0;      int nMuGMM = 0;
+      int nMuNDM = 0;       int nMuDCG = 0;
+      int nMuNRR = 0;       int nMuDCM = 0;                           int nMuMMM = 0;
+      int nMuNRC = 0;       int nMuDGG = 0;
+      int nMuNRG = 0;       int nMuDGM = 0;
+      int nMuNRM = 0;       int nMuDMM = 0;
+      int nMuNCC = 0;
+      int nMuNCG = 0;
+      int nMuNCM = 0;
+      int nMuNGG = 0;
+      int nMuNGM = 0;
+      int nMuNMM = 0;
+
+      int nMuNN = 0;    int nMuDD = 0;   int nMuRR = 0;   int nMuCC = 0;    int nMuGG = 0;
+      int nMuND = 0;    int nMuDR = 0;   int nMuRC = 0;   int nMuCG = 0;    int nMuGM = 0;
+      int nMuNR = 0;    int nMuDC = 0;   int nMuRG = 0;   int nMuCM = 0;   
+      int nMuNC = 0;    int nMuDG = 0;   int nMuRM = 0;                     int nMuMM = 0;
+      int nMuNG = 0;    int nMuDM = 0;
+      int nMuNM = 0;    
+
+      int nMuN = 0;
+      int nMuD = 0;
+      int nMuR = 0;
+      int nMuC = 0;
+      int nMuG = 0;
+      int nMuM = 0;
+
+
+      int nIsMuVisibleMoreThanOneERR =0;
+
+      Bool_t isMuNNNpt[120];       Bool_t isMuDDDpt[120];      Bool_t isMuRRRpt[120];      Bool_t isMuCCCpt[120];       
+      Bool_t isMuNNDpt[120];       Bool_t isMuDDRpt[120];      Bool_t isMuRRCpt[120];      Bool_t isMuCCGpt[120];
+      Bool_t isMuNNRpt[120];       Bool_t isMuDDCpt[120];      Bool_t isMuRRGpt[120];      Bool_t isMuCCMpt[120];
+      Bool_t isMuNNCpt[120];       Bool_t isMuDDGpt[120];      Bool_t isMuRRMpt[120];      Bool_t isMuCGGpt[120];
+      Bool_t isMuNNGpt[120];       Bool_t isMuDDMpt[120];      Bool_t isMuRCCpt[120];      Bool_t isMuCGMpt[120];
+      Bool_t isMuNNMpt[120];       Bool_t isMuDRRpt[120];      Bool_t isMuRCGpt[120];      Bool_t isMuCMMpt[120];
+      Bool_t isMuNDDpt[120];       Bool_t isMuDRCpt[120];      Bool_t isMuRCMpt[120];      
+      Bool_t isMuNDRpt[120];       Bool_t isMuDRGpt[120];      Bool_t isMuRGGpt[120];      Bool_t isMuGGGpt[120]; 
+      Bool_t isMuNDCpt[120];       Bool_t isMuDRMpt[120];      Bool_t isMuRGMpt[120];      Bool_t isMuGGMpt[120];
+      Bool_t isMuNDGpt[120];       Bool_t isMuDCCpt[120];      Bool_t isMuRMMpt[120];      Bool_t isMuGMMpt[120];
+      Bool_t isMuNDMpt[120];       Bool_t isMuDCGpt[120];
+      Bool_t isMuNRRpt[120];       Bool_t isMuDCMpt[120];   	                       	   Bool_t isMuMMMpt[120];
+      Bool_t isMuNRCpt[120];       Bool_t isMuDGGpt[120];
+      Bool_t isMuNRGpt[120];       Bool_t isMuDGMpt[120];
+      Bool_t isMuNRMpt[120];       Bool_t isMuDMMpt[120];
+      Bool_t isMuNCCpt[120];
+      Bool_t isMuNCGpt[120];
+      Bool_t isMuNCMpt[120];
+      Bool_t isMuNGGpt[120];
+      Bool_t isMuNGMpt[120];
+      Bool_t isMuNMMpt[120];
+                                                                                                                   
+      int nMuNNNpt[120];       int nMuDDDpt[120];      int nMuRRRpt[120];      int nMuCCCpt[120];       
+      int nMuNNDpt[120];       int nMuDDRpt[120];      int nMuRRCpt[120];      int nMuCCGpt[120];
+      int nMuNNRpt[120];       int nMuDDCpt[120];      int nMuRRGpt[120];      int nMuCCMpt[120];
+      int nMuNNCpt[120];       int nMuDDGpt[120];      int nMuRRMpt[120];      int nMuCGGpt[120];
+      int nMuNNGpt[120];       int nMuDDMpt[120];      int nMuRCCpt[120];      int nMuCGMpt[120];
+      int nMuNNMpt[120];       int nMuDRRpt[120];      int nMuRCGpt[120];      int nMuCMMpt[120];
+      int nMuNDDpt[120];       int nMuDRCpt[120];      int nMuRCMpt[120];      
+      int nMuNDRpt[120];       int nMuDRGpt[120];      int nMuRGGpt[120];      int nMuGGGpt[120]; 
+      int nMuNDCpt[120];       int nMuDRMpt[120];      int nMuRGMpt[120];      int nMuGGMpt[120];
+      int nMuNDGpt[120];       int nMuDCCpt[120];      int nMuRMMpt[120];      int nMuGMMpt[120];
+      int nMuNDMpt[120];       int nMuDCGpt[120];
+      int nMuNRRpt[120];       int nMuDCMpt[120];                              int nMuMMMpt[120];
+      int nMuNRCpt[120];       int nMuDGGpt[120];
+      int nMuNRGpt[120];       int nMuDGMpt[120];
+      int nMuNRMpt[120];       int nMuDMMpt[120];
+      int nMuNCCpt[120];
+      int nMuNCGpt[120];
+      int nMuNCMpt[120];
+      int nMuNGGpt[120];
+      int nMuNGMpt[120];
+      int nMuNMMpt[120];
+
+      float maxPtAll=0;
+      float maxEtaAll =0;
+
+
       Bool_t mu_isME0[3]		;	//true if mu in 1.8 < |eta| < 3 
       Bool_t mu_isME0pos[3]	;       //true if mu in +1.8 < eta < +3
       Bool_t mu_isME0neg[3]	;       //true if mu in -1.8 < eta < -3
@@ -551,6 +961,8 @@ class DeltaGlobalPhiAnalyzerMinbias : public edm::one::EDAnalyzer<edm::one::Shar
 
       std::vector<Float_t> * deltaChamber = new std::vector<Float_t>(200) ;
 
+     int mismatchCount = 0;
+     int totalmismatchCount = 0;
 };
 
 //
@@ -565,9 +977,17 @@ class DeltaGlobalPhiAnalyzerMinbias : public edm::one::EDAnalyzer<edm::one::Shar
 // constructors and destructor
 //
 DeltaGlobalPhiAnalyzerMinbias::DeltaGlobalPhiAnalyzerMinbias(const edm::ParameterSet& iConfig):
-    ME0SegmentToken_(consumes<ME0SegmentCollection>(iConfig.getParameter<InputTag>("me0Segments")))//,
-//    genToken_(consumes<GenParticleCollection>(iConfig.getParameter<InputTag>("genParticles"))),
-//    ME0SimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("me0SimHits")))
+    ME0SegmentToken_(consumes<ME0SegmentCollection>(iConfig.getParameter<InputTag>("me0Segments"))),
+    CSCSegmentToken_(consumes<CSCSegmentCollection>(iConfig.getParameter<InputTag>("cscSegments"))),
+    GEMSegmentToken_(consumes<GEMSegmentCollection>(iConfig.getParameter<InputTag>("gemSegments"))),
+    //genToken_(consumes<GenParticleCollection>(iConfig.getParameter<InputTag>("genParticles"))),
+    //ME0SimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("me0SimHits"))),
+    //CSCSimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("cscSimHits"))),
+    //GEMSimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("gemSimHits"))),
+    //RPCSimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("rpcSimHits"))),
+    //DTSimHitToken_(consumes<vector<PSimHit>>(iConfig.getParameter<InputTag>("dtSimHits"))),
+    //simTrackToken_(consumes<vector<SimTrack>>(iConfig.getParameter<InputTag>("simTracks"))),
+    L1TSegmentToken_(consumes<BXVector<l1t::RegionalMuonCand>>(iConfig.getParameter<InputTag>("l1tSegments")))
 {
    //now do what ever initialization is needed
    usesResource("TFileService");
@@ -586,6 +1006,24 @@ DeltaGlobalPhiAnalyzerMinbias::DeltaGlobalPhiAnalyzerMinbias(const edm::Paramete
    h_Pt2D_max	= fs->make<TH2F>("h_Pt2D_max","h_Pt2D_max", 100, 0, 50, 100, 0, 50);
    h_Pt2D_min	= fs->make<TH2F>("h_Pt2D_min","h_Pt2D_min", 100, 0, 50, 100, 0, 50);
    h_Pt3D	= fs->make<TH3F>("h_Pt3D","h_Pt3D", 100, 0, 50, 100, 0, 50, 100, 0, 50);
+   h_xy_strange	= fs->make<TH2F>("h_xy_strange","h_xy_strange", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeEP1	= fs->make<TH2F>("h_xy_strangeEP1","h_xy_strangeEP1", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeEP2	= fs->make<TH2F>("h_xy_strangeEP2","h_xy_strangeEP2", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeEP3	= fs->make<TH2F>("h_xy_strangeEP3","h_xy_strangeEP3", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeEP4	= fs->make<TH2F>("h_xy_strangeEP4","h_xy_strangeEP4", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeEP5	= fs->make<TH2F>("h_xy_strangeEP5","h_xy_strangeEP5", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeEP6	= fs->make<TH2F>("h_xy_strangeEP6","h_xy_strangeEP6", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeEP7	= fs->make<TH2F>("h_xy_strangeEP7","h_xy_strangeEP7", 3000, -30, 30, 3000, -30, +30);         
+   h_xy_strangeEP8	= fs->make<TH2F>("h_xy_strangeEP8","h_xy_strangeEP8", 3000, -30, 30, 3000, -30, +30);         
+   h_z_strange	= fs->make<TH1F>("h_z_strange","h_z_strange", 1000, -1, +1);         
+   h_z_strangeEP1	= fs->make<TH1F>("h_z_strangeEP1","h_z_strangeEP1", 1000, -1, +1);         
+   h_z_strangeEP2	= fs->make<TH1F>("h_z_strangeEP2","h_z_strangeEP2", 1000, -1, +1);         
+   h_z_strangeEP3	= fs->make<TH1F>("h_z_strangeEP3","h_z_strangeEP3", 1000, -1, +1);         
+   h_z_strangeEP4	= fs->make<TH1F>("h_z_strangeEP4","h_z_strangeEP4", 1000, -1, +1);         
+   h_z_strangeEP5	= fs->make<TH1F>("h_z_strangeEP5","h_z_strangeEP5", 1000, -1, +1);         
+   h_z_strangeEP6	= fs->make<TH1F>("h_z_strangeEP6","h_z_strangeEP6", 1000, -1, +1);         
+   h_z_strangeEP7	= fs->make<TH1F>("h_z_strangeEP7","h_z_strangeEP7", 1000, -1, +1);         
+   h_z_strangeEP8	= fs->make<TH1F>("h_z_strangeEP8","h_z_strangeEP8", 1000, -1, +1);         
 
    tr = fs->make<TTree>("Event", "");
    trSum = fs->make<TTree>("EventSummary", "");
@@ -734,6 +1172,54 @@ DeltaGlobalPhiAnalyzerMinbias::DeltaGlobalPhiAnalyzerMinbias(const edm::Paramete
 
 				}
 
+   for ( int i=0; i<120; i++ )
+   {
+      isMuNNNpt[i]=0;       isMuDDDpt[i]=0;      isMuRRRpt[i]=0;      isMuCCCpt[i]=0;       
+      isMuNNDpt[i]=0;       isMuDDRpt[i]=0;      isMuRRCpt[i]=0;      isMuCCGpt[i]=0;             
+      isMuNNRpt[i]=0;       isMuDDCpt[i]=0;      isMuRRGpt[i]=0;      isMuCCMpt[i]=0;
+      isMuNNCpt[i]=0;       isMuDDGpt[i]=0;      isMuRRMpt[i]=0;      isMuCGGpt[i]=0;
+      isMuNNGpt[i]=0;       isMuDDMpt[i]=0;      isMuRCCpt[i]=0;      isMuCGMpt[i]=0;
+      isMuNNMpt[i]=0;       isMuDRRpt[i]=0;      isMuRCGpt[i]=0;      isMuCMMpt[i]=0;
+      isMuNDDpt[i]=0;       isMuDRCpt[i]=0;      isMuRCMpt[i]=0;      
+      isMuNDRpt[i]=0;       isMuDRGpt[i]=0;      isMuRGGpt[i]=0;      isMuGGGpt[i]=0; 
+      isMuNDCpt[i]=0;       isMuDRMpt[i]=0;      isMuRGMpt[i]=0;      isMuGGMpt[i]=0;
+      isMuNDGpt[i]=0;       isMuDCCpt[i]=0;      isMuRMMpt[i]=0;      isMuGMMpt[i]=0;
+      isMuNDMpt[i]=0;       isMuDCGpt[i]=0;
+      isMuNRRpt[i]=0;       isMuDCMpt[i]=0;                           isMuMMMpt[i]=0;
+      isMuNRCpt[i]=0;       isMuDGGpt[i]=0;
+      isMuNRGpt[i]=0;       isMuDGMpt[i]=0;
+      isMuNRMpt[i]=0;       isMuDMMpt[i]=0;
+      isMuNCCpt[i]=0;
+      isMuNCGpt[i]=0;
+      isMuNCMpt[i]=0;
+      isMuNGGpt[i]=0;
+      isMuNGMpt[i]=0;
+      isMuNMMpt[i]=0;
+
+      nMuNNNpt[i]=0;       nMuDDDpt[i]=0;      nMuRRRpt[i]=0;      nMuCCCpt[i]=0;       
+      nMuNNDpt[i]=0;       nMuDDRpt[i]=0;      nMuRRCpt[i]=0;      nMuCCGpt[i]=0;             
+      nMuNNRpt[i]=0;       nMuDDCpt[i]=0;      nMuRRGpt[i]=0;      nMuCCMpt[i]=0;
+      nMuNNCpt[i]=0;       nMuDDGpt[i]=0;      nMuRRMpt[i]=0;      nMuCGGpt[i]=0;
+      nMuNNGpt[i]=0;       nMuDDMpt[i]=0;      nMuRCCpt[i]=0;      nMuCGMpt[i]=0;
+      nMuNNMpt[i]=0;       nMuDRRpt[i]=0;      nMuRCGpt[i]=0;      nMuCMMpt[i]=0;
+      nMuNDDpt[i]=0;       nMuDRCpt[i]=0;      nMuRCMpt[i]=0;      
+      nMuNDRpt[i]=0;       nMuDRGpt[i]=0;      nMuRGGpt[i]=0;      nMuGGGpt[i]=0; 
+      nMuNDCpt[i]=0;       nMuDRMpt[i]=0;      nMuRGMpt[i]=0;      nMuGGMpt[i]=0;
+      nMuNDGpt[i]=0;       nMuDCCpt[i]=0;      nMuRMMpt[i]=0;      nMuGMMpt[i]=0;
+      nMuNDMpt[i]=0;       nMuDCGpt[i]=0;
+      nMuNRRpt[i]=0;       nMuDCMpt[i]=0;                          nMuMMMpt[i]=0;
+      nMuNRCpt[i]=0;       nMuDGGpt[i]=0;
+      nMuNRGpt[i]=0;       nMuDGMpt[i]=0;
+      nMuNRMpt[i]=0;       nMuDMMpt[i]=0;
+      nMuNCCpt[i]=0;
+      nMuNCGpt[i]=0;
+      nMuNCMpt[i]=0;
+      nMuNGGpt[i]=0;
+      nMuNGMpt[i]=0;
+      nMuNMMpt[i]=0;
+   }
+
+
    TString tripleStringInt = "";
    TString tripleStringBool = "";
    TString tripleStringFloat = "";
@@ -752,6 +1238,166 @@ DeltaGlobalPhiAnalyzerMinbias::DeltaGlobalPhiAnalyzerMinbias(const edm::Paramete
 	   tripleStringFloat =tripleStringFloat +":";
 	   }
 	 }
+
+   TString tripleStringIntLow = "";
+   TString tripleStringBoolLow = "";
+   TString tripleStringFloatLow = "";
+   TString ptLow[8] = {"0","1","2","3","5","10","20","50"};
+   for (int i1=0 ; i1<8 ; i1++)
+     for (int i2=i1 ; i2<8; i2++)
+       for (int i3=i2 ; i3<8; i3++)
+         {
+         tripleStringIntLow   = tripleStringIntLow   +ptLow[i1]+"_"+ptLow[i2]+"_"+ptLow[i3]+"GeV/I";
+         tripleStringBoolLow  = tripleStringBoolLow  +ptLow[i1]+"_"+ptLow[i2]+"_"+ptLow[i3]+"GeV/O";
+         tripleStringFloatLow = tripleStringFloatLow +ptLow[i1]+"_"+ptLow[i2]+"_"+ptLow[i3]+"GeV/F";
+         if ( !(i1==7 && i2==7 && i3==7) ) 
+           {
+           tripleStringIntLow   =tripleStringIntLow   +":";
+           tripleStringBoolLow  =tripleStringBoolLow  +":";
+           tripleStringFloatLow =tripleStringFloatLow +":";
+           }
+         }
+
+   //pt from 0 to 70 GeV/c with 1 GeV/c step
+   for( int i=0; i<71; i++ )
+   {
+      ptEdges[i] = i;
+   }
+                                              
+   //eta from 0 to 5 with 0.1 step
+   for( int i=0; i<51; i++ )
+   {
+      etaEdges[i] = 0.1*i;
+   }
+
+       h_nMuNNN_PtVsEta = fs->make<TH2F>("h_nMuNNN_PtVsEta","h_nMuNNN_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNND_PtVsEta = fs->make<TH2F>("h_nMuNND_PtVsEta","h_nMuNND_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNNR_PtVsEta = fs->make<TH2F>("h_nMuNNR_PtVsEta","h_nMuNNR_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNNC_PtVsEta = fs->make<TH2F>("h_nMuNNC_PtVsEta","h_nMuNNC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNNG_PtVsEta = fs->make<TH2F>("h_nMuNNG_PtVsEta","h_nMuNNG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNNM_PtVsEta = fs->make<TH2F>("h_nMuNNM_PtVsEta","h_nMuNNM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNDD_PtVsEta = fs->make<TH2F>("h_nMuNDD_PtVsEta","h_nMuNDD_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNDR_PtVsEta = fs->make<TH2F>("h_nMuNDR_PtVsEta","h_nMuNDR_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNDC_PtVsEta = fs->make<TH2F>("h_nMuNDC_PtVsEta","h_nMuNDC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNDG_PtVsEta = fs->make<TH2F>("h_nMuNDG_PtVsEta","h_nMuNDG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNDM_PtVsEta = fs->make<TH2F>("h_nMuNDM_PtVsEta","h_nMuNDM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNRR_PtVsEta = fs->make<TH2F>("h_nMuNRR_PtVsEta","h_nMuNRR_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNRC_PtVsEta = fs->make<TH2F>("h_nMuNRC_PtVsEta","h_nMuNRC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNRG_PtVsEta = fs->make<TH2F>("h_nMuNRG_PtVsEta","h_nMuNRG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNRM_PtVsEta = fs->make<TH2F>("h_nMuNRM_PtVsEta","h_nMuNRM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNCC_PtVsEta = fs->make<TH2F>("h_nMuNCC_PtVsEta","h_nMuNCC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNCG_PtVsEta = fs->make<TH2F>("h_nMuNCG_PtVsEta","h_nMuNCG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNCM_PtVsEta = fs->make<TH2F>("h_nMuNCM_PtVsEta","h_nMuNCM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNGG_PtVsEta = fs->make<TH2F>("h_nMuNGG_PtVsEta","h_nMuNGG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNGM_PtVsEta = fs->make<TH2F>("h_nMuNGM_PtVsEta","h_nMuNGM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuNMM_PtVsEta = fs->make<TH2F>("h_nMuNMM_PtVsEta","h_nMuNMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+                                                                     
+       h_nMuDDD_PtVsEta = fs->make<TH2F>("h_nMuDDD_PtVsEta","h_nMuDDD_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDDR_PtVsEta = fs->make<TH2F>("h_nMuDDR_PtVsEta","h_nMuDDR_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDDC_PtVsEta = fs->make<TH2F>("h_nMuDDC_PtVsEta","h_nMuDDC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDDG_PtVsEta = fs->make<TH2F>("h_nMuDDG_PtVsEta","h_nMuDDG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDDM_PtVsEta = fs->make<TH2F>("h_nMuDDM_PtVsEta","h_nMuDDM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDRR_PtVsEta = fs->make<TH2F>("h_nMuDRR_PtVsEta","h_nMuDRR_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDRC_PtVsEta = fs->make<TH2F>("h_nMuDRC_PtVsEta","h_nMuDRC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDRG_PtVsEta = fs->make<TH2F>("h_nMuDRG_PtVsEta","h_nMuDRG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDRM_PtVsEta = fs->make<TH2F>("h_nMuDRM_PtVsEta","h_nMuDRM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDCC_PtVsEta = fs->make<TH2F>("h_nMuDCC_PtVsEta","h_nMuDCC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDCG_PtVsEta = fs->make<TH2F>("h_nMuDCG_PtVsEta","h_nMuDCG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDCM_PtVsEta = fs->make<TH2F>("h_nMuDCM_PtVsEta","h_nMuDCM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDGG_PtVsEta = fs->make<TH2F>("h_nMuDGG_PtVsEta","h_nMuDGG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDGM_PtVsEta = fs->make<TH2F>("h_nMuDGM_PtVsEta","h_nMuDGM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuDMM_PtVsEta = fs->make<TH2F>("h_nMuDMM_PtVsEta","h_nMuDMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+                                                                     
+       h_nMuRRR_PtVsEta = fs->make<TH2F>("h_nMuRRR_PtVsEta","h_nMuRRR_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuRRC_PtVsEta = fs->make<TH2F>("h_nMuRRC_PtVsEta","h_nMuRRC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuRRG_PtVsEta = fs->make<TH2F>("h_nMuRRG_PtVsEta","h_nMuRRG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuRRM_PtVsEta = fs->make<TH2F>("h_nMuRRM_PtVsEta","h_nMuRRM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuRCC_PtVsEta = fs->make<TH2F>("h_nMuRCC_PtVsEta","h_nMuRCC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuRCG_PtVsEta = fs->make<TH2F>("h_nMuRCG_PtVsEta","h_nMuRCG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuRCM_PtVsEta = fs->make<TH2F>("h_nMuRCM_PtVsEta","h_nMuRCM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuRGG_PtVsEta = fs->make<TH2F>("h_nMuRGG_PtVsEta","h_nMuRGG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuRGM_PtVsEta = fs->make<TH2F>("h_nMuRGM_PtVsEta","h_nMuRGM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuRMM_PtVsEta = fs->make<TH2F>("h_nMuRMM_PtVsEta","h_nMuRMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+                                                                  
+       h_nMuCCC_PtVsEta = fs->make<TH2F>("h_nMuCCC_PtVsEta","h_nMuCCC_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuCCG_PtVsEta = fs->make<TH2F>("h_nMuCCG_PtVsEta","h_nMuCCG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuCCM_PtVsEta = fs->make<TH2F>("h_nMuCCM_PtVsEta","h_nMuCCM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuCGG_PtVsEta = fs->make<TH2F>("h_nMuCGG_PtVsEta","h_nMuCGG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuCGM_PtVsEta = fs->make<TH2F>("h_nMuCGM_PtVsEta","h_nMuCGM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuCMM_PtVsEta = fs->make<TH2F>("h_nMuCMM_PtVsEta","h_nMuCMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+                                                                  
+       h_nMuGGG_PtVsEta = fs->make<TH2F>("h_nMuGGG_PtVsEta","h_nMuGGG_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuGGM_PtVsEta = fs->make<TH2F>("h_nMuGGM_PtVsEta","h_nMuGGM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       h_nMuGMM_PtVsEta = fs->make<TH2F>("h_nMuGMM_PtVsEta","h_nMuGMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+                                                                     
+       h_nMuMMM_PtVsEta = fs->make<TH2F>("h_nMuMMM_PtVsEta","h_nMuMMM_PtVsEta", etaBins, etaEdges, ptBins, ptEdges);
+       
+       h_nMuNNN_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNNN_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNND_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNND_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNNR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNNR_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNNC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNNC_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNNG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNNG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNNM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNNM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNDD_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNDD_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNDR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNDR_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNDC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNDC_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNDG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNDG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNDM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNDM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNRR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNRR_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNRC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNRC_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNRG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNRG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNRM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNRM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNCC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNCC_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNCG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNCG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNCM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNCM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNGG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNGG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNGM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNGM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuNMM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuNMM_PtVsEta->GetYaxis()->SetTitle("Pt");
+                                                              
+       h_nMuDDD_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDDD_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDDR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDDR_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDDC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDDC_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDDG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDDG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDDM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDDM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDRR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDRR_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDRC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDRC_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDRG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDRG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDRM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDRM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDCC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDCC_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDCG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDCG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDCM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDCM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDGG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDGG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDGM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDGM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuDMM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuDMM_PtVsEta->GetYaxis()->SetTitle("Pt");
+                                                              
+       h_nMuRRR_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRRR_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuRRC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRRC_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuRRG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRRG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuRRM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRRM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuRCC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRCC_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuRCG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRCG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuRCM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRCM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuRGG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRGG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuRGM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRGM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuRMM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuRMM_PtVsEta->GetYaxis()->SetTitle("Pt");
+                                                              
+       h_nMuCCC_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuCCC_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuCCG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuCCG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuCCM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuCCM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuCGG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuCGG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuCGM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuCGM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuCMM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuCMM_PtVsEta->GetYaxis()->SetTitle("Pt");
+                                                              
+       h_nMuGGG_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuGGG_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuGGM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuGGM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       h_nMuGMM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuGMM_PtVsEta->GetYaxis()->SetTitle("Pt");
+                                                              
+       h_nMuMMM_PtVsEta->GetXaxis()->SetTitle("Eta"); h_nMuMMM_PtVsEta->GetYaxis()->SetTitle("Pt");
+       
+
+
+
+
 
 
    //tr->Branch("nEvent"     ,	&nEvent	  , 	"nEvent/I"     	);
@@ -790,10 +1436,27 @@ DeltaGlobalPhiAnalyzerMinbias::DeltaGlobalPhiAnalyzerMinbias(const edm::Paramete
    tr->Branch("mesonVzDeath"  ,	&mesonVzDeath,	"mesonVzDeath"	);
    tr->Branch("muPt"     ,	&muPt[0]     , 	"mu1_Pt:mu2_Pt:mu3_Pt"     );
    tr->Branch("muEta"     ,	&muEta[0]     , 	"mu1_Eta:mu2_Eta:mu3_Eta"     );
+   tr->Branch("muIdx"     ,	&muIdx[0]     , 	"mu1_Idx/I:mu2_Idx/I:mu3_Idx/I"     );
+   tr->Branch("muTrackId"     ,	&muTrackId[0]     , 	"mu1_Idx/I:mu2_Idx/I:mu3_Idx/I"     );
    tr->Branch("muP"     ,	&muP[0]     , 	"mu1_P:mu2_P:mu3_P"     );
    tr->Branch("muPx"     ,	&muPx[0]     , 	"mu1_Px:mu2_Px:mu3_Px"     );
    tr->Branch("muPy"     ,	&muPy[0]     , 	"mu1_Py:mu2_Py:mu3_Py"     );
    tr->Branch("muPz"     ,	&muPz[0]     , 	"mu1_Pz:mu2_Pz:mu3_Pz"     );
+   tr->Branch("isMuVisible"     ,	&isMuVisible[0]		     , 	"mu1_isVisible/O:mu2_isVisible/O:mu3_isVisible/O"     );
+   tr->Branch("isMuVisibleME0"     ,	&isMuVisibleME0[0]     , 	"mu1_isVisibleME0/O:mu2_isVisibleME0/O:mu3_isVisibleME0/O"     );
+   tr->Branch("isMuVisibleCSC"     ,	&isMuVisibleCSC[0]     , 	"mu1_isVisibleCSC/O:mu2_isVisibleCSC/O:mu3_isVisibleCSC/O"     );
+   tr->Branch("isMuVisibleGEM"     ,	&isMuVisibleGEM[0]     , 	"mu1_isVisibleGEM/O:mu2_isVisibleGEM/O:mu3_isVisibleGEM/O"     );
+   tr->Branch("isMuVisibleRPC"     ,	&isMuVisibleRPC[0]     , 	"mu1_isVisibleRPC/O:mu2_isVisibleRPC/O:mu3_isVisibleRPC/O"     );
+   tr->Branch("isMuVisibleDT"     ,	&isMuVisibleDT[0]     , 	"mu1_isVisibleDT/O:mu2_isVisibleDT/O:mu3_isVisibleDT/O"     );
+   tr->Branch("isMuVisibleNONE"     ,	&isMuVisibleNONE[0]     , 	"mu1_isVisibleNONE/O:mu2_isVisibleNONE/O:mu3_isVisibleNONE/O"     );
+   tr->Branch("nVisibleMu"  ,	&nVisibleMu,	"nVisibleMu/I" 	);
+   tr->Branch("nVisibleMuME0" ,	&nVisibleMuME0,	"nVisibleMuME0/I");
+   tr->Branch("nVisibleMuCSC" ,	&nVisibleMuCSC,	"nVisibleMuCSC/I"	);
+   tr->Branch("nVisibleMuGEM" ,	&nVisibleMuGEM,	"nVisibleMuGEM/I"	);
+   tr->Branch("nVisibleMuRPC" ,	&nVisibleMuRPC,	"nVisibleMuRPC/I"	);
+   tr->Branch("nVisibleMuDT" ,	&nVisibleMuDT,	"nVisibleMuDT/I"	);
+   tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
+   tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
    tr->Branch("muVxBirth"     ,	&muVxBirth[0]     , 	"mu1_VxBirth:mu2_VxBirth:mu3_VxBirth"     );
    tr->Branch("muVyBirth"     ,	&muVyBirth[0]     , 	"mu1_VyBirth:mu2_VyBirth:mu3_VyBirth"     );
    tr->Branch("muVzBirth"     ,	&muVzBirth[0]     , 	"mu1_VzBirth:mu2_VzBirth:mu3_VzBirth"     );
@@ -820,6 +1483,226 @@ DeltaGlobalPhiAnalyzerMinbias::DeltaGlobalPhiAnalyzerMinbias(const edm::Paramete
    tr->Branch("diffEta_maxmin"  ,	&diffEta_maxmin,	"diffEta_maxmin"	);
    tr->Branch("diffEta_medmin"  ,	&diffEta_medmin,	"diffEta_medmin"	);
    tr->Branch("deltaChamber"     ,	&deltaChamber ); //	, "deltaChamber/I"    );
+   
+   //B= barrel O= overlap E= endcap
+   tr->Branch("nBarrel"  ,	&nBarrel,	"nBarrel/I"	);
+   tr->Branch("nOverlap"  ,	&nOverlap,	"nOverlap/I"	);
+   tr->Branch("nEndcap"  ,	&nEndcap,	"nEndcap/I"	);
+   tr->Branch("nForward"  ,	&nForward,	"nForward/I"	);
+   trSum->Branch("nBBB"  ,	&nBBB,	"nBBB/I"	);
+   trSum->Branch("nBBO"  ,	&nBBO,	"nBBO/I"	);
+   trSum->Branch("nBBE"  ,	&nBBE,	"nBBE/I"	);
+   trSum->Branch("nBBF"  ,	&nBBF,	"nBBF/I"	);
+   trSum->Branch("nBOO"  ,	&nBOO,	"nBOO/I"	);
+   trSum->Branch("nBOE"  ,	&nBOE,	"nBOE/I"	);
+   trSum->Branch("nBOF"  ,	&nBOF,	"nBOF/I"	);
+   trSum->Branch("nBEE"  ,	&nBEE,	"nBEE/I"	);
+   trSum->Branch("nBEF"  ,	&nBEF,	"nBEF/I"	);
+   trSum->Branch("nBFF"  ,	&nBFF,	"nBFF/I"	);
+
+   trSum->Branch("nOOO"  ,	&nOOO,	"nOOO/I"	);
+   trSum->Branch("nOOE"  ,	&nOOE,	"nOOE/I"	);
+   trSum->Branch("nOOF"  ,	&nOOF,	"nOOF/I"	);
+   trSum->Branch("nOEE"  ,	&nOEE,	"nOEE/I"	);
+   trSum->Branch("nOEF"  ,	&nOEF,	"nOEF/I"	);
+   trSum->Branch("nOFF"  ,	&nOFF,	"nOFF/I"	);
+
+   trSum->Branch("nEEE"  ,	&nEEE,	"nEEE/I"	);
+   trSum->Branch("nEEF"  ,	&nEEF,	"nEEF/I"	);
+   trSum->Branch("nEFF"  ,	&nEFF,	"nEFF/I"	);
+
+   trSum->Branch("nFFF"  ,	&nFFF,	"nFFF/I"	);
+   trSum->Branch("nEEEME0"  ,	&nEEEME0,	"nEEEME0/I"	);
+
+   trSum->Branch("nIsMuVisibleMoreThanOneERR"  ,	&nIsMuVisibleMoreThanOneERR,	"nIsMuVisibleMoreThanOneERR/I"	);
+
+   trSum->Branch("maxPtAll"  ,	&maxPtAll,	"maxPtAll/F"	);
+   trSum->Branch("maxEtaAll"  ,	&maxEtaAll,	"maxEtaAll/F"	);
+   
+   tr->Branch("isMuNNN", &isMuNNN, "isMuNNN/O"	);	tr->Branch("isMuDDD", &isMuDDD, "isMuDDD/O"	);
+   tr->Branch("isMuNND", &isMuNND, "isMuNND/O"	); 	tr->Branch("isMuDDR", &isMuDDR, "isMuDDR/O"	);
+   tr->Branch("isMuNNR", &isMuNNR, "isMuNNR/O"	);	tr->Branch("isMuDDC", &isMuDDC, "isMuDDC/O"	);
+   tr->Branch("isMuNNC", &isMuNNC, "isMuNNC/O"	);	tr->Branch("isMuDDG", &isMuDDG, "isMuDDG/O"	);
+   tr->Branch("isMuNNG", &isMuNNG, "isMuNNG/O"	);	tr->Branch("isMuDDM", &isMuDDM, "isMuDDM/O"	);
+   tr->Branch("isMuNNM", &isMuNNM, "isMuNNM/O"	);	tr->Branch("isMuDRR", &isMuDRR, "isMuDRR/O"	);
+   tr->Branch("isMuNDD", &isMuNDD, "isMuNDD/O"	);	tr->Branch("isMuDRC", &isMuDRC, "isMuDRC/O"	);
+   tr->Branch("isMuNDR", &isMuNDR, "isMuNDR/O"	);	tr->Branch("isMuDRG", &isMuDRG, "isMuDRG/O"	);
+   tr->Branch("isMuNDC", &isMuNDC, "isMuNDC/O"	);	tr->Branch("isMuDRM", &isMuDRM, "isMuDRM/O"	);
+   tr->Branch("isMuNDG", &isMuNDG, "isMuNDG/O"	);	tr->Branch("isMuDCC", &isMuDCC, "isMuDCC/O"	);
+   tr->Branch("isMuNDM", &isMuNDM, "isMuNDM/O"	);	tr->Branch("isMuDCG", &isMuDCG, "isMuDCG/O"	);
+   tr->Branch("isMuNRR", &isMuNRR, "isMuNRR/O"	);	tr->Branch("isMuDCM", &isMuDCM, "isMuDCM/O"	);
+   tr->Branch("isMuNRC", &isMuNRC, "isMuNRC/O"	);	tr->Branch("isMuDGG", &isMuDGG, "isMuDGG/O"	);
+   tr->Branch("isMuNRG", &isMuNRG, "isMuNRG/O"	);	tr->Branch("isMuDGM", &isMuDGM, "isMuDGM/O"	);
+   tr->Branch("isMuNRM", &isMuNRM, "isMuNRM/O"	);	tr->Branch("isMuDMM", &isMuDMM, "isMuDMM/O"	);
+   tr->Branch("isMuNCC", &isMuNCC, "isMuNCC/O"	);
+   tr->Branch("isMuNCG", &isMuNCG, "isMuNCG/O"	);
+   tr->Branch("isMuNCM", &isMuNCM, "isMuNCM/O"	);
+   tr->Branch("isMuNGG", &isMuNGG, "isMuNGG/O"	);
+   tr->Branch("isMuNGM", &isMuNGM, "isMuNGM/O"	);
+   tr->Branch("isMuNMM", &isMuNMM, "isMuNMM/O"	);
+
+   tr->Branch("isMuRRR", &isMuRRR, "isMuRRR/O"	);	tr->Branch("isMuCCC", &isMuCCC, "isMuCCC/O"	);
+   tr->Branch("isMuRRC", &isMuRRC, "isMuRRC/O"	);      tr->Branch("isMuCCG", &isMuCCG, "isMuCCG/O"	);
+   tr->Branch("isMuRRG", &isMuRRG, "isMuRRG/O"	);      tr->Branch("isMuCCM", &isMuCCM, "isMuCCM/O"	);
+   tr->Branch("isMuRRM", &isMuRRM, "isMuRRM/O"	);      tr->Branch("isMuCGG", &isMuCGG, "isMuCGG/O"	);
+   tr->Branch("isMuRCC", &isMuRCC, "isMuRCC/O"	);      tr->Branch("isMuCGM", &isMuCGM, "isMuCGM/O"	);
+   tr->Branch("isMuRCG", &isMuRCG, "isMuRCG/O"	);      tr->Branch("isMuCMM", &isMuCMM, "isMuCMM/O"	);
+   tr->Branch("isMuRCM", &isMuRCM, "isMuRCM/O"	);
+   tr->Branch("isMuRGG", &isMuRGG, "isMuRGG/O"	);	tr->Branch("isMuGGG", &isMuGGG, "isMuGGG/O"	);
+   tr->Branch("isMuRGM", &isMuRGM, "isMuRGM/O"	);      tr->Branch("isMuGGM", &isMuGGM, "isMuGGM/O"	);
+   tr->Branch("isMuRMM", &isMuRMM, "isMuRMM/O"	);      tr->Branch("isMuGMM", &isMuGMM, "isMuGMM/O"	);
+                                                                                           
+                                                        tr->Branch("isMuMMM", &isMuMMM, "isMuMMM/O"	);
+
+
+   tr->Branch("isMuDD", &isMuDD, "isMuDD/O"	);	tr->Branch("isMuCC", &isMuCC, "isMuCC/O"	);
+   tr->Branch("isMuDR", &isMuDR, "isMuDR/O"	);      tr->Branch("isMuCG", &isMuCG, "isMuCG/O"	);
+   tr->Branch("isMuDC", &isMuDC, "isMuDC/O"	);      tr->Branch("isMuCM", &isMuCM, "isMuCM/O"	);
+   tr->Branch("isMuDG", &isMuDG, "isMuDG/O"	);                                           
+   tr->Branch("isMuDM", &isMuDM, "isMuDM/O"	);	tr->Branch("isMuGG", &isMuGG, "isMuGG/O"	);
+			              		    	tr->Branch("isMuGM", &isMuGM, "isMuGM/O"	);
+   tr->Branch("isMuRR", &isMuRR, "isMuRR/O"	);                                           
+   tr->Branch("isMuRC", &isMuRC, "isMuRC/O"	);	tr->Branch("isMuMM", &isMuMM, "isMuMM/O"	);
+   tr->Branch("isMuRG", &isMuRG, "isMuRG/O"	);
+   tr->Branch("isMuRM", &isMuRM, "isMuRM/O"	);
+
+   tr->Branch("isMuNN", &isMuNN, "isMuNN/O"	);	tr->Branch("isMuN", &isMuN, "isMuN/O"	);
+   tr->Branch("isMuND", &isMuND, "isMuND/O"	);      tr->Branch("isMuD", &isMuD, "isMuD/O"	);
+   tr->Branch("isMuNR", &isMuNR, "isMuNR/O"	);      tr->Branch("isMuR", &isMuR, "isMuR/O"	);
+   tr->Branch("isMuNC", &isMuNC, "isMuNC/O"	);      tr->Branch("isMuC", &isMuC, "isMuC/O"	);
+   tr->Branch("isMuNG", &isMuNG, "isMuNG/O"	);      tr->Branch("isMuG", &isMuG, "isMuG/O"	);
+   tr->Branch("isMuNM", &isMuNM, "isMuNM/O"	);      tr->Branch("isMuM", &isMuM, "isMuM/O"	);
+
+
+   trSum->Branch("nMuNNN", &nMuNNN, "nMuNNN/I"	);	trSum->Branch("nMuDDD", &nMuDDD, "nMuDDD/I"	);
+   trSum->Branch("nMuNND", &nMuNND, "nMuNND/I"	); 	trSum->Branch("nMuDDR", &nMuDDR, "nMuDDR/I"	);
+   trSum->Branch("nMuNNR", &nMuNNR, "nMuNNR/I"	);	trSum->Branch("nMuDDC", &nMuDDC, "nMuDDC/I"	);
+   trSum->Branch("nMuNNC", &nMuNNC, "nMuNNC/I"	);	trSum->Branch("nMuDDG", &nMuDDG, "nMuDDG/I"	);
+   trSum->Branch("nMuNNG", &nMuNNG, "nMuNNG/I"	);	trSum->Branch("nMuDDM", &nMuDDM, "nMuDDM/I"	);
+   trSum->Branch("nMuNNM", &nMuNNM, "nMuNNM/I"	);	trSum->Branch("nMuDRR", &nMuDRR, "nMuDRR/I"	);
+   trSum->Branch("nMuNDD", &nMuNDD, "nMuNDD/I"	);	trSum->Branch("nMuDRC", &nMuDRC, "nMuDRC/I"	);
+   trSum->Branch("nMuNDR", &nMuNDR, "nMuNDR/I"	);	trSum->Branch("nMuDRG", &nMuDRG, "nMuDRG/I"	);
+   trSum->Branch("nMuNDC", &nMuNDC, "nMuNDC/I"	);	trSum->Branch("nMuDRM", &nMuDRM, "nMuDRM/I"	);
+   trSum->Branch("nMuNDG", &nMuNDG, "nMuNDG/I"	);	trSum->Branch("nMuDCC", &nMuDCC, "nMuDCC/I"	);
+   trSum->Branch("nMuNDM", &nMuNDM, "nMuNDM/I"	);	trSum->Branch("nMuDCG", &nMuDCG, "nMuDCG/I"	);
+   trSum->Branch("nMuNRR", &nMuNRR, "nMuNRR/I"	);	trSum->Branch("nMuDCM", &nMuDCM, "nMuDCM/I"	);
+   trSum->Branch("nMuNRC", &nMuNRC, "nMuNRC/I"	);	trSum->Branch("nMuDGG", &nMuDGG, "nMuDGG/I"	);
+   trSum->Branch("nMuNRG", &nMuNRG, "nMuNRG/I"	);	trSum->Branch("nMuDGM", &nMuDGM, "nMuDGM/I"	);
+   trSum->Branch("nMuNRM", &nMuNRM, "nMuNRM/I"	);	trSum->Branch("nMuDMM", &nMuDMM, "nMuDMM/I"	);
+   trSum->Branch("nMuNCC", &nMuNCC, "nMuNCC/I"	);
+   trSum->Branch("nMuNCG", &nMuNCG, "nMuNCG/I"	);
+   trSum->Branch("nMuNCM", &nMuNCM, "nMuNCM/I"	);
+   trSum->Branch("nMuNGG", &nMuNGG, "nMuNGG/I"	);
+   trSum->Branch("nMuNGM", &nMuNGM, "nMuNGM/I"	);
+   trSum->Branch("nMuNMM", &nMuNMM, "nMuNMM/I"	);
+                                                                                                           
+   trSum->Branch("nMuRRR", &nMuRRR, "nMuRRR/I"	);	trSum->Branch("nMuCCC", &nMuCCC, "nMuCCC/I"	);
+   trSum->Branch("nMuRRC", &nMuRRC, "nMuRRC/I"	);      trSum->Branch("nMuCCG", &nMuCCG, "nMuCCG/I"	);
+   trSum->Branch("nMuRRG", &nMuRRG, "nMuRRG/I"	);      trSum->Branch("nMuCCM", &nMuCCM, "nMuCCM/I"	);
+   trSum->Branch("nMuRRM", &nMuRRM, "nMuRRM/I"	);      trSum->Branch("nMuCGG", &nMuCGG, "nMuCGG/I"	);
+   trSum->Branch("nMuRCC", &nMuRCC, "nMuRCC/I"	);      trSum->Branch("nMuCGM", &nMuCGM, "nMuCGM/I"	);
+   trSum->Branch("nMuRCG", &nMuRCG, "nMuRCG/I"	);      trSum->Branch("nMuCMM", &nMuCMM, "nMuCMM/I"	);
+   trSum->Branch("nMuRCM", &nMuRCM, "nMuRCM/I"	);                                               
+   trSum->Branch("nMuRGG", &nMuRGG, "nMuRGG/I"	);	trSum->Branch("nMuGGG", &nMuGGG, "nMuGGG/I"	);
+   trSum->Branch("nMuRGM", &nMuRGM, "nMuRGM/I"	);      trSum->Branch("nMuGGM", &nMuGGM, "nMuGGM/I"	);
+   trSum->Branch("nMuRMM", &nMuRMM, "nMuRMM/I"	);      trSum->Branch("nMuGMM", &nMuGMM, "nMuGMM/I"	);
+                                                                                           
+                                                        trSum->Branch("nMuMMM", &nMuMMM, "nMuMMM/I"	);
+                                                                                                           
+                                                                                                           
+   trSum->Branch("nMuDD", &nMuDD, "nMuDD/I"	);	trSum->Branch("nMuCC", &nMuCC, "nMuCC/I"	);
+   trSum->Branch("nMuDR", &nMuDR, "nMuDR/I"	);      trSum->Branch("nMuCG", &nMuCG, "nMuCG/I"	);
+   trSum->Branch("nMuDC", &nMuDC, "nMuDC/I"	);      trSum->Branch("nMuCM", &nMuCM, "nMuCM/I"	);
+   trSum->Branch("nMuDG", &nMuDG, "nMuDG/I"	);                                     
+   trSum->Branch("nMuDM", &nMuDM, "nMuDM/I"	);	trSum->Branch("nMuGG", &nMuGG, "nMuGG/I"	);
+        	                      	 	  	trSum->Branch("nMuGM", &nMuGM, "nMuGM/I"	);
+   trSum->Branch("nMuRR", &nMuRR, "nMuRR/I"	);                                     
+   trSum->Branch("nMuRC", &nMuRC, "nMuRC/I"	);	trSum->Branch("nMuMM", &nMuMM, "nMuMM/I"	);
+   trSum->Branch("nMuRG", &nMuRG, "nMuRG/I"	);
+   trSum->Branch("nMuRM", &nMuRM, "nMuRM/I"	);
+
+   trSum->Branch("nMuNN", &nMuNN, "nMuNN/I"	);	trSum->Branch("nMuN", &nMuN, "nMuN/I"	);
+   trSum->Branch("nMuND", &nMuND, "nMuND/I"	);      trSum->Branch("nMuD", &nMuD, "nMuD/I"	);
+   trSum->Branch("nMuNR", &nMuNR, "nMuNR/I"	);      trSum->Branch("nMuR", &nMuR, "nMuR/I"	);
+   trSum->Branch("nMuNC", &nMuNC, "nMuNC/I"	);      trSum->Branch("nMuC", &nMuC, "nMuC/I"	);
+   trSum->Branch("nMuNG", &nMuNG, "nMuNG/I"	);      trSum->Branch("nMuG", &nMuG, "nMuG/I"	);
+   trSum->Branch("nMuNM", &nMuNM, "nMuNM/I"	);      trSum->Branch("nMuM", &nMuM, "nMuM/I"	);
+
+
+
+   //Branch for pt cut on topology of muons in CMS
+   tr->Branch("isMuNNNpt", &isMuNNNpt[0], tripleStringBoolLow	);	tr->Branch("isMuDDDpt", &isMuDDDpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNNDpt", &isMuNNDpt[0], tripleStringBoolLow  	); 	tr->Branch("isMuDDRpt", &isMuDDRpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNNRpt", &isMuNNRpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDDCpt", &isMuDDCpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNNCpt", &isMuNNCpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDDGpt", &isMuDDGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNNGpt", &isMuNNGpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDDMpt", &isMuDDMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNNMpt", &isMuNNMpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDRRpt", &isMuDRRpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNDDpt", &isMuNDDpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDRCpt", &isMuDRCpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNDRpt", &isMuNDRpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDRGpt", &isMuDRGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNDCpt", &isMuNDCpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDRMpt", &isMuDRMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNDGpt", &isMuNDGpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDCCpt", &isMuDCCpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNDMpt", &isMuNDMpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDCGpt", &isMuDCGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNRRpt", &isMuNRRpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDCMpt", &isMuDCMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNRCpt", &isMuNRCpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDGGpt", &isMuDGGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNRGpt", &isMuNRGpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDGMpt", &isMuDGMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNRMpt", &isMuNRMpt[0], tripleStringBoolLow  	);	tr->Branch("isMuDMMpt", &isMuDMMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuNCCpt", &isMuNCCpt[0], tripleStringBoolLow  	);
+   tr->Branch("isMuNCGpt", &isMuNCGpt[0], tripleStringBoolLow  	);
+   tr->Branch("isMuNCMpt", &isMuNCMpt[0], tripleStringBoolLow  	);
+   tr->Branch("isMuNGGpt", &isMuNGGpt[0], tripleStringBoolLow  	);
+   tr->Branch("isMuNGMpt", &isMuNGMpt[0], tripleStringBoolLow  	);
+   tr->Branch("isMuNMMpt", &isMuNMMpt[0], tripleStringBoolLow  	);
+                                                                                                
+   tr->Branch("isMuRRRpt", &isMuRRRpt[0], tripleStringBoolLow  	);	tr->Branch("isMuCCCpt", &isMuCCCpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRRCpt", &isMuRRCpt[0], tripleStringBoolLow  	);      tr->Branch("isMuCCGpt", &isMuCCGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRRGpt", &isMuRRGpt[0], tripleStringBoolLow  	);      tr->Branch("isMuCCMpt", &isMuCCMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRRMpt", &isMuRRMpt[0], tripleStringBoolLow  	);      tr->Branch("isMuCGGpt", &isMuCGGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRCCpt", &isMuRCCpt[0], tripleStringBoolLow  	);      tr->Branch("isMuCGMpt", &isMuCGMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRCGpt", &isMuRCGpt[0], tripleStringBoolLow  	);      tr->Branch("isMuCMMpt", &isMuCMMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRCMpt", &isMuRCMpt[0], tripleStringBoolLow  	);
+   tr->Branch("isMuRGGpt", &isMuRGGpt[0], tripleStringBoolLow  	);	tr->Branch("isMuGGGpt", &isMuGGGpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRGMpt", &isMuRGMpt[0], tripleStringBoolLow  	);      tr->Branch("isMuGGMpt", &isMuGGMpt[0], tripleStringBoolLow	);
+   tr->Branch("isMuRMMpt", &isMuRMMpt[0], tripleStringBoolLow  	);      tr->Branch("isMuGMMpt", &isMuGMMpt[0], tripleStringBoolLow	);
+                                                                                           
+                                                        		tr->Branch("isMuMMMpt", &isMuMMMpt[0], tripleStringBoolLow	);
+
+   //Branch for pt cut on topology of muons in CMS
+   trSum->Branch("nMuNNNpt", &nMuNNNpt[0], tripleStringIntLow	);	trSum->Branch("nMuDDDpt", &nMuDDDpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNNDpt", &nMuNNDpt[0], tripleStringIntLow  	); 	trSum->Branch("nMuDDRpt", &nMuDDRpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNNRpt", &nMuNNRpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDDCpt", &nMuDDCpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNNCpt", &nMuNNCpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDDGpt", &nMuDDGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNNGpt", &nMuNNGpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDDMpt", &nMuDDMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNNMpt", &nMuNNMpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDRRpt", &nMuDRRpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNDDpt", &nMuNDDpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDRCpt", &nMuDRCpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNDRpt", &nMuNDRpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDRGpt", &nMuDRGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNDCpt", &nMuNDCpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDRMpt", &nMuDRMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNDGpt", &nMuNDGpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDCCpt", &nMuDCCpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNDMpt", &nMuNDMpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDCGpt", &nMuDCGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNRRpt", &nMuNRRpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDCMpt", &nMuDCMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNRCpt", &nMuNRCpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDGGpt", &nMuDGGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNRGpt", &nMuNRGpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDGMpt", &nMuDGMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNRMpt", &nMuNRMpt[0], tripleStringIntLow  	);	trSum->Branch("nMuDMMpt", &nMuDMMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuNCCpt", &nMuNCCpt[0], tripleStringIntLow  	);
+   trSum->Branch("nMuNCGpt", &nMuNCGpt[0], tripleStringIntLow  	);
+   trSum->Branch("nMuNCMpt", &nMuNCMpt[0], tripleStringIntLow  	);
+   trSum->Branch("nMuNGGpt", &nMuNGGpt[0], tripleStringIntLow  	);
+   trSum->Branch("nMuNGMpt", &nMuNGMpt[0], tripleStringIntLow  	);
+   trSum->Branch("nMuNMMpt", &nMuNMMpt[0], tripleStringIntLow  	);
+                                                                                              
+   trSum->Branch("nMuRRRpt", &nMuRRRpt[0], tripleStringIntLow  	);	trSum->Branch("nMuCCCpt", &nMuCCCpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRRCpt", &nMuRRCpt[0], tripleStringIntLow  	);      trSum->Branch("nMuCCGpt", &nMuCCGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRRGpt", &nMuRRGpt[0], tripleStringIntLow  	);      trSum->Branch("nMuCCMpt", &nMuCCMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRRMpt", &nMuRRMpt[0], tripleStringIntLow  	);      trSum->Branch("nMuCGGpt", &nMuCGGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRCCpt", &nMuRCCpt[0], tripleStringIntLow  	);      trSum->Branch("nMuCGMpt", &nMuCGMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRCGpt", &nMuRCGpt[0], tripleStringIntLow  	);      trSum->Branch("nMuCMMpt", &nMuCMMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRCMpt", &nMuRCMpt[0], tripleStringIntLow  	);
+   trSum->Branch("nMuRGGpt", &nMuRGGpt[0], tripleStringIntLow  	);	trSum->Branch("nMuGGGpt", &nMuGGGpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRGMpt", &nMuRGMpt[0], tripleStringIntLow  	);      trSum->Branch("nMuGGMpt", &nMuGGMpt[0], tripleStringIntLow	);
+   trSum->Branch("nMuRMMpt", &nMuRMMpt[0], tripleStringIntLow  	);      trSum->Branch("nMuGMMpt", &nMuGMMpt[0], tripleStringIntLow	);
+                                                                                           
+                                                        		trSum->Branch("nMuMMMpt", &nMuMMMpt[0], tripleStringIntLow	);
+
+
 
 
 
@@ -846,10 +1729,28 @@ DeltaGlobalPhiAnalyzerMinbias::DeltaGlobalPhiAnalyzerMinbias(const edm::Paramete
    //tr->Branch("muPx"     ,	&muPx    );
    //tr->Branch("muPy"     ,	&muPy    );
    //tr->Branch("muPz"     ,	&muPz    );
-   tr->Branch("nEvent"     ,	&nEvent	, "nEvent/I"    );  //, 	"theta"     );
-   tr->Branch("nEventSel"     ,	&nEventSel	, "nEventSel/I"    );  //, 	"theta"     );
+   //tr->Branch("nEvent"     ,	&nEvent	, "nEvent/I"    );  //, 	"theta"     );
+   //tr->Branch("nEventSel"     ,	&nEventSel	, "nEventSel/I"    );  //, 	"theta"     );
+   /*tr->Branch("nEventVis"     ,	&nEventVis	, "nEventVis/I"    );  //, 	"theta"     );
+   tr->Branch("nEventSelME0"     ,	&nEventSelME0	, "nEventSelME0/I"    );  //, 	"theta"     );
+   tr->Branch("nEventSelME01"     ,	&nEventSelME01	, "nEventSelME01/I"    );  //, 	"theta"     );
+   tr->Branch("nEventSelME02"  ,        &nEventSelME02  , "nEventSelME02/I"    );  //,     "theta"     );
+   tr->Branch("nEventSelME03"  ,        &nEventSelME03  , "nEventSelME03/I"    );  //,     "theta"     );
+   tr->Branch("nEventSelCSC1"     ,	&nEventSelCSC1	, "nEventSelCSC1/I"    );  //, 	"theta"     );
+   tr->Branch("nEventSelCSC2"     ,     &nEventSelCSC2  , "nEventSelCSC2/I"    );  //,     "theta"     );
+   tr->Branch("nEventSelCSC3"     ,     &nEventSelCSC3  , "nEventSelCSC3/I"    );  //,     "theta"     );
+   tr->Branch("nEventSelGEM1"     ,	&nEventSelGEM1	, "nEventSelGEM1/I"    );  //, 	"theta"     );
+   tr->Branch("nEventSelGEM2"     ,     &nEventSelGEM2  , "nEventSelGEM2/I"    );  //,     "theta"     );
+   tr->Branch("nEventSelGEM3"     ,     &nEventSelGEM3  , "nEventSelGEM3/I"    );  //,     "theta"     );*/
    trSum->Branch("lastEvent"     ,	&lastEvent	, "lastEvent/I"    );  //, 	"theta"     );
    trSum->Branch("lastEventSel"     ,	&lastEventSel	, "lastEventSel/I"    );  //, 	"theta"     );
+   //trSum->Branch("lastEventVis"     ,	&lastEventVis	, "lastEventVis/I"    );  //, 	"theta"     );
+   trSum->Branch("lastEventDRCGM"     ,	&lastEventDRCGM	, "lastEventDRCGM/I"    );  //, 	"theta"     );
+   trSum->Branch("lastEventRCGM"     ,	&lastEventRCGM	, "lastEventRCGM/I"    );  //, 	"theta"     );
+   /*trSum->Branch("lastEventSelME0"     ,    &lastEventSelME0  , "lastEventSelME0/I"    );  //, 	"theta"     );
+   trSum->Branch("lastEventSelME01"     ,   &lastEventSelME01 , "lastEventSelME01/I"    );  //, 	"theta"     );
+   trSum->Branch("lastEventSelME02"     ,   &lastEventSelME02 , "lastEventSelME02/I"    );  //,   "theta"     );
+   trSum->Branch("lastEventSelME03"     ,   &lastEventSelME03 , "lastEventSelME03/I"    );  //,   "theta"     );*/
    tr->Branch("nSegments"     ,	&nSegments	, "nSegments/I"    );  //, 	"theta"     );
    tr->Branch("segmentNrecHits"     ,	&nSegmRecHitList ); //	, "etaPartList/I"    );  //, 	"theta"     );
    tr->Branch("segmentQuality"     ,	&qualityList ); // q=0 if nRH=4, q=1 if nRH=5, q=2 if nRH=6
@@ -918,7 +1819,141 @@ DeltaGlobalPhiAnalyzerMinbias::DeltaGlobalPhiAnalyzerMinbias(const edm::Paramete
    tr->Branch("is_tripleME0nearQuality2Veto2", &is_tripleME0nearQuality2Veto2[0] , tripleStringBool);
    tr->Branch("is_tripleME0nearQuality2Veto3", &is_tripleME0nearQuality2Veto3[0] , tripleStringBool);
    tr->Branch("is_tripleME0close", &is_tripleME0close[0] , tripleStringBool);
-   tr->Branch("singleME0_multiplicity", &multiplicity[0] , "3GeV/I:5GeV/I:10GeV/I:20GeV/I:50GeV/I");
+   tr->Branch("singleME0_multiplicity", &multiplicityME0[0] , "3GeV/I:5GeV/I:10GeV/I:20GeV/I:50GeV/I");
+   tr->Branch("singleCSC_multiplicity", &multiplicityCSC[0] , "3GeV/I:5GeV/I:10GeV/I:20GeV/I:50GeV/I");
+   tr->Branch("singleGEM_multiplicity", &multiplicityGEM[0] , "3GeV/I:5GeV/I:10GeV/I:20GeV/I:50GeV/I");
+
+   //CSC
+   tr->Branch("is_singleCSC", &is_singleCSC[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality0", &is_singleCSCQuality0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality1", &is_singleCSCQuality1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality2", &is_singleCSCQuality2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCVeto0", &is_singleCSCVeto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCVeto1", &is_singleCSCVeto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCVeto2", &is_singleCSCVeto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCVeto3", &is_singleCSCVeto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality0Veto0", &is_singleCSCQuality0Veto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality0Veto1", &is_singleCSCQuality0Veto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality0Veto2", &is_singleCSCQuality0Veto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality0Veto3", &is_singleCSCQuality0Veto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality1Veto0", &is_singleCSCQuality1Veto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality1Veto1", &is_singleCSCQuality1Veto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality1Veto2", &is_singleCSCQuality1Veto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality1Veto3", &is_singleCSCQuality1Veto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality2Veto0", &is_singleCSCQuality2Veto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality2Veto1", &is_singleCSCQuality2Veto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality2Veto2", &is_singleCSCQuality2Veto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleCSCQuality2Veto3", &is_singleCSCQuality2Veto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_doubleCSC", &is_doubleCSC[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnear", &is_doubleCSCnear[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality0", &is_doubleCSCnearQuality0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality1", &is_doubleCSCnearQuality1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality2", &is_doubleCSCnearQuality2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearVeto0", &is_doubleCSCnearVeto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearVeto1", &is_doubleCSCnearVeto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearVeto2", &is_doubleCSCnearVeto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearVeto3", &is_doubleCSCnearVeto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality0Veto0", &is_doubleCSCnearQuality0Veto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality0Veto1", &is_doubleCSCnearQuality0Veto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality0Veto2", &is_doubleCSCnearQuality0Veto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality0Veto3", &is_doubleCSCnearQuality0Veto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality1Veto0", &is_doubleCSCnearQuality1Veto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality1Veto1", &is_doubleCSCnearQuality1Veto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality1Veto2", &is_doubleCSCnearQuality1Veto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality1Veto3", &is_doubleCSCnearQuality1Veto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality2Veto0", &is_doubleCSCnearQuality2Veto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality2Veto1", &is_doubleCSCnearQuality2Veto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality2Veto2", &is_doubleCSCnearQuality2Veto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCnearQuality2Veto3", &is_doubleCSCnearQuality2Veto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleCSCclose", &is_doubleCSCclose[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_tripleCSC", &is_tripleCSC[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnear", &is_tripleCSCnear[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality0", &is_tripleCSCnearQuality0[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality1", &is_tripleCSCnearQuality1[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality2", &is_tripleCSCnearQuality2[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearVeto0", &is_tripleCSCnearVeto0[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearVeto1", &is_tripleCSCnearVeto1[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearVeto2", &is_tripleCSCnearVeto2[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearVeto3", &is_tripleCSCnearVeto3[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality0Veto0", &is_tripleCSCnearQuality0Veto0[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality0Veto1", &is_tripleCSCnearQuality0Veto1[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality0Veto2", &is_tripleCSCnearQuality0Veto2[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality0Veto3", &is_tripleCSCnearQuality0Veto3[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality1Veto0", &is_tripleCSCnearQuality1Veto0[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality1Veto1", &is_tripleCSCnearQuality1Veto1[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality1Veto2", &is_tripleCSCnearQuality1Veto2[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality1Veto3", &is_tripleCSCnearQuality1Veto3[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality2Veto0", &is_tripleCSCnearQuality2Veto0[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality2Veto1", &is_tripleCSCnearQuality2Veto1[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality2Veto2", &is_tripleCSCnearQuality2Veto2[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCnearQuality2Veto3", &is_tripleCSCnearQuality2Veto3[0] , tripleStringBool);
+   tr->Branch("is_tripleCSCclose", &is_tripleCSCclose[0] , tripleStringBool);
+
+   //GEM
+   tr->Branch("is_singleGEM", &is_singleGEM[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality0", &is_singleGEMQuality0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality1", &is_singleGEMQuality1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality2", &is_singleGEMQuality2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMVeto0", &is_singleGEMVeto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMVeto1", &is_singleGEMVeto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMVeto2", &is_singleGEMVeto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMVeto3", &is_singleGEMVeto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality0Veto0", &is_singleGEMQuality0Veto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality0Veto1", &is_singleGEMQuality0Veto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality0Veto2", &is_singleGEMQuality0Veto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality0Veto3", &is_singleGEMQuality0Veto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality1Veto0", &is_singleGEMQuality1Veto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality1Veto1", &is_singleGEMQuality1Veto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality1Veto2", &is_singleGEMQuality1Veto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality1Veto3", &is_singleGEMQuality1Veto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality2Veto0", &is_singleGEMQuality2Veto0[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality2Veto1", &is_singleGEMQuality2Veto1[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality2Veto2", &is_singleGEMQuality2Veto2[0] , "3GeV/O:5GeV/O:10GeV/O:20GeV/O:50GeV/O");
+   tr->Branch("is_singleGEMQuality2Veto3", &is_singleGEMQuality2Veto3[0] , "3GeV/O:5GeV/O:10GeV/O:30GeV/O:50GeV/O");
+   tr->Branch("is_doubleGEM", &is_doubleGEM[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnear", &is_doubleGEMnear[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality0", &is_doubleGEMnearQuality0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality1", &is_doubleGEMnearQuality1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality2", &is_doubleGEMnearQuality2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearVeto0", &is_doubleGEMnearVeto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearVeto1", &is_doubleGEMnearVeto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearVeto2", &is_doubleGEMnearVeto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearVeto3", &is_doubleGEMnearVeto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality0Veto0", &is_doubleGEMnearQuality0Veto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality0Veto1", &is_doubleGEMnearQuality0Veto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality0Veto2", &is_doubleGEMnearQuality0Veto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality0Veto3", &is_doubleGEMnearQuality0Veto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality1Veto0", &is_doubleGEMnearQuality1Veto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality1Veto1", &is_doubleGEMnearQuality1Veto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality1Veto2", &is_doubleGEMnearQuality1Veto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality1Veto3", &is_doubleGEMnearQuality1Veto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality2Veto0", &is_doubleGEMnearQuality2Veto0[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality2Veto1", &is_doubleGEMnearQuality2Veto1[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality2Veto2", &is_doubleGEMnearQuality2Veto2[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMnearQuality2Veto3", &is_doubleGEMnearQuality2Veto3[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_30GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_30GeV/O:5_50GeV/O:10_10GeV/O:10_30GeV/O:10_50GeV/O:30_30GeV/O:30_50GeV/O:50_50GeV/O");
+   tr->Branch("is_doubleGEMclose", &is_doubleGEMclose[0] , "3_3GeV/O:3_5GeV/O:3_10GeV/O:3_20GeV/O:3_50GeV/O:5_5GeV/O:5_10GeV/O:5_20GeV/O:5_50GeV/O:10_10GeV/O:10_20GeV/O:10_50GeV/O:20_20GeV/O:20_50GeV/O:50_50GeV/O");
+   tr->Branch("is_tripleGEM", &is_tripleGEM[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnear", &is_tripleGEMnear[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality0", &is_tripleGEMnearQuality0[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality1", &is_tripleGEMnearQuality1[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality2", &is_tripleGEMnearQuality2[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearVeto0", &is_tripleGEMnearVeto0[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearVeto1", &is_tripleGEMnearVeto1[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearVeto2", &is_tripleGEMnearVeto2[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearVeto3", &is_tripleGEMnearVeto3[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality0Veto0", &is_tripleGEMnearQuality0Veto0[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality0Veto1", &is_tripleGEMnearQuality0Veto1[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality0Veto2", &is_tripleGEMnearQuality0Veto2[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality0Veto3", &is_tripleGEMnearQuality0Veto3[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality1Veto0", &is_tripleGEMnearQuality1Veto0[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality1Veto1", &is_tripleGEMnearQuality1Veto1[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality1Veto2", &is_tripleGEMnearQuality1Veto2[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality1Veto3", &is_tripleGEMnearQuality1Veto3[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality2Veto0", &is_tripleGEMnearQuality2Veto0[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality2Veto1", &is_tripleGEMnearQuality2Veto1[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality2Veto2", &is_tripleGEMnearQuality2Veto2[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMnearQuality2Veto3", &is_tripleGEMnearQuality2Veto3[0] , tripleStringBool);
+   tr->Branch("is_tripleGEMclose", &is_tripleGEMclose[0] , tripleStringBool);
 
    tr2 = fs->make<TTree>("Trigger", "");
    //trigger counts
@@ -1473,8 +2508,8 @@ gStyle->SetOptTitle(0);
       diffEta_maxmin = 9999;  //muEta[3]-muEta[1]
       diffEta_medmin = 9999;  //muEta[2]-muEta[1]
 //------------------ GEN PARTICLES ------------------------------
-//     Handle<GenParticleCollection> genParticles;
-//     iEvent.getByToken(genToken_, genParticles);
+     //Handle<GenParticleCollection> genParticles;
+     //iEvent.getByToken(genToken_, genParticles);
 
      mesonPt  = 0;
      mesonEta = 0;
@@ -1500,6 +2535,12 @@ gStyle->SetOptTitle(0);
      tauVxDeath = 0;
      tauVyDeath = 0;
      tauVzDeath = 0;
+     nVisibleMu = 0;
+     nVisibleMuME0 = 0;
+     nVisibleMuCSC = 0;
+     nVisibleMuGEM = 0;
+     nVisibleMuRPC = 0;
+     nVisibleMuDT = 0;
 
      for (int i=0; i<3; i++)
        {
@@ -1509,6 +2550,13 @@ gStyle->SetOptTitle(0);
        muPx[i] 		= 0; 
        muPy[i] 		= 0; 
        muPz[i] 		= 0; 
+       isMuVisible[i] 	= 0; 
+       isMuVisibleME0[i]= 0; 
+       isMuVisibleCSC[i]= 0; 
+       isMuVisibleGEM[i]= 0; 
+       isMuVisibleRPC[i]= 0; 
+       isMuVisibleDT[i]= 0; 
+       isMuVisibleNONE[i]= 0; 
        muVxBirth[i] 	= 0; 
        muVyBirth[i] 	= 0; 
        muVzBirth[i] 	= 0; 
@@ -1516,22 +2564,23 @@ gStyle->SetOptTitle(0);
        muVyDeath[i] 	= 0; 
        muVzDeath[i] 	= 0; 
        muEta[i] 	= 0; 
+       muIdx[i]		= -1;
+       muTrackId[i]	= -1;
        muStatus[i] 	= 0; 
        }
 
-//if (!signal)
-//{
-//cout << "START LOOP on GEN PARTICLES" << endl;
-//       cout << "Nr. of genParticles: " << genParticles->size()+1 << endl;
-//cout << "Size of GenParticles: " << genParticles->size() << endl;
+//     cout << "START LOOP on GEN PARTICLES" << endl;
+//     cout << "Nr. of genParticles: " << genParticles->size()+1 << endl;
+//     cout << "Size of GenParticles: " << genParticles->size() << endl;
 //     for(size_t i = 0; i < genParticles->size(); ++ i) 
 //     {
-//       //if (v) cout << "GenParticle index: " << i << endl;
+       ///*INACTIVE*/if (v) cout << "GenParticle index: " << i << endl;
+//       int pidx = i;
 //       const GenParticle & p = (*genParticles)[i];
-//       //const Candidate * mom =( p.mother());
-//
-//       if ( (fabs(p.pdgId()) != 511) && (fabs(p.pdgId()) != 15) && (fabs(p.pdgId()) != 431) ) continue;  //15=tau, 511=B0
-//       //selects only tau and B0
+       ///*INACTIVE*/const Candidate * mom =( p.mother());
+
+//       if ( (fabs(p.pdgId()) != 511) && (fabs(p.pdgId()) != 15) && (fabs(p.pdgId()) != 431) ) continue;  ///*INACTIVE*/15=tau, 511=B0
+       //selects only tau and B0
 //       if (v) 
 //         {
 //         cout  <<"id: "<<p.pdgId()<<"\tstatus: "<<p.status()
@@ -1541,9 +2590,9 @@ gStyle->SetOptTitle(0);
 //         <<"\nvx: "<<p.vx()<<"\tvy "<<p.vy()
 //         <<"\tvz: "<<p.vz() << "\n" << endl;
 //         }
-//
-//      if ( fabs(p.pdgId()) == 511 ||  fabs(p.pdgId()) == 431 )	//511=B0, 431=Ds+
-//      // set myB0decay=TRUE if a decay B0->tau + X is found
+
+//      if ( fabs(p.pdgId()) == 511 ||  fabs(p.pdgId()) == 431 )	///*INACTIVE*/511=B0, 431=Ds+
+      // set myB0decay=TRUE if a decay B0->tau + X is found
 //        {
 //	bool B0found = false;
 //	bool Dsfound = false;
@@ -1579,10 +2628,10 @@ gStyle->SetOptTitle(0);
 //	  cout << "Ds -> tau FOUND!" << endl;
 //	  }
 //        }
-//
-//
-//      if ( fabs(p.pdgId()) == 15 )  //15=tau
-//      // set myTauDecay = TRUE if a decay tau->3mu + X is found
+
+
+//      if ( fabs(p.pdgId()) == 15 )  ///*INACTIVE*/15=tau
+      // set myTauDecay = TRUE if a decay tau->3mu + X is found
 //        {
 //	nTau++;
 //	tauPdgId = p.pdgId();
@@ -1598,7 +2647,7 @@ gStyle->SetOptTitle(0);
 //	  cout << "status: " << dauStatus[j]  << endl;
 //	  }
 //	bool myTauDecay = false;
-//	//bool myChain	= false;
+	///*INACTIVE*/bool myChain	= false;
 //	int n_mu = 0;
 //        for(unsigned int j = 0; j < p.numberOfDaughters(); ++ j) 
 //	  {
@@ -1611,11 +2660,11 @@ gStyle->SetOptTitle(0);
 //	  nTau3Mu++;
 //	  cout << "tau -> 3mu FOUND!" << endl;
 //	  }
-//        
+        
 //	const Candidate * mom =( p.mother());
 //	if (myTauDecay && (fabs(mom->pdgId()) == 511) )	
 //	  {
-//	  //myChain = true;
+	  ///*INACTIVE*/myChain = true;
 //	  N_myB0Chain++;
 //	  nB0Tau3Mu++;
 //	  cout << "B0 -> tau -> 3mu FOUND!" << endl;
@@ -1647,7 +2696,7 @@ gStyle->SetOptTitle(0);
 //	  }
 //	if (myTauDecay && (fabs(mom->pdgId()) == 431) )	
 //	  {
-//	  //myChain = true;
+//	  ///*INACTIVE*/myChain = true;
 //	  N_myDsChain++;
 //	  nDsTau3Mu++;
 //	  cout << "Ds -> tau -> 3mu FOUND!" << endl;
@@ -1677,14 +2726,14 @@ gStyle->SetOptTitle(0);
 //	  tauVyDeath = gdaugh->vy();
 //	  tauVzDeath = gdaugh->vz();
 //	  }
-//
-//	//Fill histograms
+
+	//Fill histograms
 //	if ( (myTauDecay && (fabs(mom->pdgId()) == 511)) || (myTauDecay && (fabs(mom->pdgId()) == 431))  )
 //	  {
-//	  //float muEta[3];
-//	  //float muPt[3];o
+//	  ///*INACTIVE*/float muEta[3];
+//	  ///*INACTIVE*/float muPt[3];o
 //	  mesonPdgId = mom->pdgId();
-//	  //int muPdgId[3];
+//	  ///*INACTIVE*/int muPdgId[3];
 //	  unsigned int i=0;
 //          for(unsigned int j = 0; j < p.numberOfDaughters(); ++j) 
 //	    {
@@ -1701,33 +2750,59 @@ gStyle->SetOptTitle(0);
 //	    muVzBirth[i] = d->vz();
 //	    muEta[i] = fabs(d->eta());
 //	    muStatus[i] = d->status();
-//            //if (muStatus[i]==1)
-//	    //  {
-//	    //  muVxDeath[i] = 0;
-//	    //  muVyDeath[i] = 0;
-//	    //  muVzDeath[i] = 0;
-//	    //  }
+//	    ///*INACTIVE*/muGenPind[i] = d->index();
+//	    ///*INACTIVE*/cout << "	!!! MU PARTICLE INDEX !!!   " <<  (d->track()).size() << endl;
+//            ///*INACTIVE*/if (muStatus[i]==1)
+//	    ///*INACTIVE*/  {
+//	    ///*INACTIVE*/  muVxDeath[i] = 0;
+//	    ///*INACTIVE*/  muVyDeath[i] = 0;
+//	    ///*INACTIVE*/  muVzDeath[i] = 0;
+//	    ///*INACTIVE*/  }
+//
 //	    if (muStatus[i]!=1)
 //	      {
 //	      const Candidate *gdaugh = d->daughter( 0 );
 //	      muVxDeath[i] = gdaugh->vx();
 //	      muVyDeath[i] = gdaugh->vy();
 //	      muVzDeath[i] = gdaugh->vz();
-//
-//
-//	    //canDeleteFromHere
+
+
+	    //canDeleteFromHere
 //	      for( size_t i = 0; i < d->numberOfDaughters(); ++ i ) 
 //	        {
 //	        const Candidate * gdaugh = d->daughter( i );
 //		cout << "VERTEX: " << gdaugh->vx()  << ", " << gdaugh->vy() << ", " << gdaugh->vz() << endl;
 //	        }
-//	    //canDeleteToHere
+	    //canDeleteToHere
 //	      }
 //	    i++;
 //	    }
+	    
+//            ///*INACTIVE*/cout << "\nTRY to compare particle taken from index with tau children" << endl;
+//	    ///*INACTIVE*/cout << "current mom i = " << pidx << endl;
+//	    ///*INACTIVE*/cout << "full chain: " << (*genParticles)[pidx-1].pdgId() << " -> " << (*genParticles)[pidx].pdgId() << " -> 3mu " << endl;
+//	    ///*INACTIVE*/for ( int back = 1 ; back<pidx ; back ++)  
+//	    ///*INACTIVE*/   {
+//	    ///*INACTIVE*/   cout << "particle -" << back << "from tau:\t" << (*genParticles)[pidx-back].pdgId() << endl;
+//	    ///*INACTIVE*/   if ( fabs( (*genParticles)[pidx-back].pdgId() ) == 511 )/*||  fabs( (*genParticles)[pidx-back].pdgId() ) == 431 )*/ break;
+//	    ///*INACTIVE*/   }
+//            ///*INACTIVE*/const GenParticle & p1 = (*genParticles)[pidx+1];
+//	    ///*INACTIVE*/cout << "p1 eta= " << p1.eta() << "   child eta= " << muEta[0] << endl;
+//            ///*INACTIVE*/const GenParticle & p2 = (*genParticles)[pidx+2];
+//	    ///*INACTIVE*/cout << "p2 eta= " << p2.eta() << "   child eta= " << muEta[1] << endl;
+//            ///*INACTIVE*/const GenParticle & p3 = (*genParticles)[pidx+3];
+//	    ///*INACTIVE*/cout << "p2 eta= " << p3.eta() << "   child eta= " << muEta[2] << "\n" << endl;
+//	    ///*INACTIVE*/muIdx[0] = pidx+1;
+//	    ///*INACTIVE*/muIdx[1] = pidx+2;
+//	    ///*INACTIVE*/muIdx[2] = pidx+3;
+//	    ///*INACTIVE*/cout << "MOM vertex: " << p.vertex() << endl;
+//	    ///*INACTIVE*/cout << "MUON1 vertex: " << p1.vertex() << endl;
+//	    ///*INACTIVE*/cout << "MUON2 vertex: " << p2.vertex() << endl;
+//	    ///*INACTIVE*/cout << "MUON3 vertex: " << p3.vertex() << endl;
+
 //	  for (unsigned int i = 0; i < 3; i++)	h_PtVsEta->Fill( muEta[i], muPt[i] );
-//          //std::sort(muPt, muPt+3);
-//          //std::sort(muEta, muEta+3);
+//          ///*INACTIVE*/std::sort(muPt, muPt+3);
+//          ///*INACTIVE*/std::sort(muEta, muEta+3);
 //
 //	  // sort arrays according to increasing Pt
 //	  int imax = distance(muPt, max_element(muPt, muPt + 3));
@@ -1745,6 +2820,7 @@ gStyle->SetOptTitle(0);
 //	  std::swap(muVxDeath[2], muVxDeath[imax]);
 //	  std::swap(muVyDeath[2], muVyDeath[imax]);
 //	  std::swap(muVzDeath[2], muVzDeath[imax]);
+//	  ///*INACTIVE*/std::swap(muIdx[2], muIdx[imax]);
 //	  int imin = distance(muPt, min_element(muPt, muPt + 3));
 //	  std::swap(muPt[0], muPt[imin]);
 //	  std::swap(muEta[0], muEta[imin]);
@@ -1760,16 +2836,17 @@ gStyle->SetOptTitle(0);
 //	  std::swap(muVxDeath[0], muVxDeath[imin]);
 //	  std::swap(muVyDeath[0], muVyDeath[imin]);
 //	  std::swap(muVzDeath[0], muVzDeath[imin]);
+//	  ///*INACTIVE*/std::swap(muIdx[0], muIdx[imin]);
 //	  // end sort arrays together
-//
-//	  h_Eta2D_max->Fill(muEta[2], muEta[1]) ; 		//(highest eta, second highest eta)
-//	  h_Eta2D_min->Fill(muEta[0], muEta[1]) ; 		//(smallest eta, second highest eta)
-//	  h_Eta3D->Fill(muEta[2], muEta[1], muEta[0]) ;		//(highest eta, second highest eta, smallest eta)
+
+//	  h_Eta2D_max->Fill(muEta[2], muEta[1]) ; 		//(highest-pt eta, second highest-pt eta)
+//	  h_Eta2D_min->Fill(muEta[0], muEta[1]) ; 		//(smallest-pt eta, second highest-pt eta)
+//	  h_Eta3D->Fill(muEta[2], muEta[1], muEta[0]) ;		//(highest-pt eta, second highest-pt eta, smallest-pt eta)
 //	  h_Pt2D_max->Fill(muPt[2], muPt[1]) ; 			//(highest pt, second highest pt)
 //	  h_Pt2D_min->Fill(muPt[0], muPt[1]) ; 			//(smallest pt, second highest pt)
 //	  h_Pt3D->Fill(muPt[2], muPt[1], muPt[0]) ; 		//(highest pt, second highest pt, smallest pt)
 //          for (auto i=0; i<3; i++)  cout << muPt[i] << "\t" << muEta[i] << "\t" << muPdgId[i] << endl;	
-//
+
 //	  for (auto i=0; i<3; i++)
 //	    {
 //	    if ( fabs(muEta[i])>1.8 && fabs(muEta[i])<3.0 )
@@ -1791,58 +2868,1174 @@ gStyle->SetOptTitle(0);
 //	  diffEta_medmin=muEta[jmed]-muEta[jmin];
 //	  }
 //        }
-//      // << "\nmother: "<<p.mother()<<"\tMOTHER id: "<<mom->pdgId()
-//      // <<"\tMOTHER pt:"<<mom->pt()<<endl<<endl;
+//      ///*INACTIVE*/ << "\nmother: "<<p.mother()<<"\tMOTHER id: "<<mom->pdgId()
+//      ///*INACTIVE*/ <<"\tMOTHER pt:"<<mom->pt()<<endl<<endl;
 //
-//     // if ( fabs(p.eta()) < 2.0 || fabs(p.eta()) > 2.8 ) return;
-//     // if ( fabs(p.pt()) < 0.5 ) return;
-//
+//     ///*INACTIVE*/ if ( fabs(p.eta()) < 2.0 || fabs(p.eta()) > 2.8 ) return;
+//     ///*INACTIVE*/ if ( fabs(p.pt()) < 0.5 ) return;
+//     cout << "END LOOP GEN PARTICLES" << endl;
 //     }
-//}
-//h_PtVsEta	->Draw("COLZ");
-//h_Eta2D_max	->Draw("COLZ");
-//h_Eta2D_min	->Draw("COLZ");
-//h_Eta3D		->Draw("COLZ");
-//h_Pt2D_max	->Draw("COLZ");
-//h_Pt2D_min	->Draw("COLZ");
-//h_Pt3D		->Draw("COLZ");
 
 
-   //Handle<vector<PSimHit>> me0simHitH;
-   //iEvent.getByToken(ME0SimHitToken_, me0simHitH);
-   //for ( auto it = me0simHitH->begin(); it != me0simHitH->end(); ++it )
-   //{
-   //if ( fabs( (*it).particleType() ) != 13 )	continue;
-// //  Local3DPoint locPosSH = (*it).localPosition();
-// //  Local3DPoint entryPoint =   (*it).entryPoint();
-// //  Local3DPoint exitPoint  =   (*it).exitPoint();
-   //ME0DetId me0id = ME0DetId::DetId( (*it).detUnitId() );
-   //(*deltaChamber).push_back(me0id.chamber());
-   //}
+//     float muPtlocal[3] = { 0,0,0 };
+//     float muEtalocal[3] = { 0,0,0 };
+//     int nMu = 0;
+//     for(size_t i = 0; i < genParticles->size(); ++ i) 
+//     {
+//       ///*INACTIVE*/if (v) cout << "GenParticle index: " << i << endl;
+//       const GenParticle & p = (*genParticles)[i];
+//       if ( fabs( p.pdgId() ) != 13 ) continue;
+//       bool found = 0;
+//       bool foundlast = 0;
+//       const Candidate * momtemp =( p.mother());
+//       Candidate * mom = momtemp->clone();
+//       // run back the mothers until a non-muon is found
+//       while ( fabs(mom->pdgId()) == 13 )
+//         {
+//	 const Candidate * momtemp1 = mom->mother();
+//         mom = momtemp1->clone();
+//	 }
+//	 	
+//       // check if the mother is a tau, and its mother is a B0 or Ds	--> if yes "found" is set to "true"
+//       const Candidate * momtemp1 = mom->mother();
+//       Candidate * mom2 = momtemp1->clone();
+//       if ( fabs(mom->pdgId())==15 && ( fabs(mom2->pdgId())==511 || fabs(mom2->pdgId())==431 ) ) 
+//	  {
+//          cout << "meson -> tau -> 3mu found" << endl;
+//          found = 1;
+//	  }
+
+//       // verify that p is the last muon in the chain  --> if yes "foundlast" is set to "true"
+//       if (p.numberOfDaughters()==0)    //easy case: the muon has no daughters
+//       {
+//       foundlast=1;       
+//       cout << "This muon has no daughters" << endl;
+//       }
+//       else	            //other case: the muon has daughters. Need NONE of them being a muon.
+//       {
+//       cout << "This muon has daughters" << endl;
+//       foundlast = 1;
+//       for(unsigned int j = 0; j < p.numberOfDaughters(); ++j)
+//         {
+//         const Candidate * d = p.daughter( j );
+//         if ( fabs(d->pdgId()) == 13 ) foundlast = 0;
+//         }
+//       }
+//       if (found && foundlast) //this is my muon if "found" and "foundlast" are verified. I store the particle index
+//         {
+//         muIdx[nMu] = i;
+//	 muPtlocal[nMu] = p.pt();
+//         muEtalocal[nMu] = fabs(p.eta());
+//         nMu++;
+//         }
+//       if (nMu==3) break;
+//      }
+      
+      ///*INACTIVE*/cout << "Muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
+      ///*INACTIVE*/cout << "Muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
+      ///*INACTIVE*/cout << "Muon eta: " << muEtalocal[0] << "  " << muEtalocal[1] << "  " << muEtalocal[2] << endl;
+      // sort arrays according to increasing Pt
+//      int imax = distance(muPtlocal, max_element(muPtlocal, muPtlocal + 3));
+//      std::swap(muIdx[2], muIdx[imax]);
+//      std::swap(muPtlocal[2], muPtlocal[imax]);
+//      std::swap(muEtalocal[2], muEtalocal[imax]);
+//      int imin = distance(muPtlocal, min_element(muPtlocal, muPtlocal + 3));
+//      ///*INACTIVE*/cout << "imin=" << imin << "  imax=" << imax << endl;
+//      std::swap(muIdx[0], muIdx[imin]);
+//      std::swap(muPtlocal[0], muPtlocal[imin]);
+//      std::swap(muEtalocal[0], muEtalocal[imin]);
+//      ///*INACTIVE*/cout << "Ordered muon indexes: " << muIdx[0] << "  " << muIdx[1] << "  " << muIdx[2] << endl;
+//      ///*INACTIVE*/cout << "Ordered muon pt: " << muPtlocal[0] << "  " << muPtlocal[1] << "  " << muPtlocal[2] << endl;
+//      ///*INACTIVE*/cout << "Muon eta (is pt that was ordered): " << muEtalocal[0] << "  " << muEtalocal[1] << "  " << muEtalocal[2] << endl;
+//      // 0th is the least energetic, 2nd is the most energetic        
+
+//      //look to the regions where the three muons are
+//      //the counters has to be set to 0 befor the loop on each event     
+//      nBarrel 	 = 0;
+//      nOverlap	 = 0;
+//      nEndcap	 = 0;
+//      nForward	 = 0;
+//      nEndcapME0 = 0;
+      
+ 
+//      for(size_t i = 0; i < genParticles->size(); ++ i)
+//      {
+//        const GenParticle & p = (*genParticles)[i];
+//        for (int j = 0; j<3; j++ )
+//        {
+//          int muCandIdx = i;
+//          if ( muCandIdx == muIdx[j] )
+//          { 
+//            if ( fabs(p.pdgId()) != 13 ) { cout << "NOT A MUON" << endl; }
+//            if ( fabs(p.eta()) < 0.85  ) 		 	   nBarrel++;
+//            if ( fabs(p.eta()) >= 0.85 && fabs(p.eta()) <= 1.25 )  nOverlap++;
+//            if ( fabs(p.eta()) > 1.25 && fabs(p.eta()) < 3.0 )     nEndcap++;
+//            if ( fabs(p.eta()) >= 3.0 ) 			   nForward++;
+//            if ( fabs(p.eta()) > 1.8 && fabs(p.eta()) < 3.0 )      nEndcapME0++;
+//	    cout << "muCand Eta:" << p.eta() << endl;
+//          }
+//        }
+
+//      }
+
+//      cout << "nBarrel:" << nBarrel << " nOverlap:" << nOverlap << " nEndcap:" << nEndcap << " nEndcapME0:" << nEndcapME0 << " nForward:" << nForward << endl;
+      
+//      if ( nBarrel + nOverlap + nEndcap + nForward == 3 )//only for triple mu from tau->3mu
+//      {
+//	  if      ( nBarrel == 3 )                                       nBBB++;
+//	  else if ( nBarrel == 2 && nOverlap == 1 )                      nBBO++;                        
+//	  else if ( nBarrel == 2 && nEndcap == 1 )                       nBBE++;
+//	  else if ( nBarrel == 2 && nForward == 1 )                      nBBF++;
+//	  else if ( nBarrel == 1 && nOverlap == 2 )                      nBOO++;
+//	  else if ( nBarrel == 1 && nOverlap == 1 && nEndcap == 1 )      nBOE++;
+//	  else if ( nBarrel == 1 && nOverlap == 1 && nForward == 1 )     nBOF++;
+//	  else if ( nBarrel == 1 && nEndcap == 2 )                       nBEE++;
+//	  else if ( nBarrel == 1 && nEndcap == 1 && nForward == 1 )      nBEF++;
+//	  else if ( nBarrel == 1 && nForward == 2 )                      nBFF++;
+
+//	  else if ( nOverlap == 3 )                                      nOOO++;
+//	  else if ( nOverlap == 2 && nEndcap == 1 )                      nOOE++;
+//	  else if ( nOverlap == 2 && nForward == 1 )                     nOOF++;
+//	  else if ( nOverlap == 1 && nEndcap == 2 )                      nOEE++;
+//	  else if ( nOverlap == 1 && nEndcap == 1 && nForward == 1 )     nOEF++;
+//	  else if ( nOverlap == 1 && nForward == 2 )                     nOFF++;
+//
+//	  else if ( nEndcap == 3 )                                       nEEE++;
+//	  else if ( nEndcap == 2 && nForward == 1 )                      nEEF++;
+//	  else if ( nEndcap == 1 && nForward == 2 )                      nEFF++;
+//
+//	  else if ( nForward == 3 )                                      nFFF++;
+//	  else {cout << "ERROR emtf-bmtf-omtf-forward" << endl;}
+//
+//      }      
+
+//      if ( nEndcapME0 == 3 ) nEEEME0++; 
+      
+      //check eta particle
+       
+
+//      ///*INACTIVE*/cout << "nBBB:" << nBBB << " nBBO:" << nBBO << " nBBE:" << nBBE << " nBBF:" << nBBF << endl;
+//      ///*INACTIVE*/cout << "nBOO:" << nBOO << " nBOE:" << nBOE << " nBOF:" << nBOF << endl;
+//      ///*INACTIVE*/cout << "nBEE:" << nBEE << " nBEF:" << nBEF << endl;
+//      ///*INACTIVE*/cout << "nBFF:" << nBFF << endl;
+//      
+//      ///*INACTIVE*/cout << "nOOO:" << nOOO << " nOOE:" << nOOE << " nOOF:" << nOOF << endl;
+//      ///*INACTIVE*/cout << "nOEE:" << nOEE << " nOEF:" << nOEF << endl;
+//      ///*INACTIVE*/cout << "nOFF:" << nOFF << endl;
+//      
+//      ///*INACTIVE*/cout << "nEEE:" << nEEE << " nEEF:" << nEEF << endl;
+//      ///*INACTIVE*/cout << "nEFF:" << nEFF << endl;
+//      
+//      ///*INACTIVE*/cout << "nFFF:" << nFFF << endl;
+
+//      ///*INACTIVE*/cout << "nEEEME0:" << nEEEME0 << endl;*/
+
+
+///*INACTIVE*/h_PtVsEta	->Draw("COLZ");
+///*INACTIVE*/h_Eta2D_max	->Draw("COLZ");
+///*INACTIVE*/h_Eta2D_min	->Draw("COLZ");
+///*INACTIVE*/h_Eta3D		->Draw("COLZ");
+///*INACTIVE*/h_Pt2D_max	->Draw("COLZ");
+///*INACTIVE*/h_Pt2D_min	->Draw("COLZ");
+///*INACTIVE*/h_Pt3D		->Draw("COLZ");
+
+//     Handle<vector<SimTrack>> simTracksH;
+//     iEvent.getByToken(simTrackToken_, simTracksH);
+//     int count = 0;
+//     for ( auto itk = simTracksH->begin(); itk != simTracksH->end(); ++itk )
+//      {
+//      int trackGenPIdx = (*itk).genpartIndex();
+//      int trackId = (*itk).trackId();
+//      ///*INACTIVE*/cout << "current track.genpartIndex = " << trackGenPIdx << endl;
+//      if       (trackGenPIdx == muIdx[0]+1)
+//        {
+//	cout << "Track of 1st muon found" << endl;
+//	muTrackId[0] = trackId;
+//	}
+//      else if ( trackGenPIdx == muIdx[1]+1 )
+//        {
+//	cout << "Track of 2nd muon found" << endl;
+//	muTrackId[1] = trackId;
+//	}
+//      else if ( trackGenPIdx == muIdx[2]+1 ) 
+//        {
+//	cout << "Track of 3rd muon found" << endl;
+//	muTrackId[2] = trackId;
+//	}
+//      else   continue;
+
+//      //adding also a check on the muType
+//      if ( fabs((*itk).type()) != 13 ) 
+//        {
+//        cout << "ERROR, the track's particle type is NOT a muon!" << endl;
+//        return;
+//        }
+//      }
+//   cout << "Trackids of SimTracks matched to muons: " << muTrackId[0] << "  " << muTrackId[1] << "  " << muTrackId[2] << endl;
+
+//   Handle<vector<PSimHit>> me0simHitH;
+//   iEvent.getByToken(ME0SimHitToken_, me0simHitH);
+
+   //loop on simihits to determine the farthest simhit in ME0 for each of the three muons
+//   double muMax_z[3] = {-1000, -1000, -1000};
+   ///*INACTIVE*/bool atLeastOne;   
+
+//   for ( auto it = me0simHitH->begin(); it != me0simHitH->end(); ++it )
+//   { 
+//     for ( int i=0; i<3; i++ )
+//     {
+//       //consider only hits of muons
+//       if ( fabs( (*it).particleType() ) != 13 )	continue; 
+//       
+//       int idtrack = (*it).trackId();
+       
+       //verify there is at least one correspondence, 
+       //if not the muon has not arrived in ME0
+       ///*INACTIVE*/atLeastOne = false;
+       
+//       if ( idtrack == muTrackId[i]  )
+//       { 
+//       isMuVisible[i] 	 = 1;
+//       isMuVisibleME0[i] = 1;
+//       ME0DetId * shMe0id = new ME0DetId( (*it).detUnitId() );
+//       if (  (*it).entryPoint().z() > -0.298 )    ///*INACTIVE*/ ||  (*it).exitPoint().z() < 0.29  )
+//         {
+	 ///*INACTIVE*/float ytmp = (*it).entryPoint().y()*3
+//	   h_z_strange->Fill( (*it).entryPoint().z() );
+//	   if ( shMe0id->roll()==1 )			h_z_strangeEP1->Fill( (*it).entryPoint().z() );
+//	   if ( shMe0id->roll()==2 )			h_z_strangeEP2->Fill( (*it).entryPoint().z() );
+//	   if ( shMe0id->roll()==3 )			h_z_strangeEP3->Fill( (*it).entryPoint().z() );
+//	   if ( shMe0id->roll()==4 )			h_z_strangeEP4->Fill( (*it).entryPoint().z() );
+//	   if ( shMe0id->roll()==5 )			h_z_strangeEP5->Fill( (*it).entryPoint().z() );
+//	   if ( shMe0id->roll()==6 )			h_z_strangeEP6->Fill( (*it).entryPoint().z() );
+//	   if ( shMe0id->roll()==7 )			h_z_strangeEP7->Fill( (*it).entryPoint().z() );
+//	   if ( shMe0id->roll()==8 )			h_z_strangeEP8->Fill( (*it).entryPoint().z() );
+//
+//           h_xy_strange->Fill( (*it).entryPoint().x(), (*it).entryPoint().y() );
+//	   if ( shMe0id->roll()==1 )			h_xy_strangeEP1->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+//	   if ( shMe0id->roll()==2 )			h_xy_strangeEP2->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+//	   if ( shMe0id->roll()==3 )			h_xy_strangeEP3->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+//	   if ( shMe0id->roll()==4 )			h_xy_strangeEP4->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+//	   if ( shMe0id->roll()==5 )			h_xy_strangeEP5->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+//	   if ( shMe0id->roll()==6 )			h_xy_strangeEP6->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+//	   if ( shMe0id->roll()==7 )			h_xy_strangeEP7->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+//	   if ( shMe0id->roll()==8 )			h_xy_strangeEP8->Fill( (*it).entryPoint().x(), (*it).entryPoint().y()  );
+//	   }
+//       if (  (*it).exitPoint().z() < 0.29 )         
+//	 {
+//	   h_z_strange->Fill( (*it).exitPoint().z() );
+//	   if ( shMe0id->roll()==1 )			h_z_strangeEP1->Fill( (*it).exitPoint().z() );
+//	   if ( shMe0id->roll()==2 )			h_z_strangeEP2->Fill( (*it).exitPoint().z() );
+//	   if ( shMe0id->roll()==3 )			h_z_strangeEP3->Fill( (*it).exitPoint().z() );
+//	   if ( shMe0id->roll()==4 )			h_z_strangeEP4->Fill( (*it).exitPoint().z() );
+//	   if ( shMe0id->roll()==5 )			h_z_strangeEP5->Fill( (*it).exitPoint().z() );
+//	   if ( shMe0id->roll()==6 )			h_z_strangeEP6->Fill( (*it).exitPoint().z() );
+//	   if ( shMe0id->roll()==7 )			h_z_strangeEP7->Fill( (*it).exitPoint().z() );
+//	   if ( shMe0id->roll()==8 )			h_z_strangeEP8->Fill( (*it).exitPoint().z() );
+////	   
+//           h_xy_strange->Fill( (*it).exitPoint().x(), (*it).exitPoint().y() );
+//	   if ( shMe0id->roll()==1 )			h_xy_strangeEP1->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+//	   if ( shMe0id->roll()==2 )			h_xy_strangeEP2->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+//	   if ( shMe0id->roll()==3 )			h_xy_strangeEP3->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+//	   if ( shMe0id->roll()==4 )			h_xy_strangeEP4->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+//	   if ( shMe0id->roll()==5 )			h_xy_strangeEP5->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+//	   if ( shMe0id->roll()==6 )			h_xy_strangeEP6->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+//	   if ( shMe0id->roll()==7 )			h_xy_strangeEP7->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+//	   if ( shMe0id->roll()==8 )			h_xy_strangeEP8->Fill( (*it).exitPoint().x(), (*it).exitPoint().y()  );
+//	 }
+
+//       ///*INACTIVE*/cout << "\ni=" << i << "\tcurrent entryPoint z= " << (*it).entryPoint().z() << "\tx= " << (*it).entryPoint().x() << "\ty= " << (*it).entryPoint().y() << endl;
+//       ///*INACTIVE*/cout 	           << "\tcurrent exitPoint z= " << (*it).exitPoint().z()   << "\tx= " << (*it).exitPoint().x()  << "\ty= " << (*it).exitPoint().y()  << endl;
+//       ///*INACTIVE*/cout                << "\tand muMax_z= " << muMax_z[i] << endl; //MR
+//       ///*INACTIVE*/cout << "ME0DetId: endcap= " <<  shMe0id->region()  << " chamber= " << shMe0id->chamber() << " layer= " << shMe0id->layer() << endl;
+//         ///*INACTIVE*/atLeastOne = true;
+//         //identify the farthest hit for the current muon
+//         if ( muMax_z[i] < (*it).entryPoint().z() )
+//         {
+//           muMax_z[i] = (*it).entryPoint().z();  
+//           ///*INACTIVE*/cout << "maxz changed" << muMax_z[i] << " i=" << i << endl;
+//         }
+       
+//       }
+        
+//     ///*INACTIVE*/cout << atLeastOne << endl;  
+//     } 
+//   }      
+//   h_xy_strange->SaveAs("h_xy_strange.root");
+//   h_z_strange->SaveAs("h_z_strange.root");
+   
+//   for (int i=0; i<3; i++)
+//   {
+//     if ( muMax_z[i] == -1000 )
+//     {
+//     cout << "The " << i << "-th mu didn't arrive in ME0!" << endl; 
+//     }
+//     else 
+//     {
+//     cout << "Max_z of " << i << "-th mu in ME0:" << muMax_z[i] << endl;  
+//     }
+//     if (isMuVisibleME0[i])  nVisibleMuME0++;
+//     cout << "isMuVisibleME0["<< i << "]: " << isMuVisibleME0[i] << endl;
+//   }
+   
+//   for ( auto it = me0simHitH->begin(); it != me0simHitH->end(); ++it )
+//   {
+//   if ( fabs( (*it).particleType() ) != 13 )	continue;
+///*INACTIVE*/   Local3DPoint locPosSH = (*it).localPosition();
+///*INACTIVE*/   Local3DPoint entryPoint =   (*it).entryPoint();
+///*INACTIVE*/   Local3DPoint exitPoint  =   (*it).exitPoint();
+//   ME0DetId me0id = ME0DetId::DetId( (*it).detUnitId() );
+//   (*deltaChamber).push_back(me0id.chamber());
+//   }
 
    //calculate average chamber
-   Int_t ent=0;
+   /*Int_t ent=0; //COMMENT ENDS AT LINE 3669 (that with nMuM++)
    Float_t av=0.00;
    for ( auto chit=(*deltaChamber).begin() ; chit!=(*deltaChamber).end() ; ++chit)
      {
      ent++;
      av=av+(*chit);
-     cout << "Chamber before shift: " << (*chit) << endl;
+     //cout << "Chamber before shift: " << (*chit) << endl;
      }
    if (ent!=0) av=av/ent;
-   cout << "Average chamber: " << av << endl;
+   //cout << "Average chamber: " << av << endl;
    //shift chambers to be centered in the average
    for ( auto chit=(*deltaChamber).begin() ; chit!=(*deltaChamber).end() ; ++chit)
      {
      (*chit)=(*chit)-av;
-     cout << "Chamber after shift: " << (*chit) << endl;
+     ///cout << "Chamber after shift: " << (*chit) << endl;
      }
 
+   //CSC SimHits
+   Handle<vector<PSimHit>> cscsimHitH;
+   iEvent.getByToken(CSCSimHitToken_, cscsimHitH);
 
+   for ( auto itc = cscsimHitH->begin(); itc != cscsimHitH->end(); ++itc )
+   { 
+     for ( int i=0; i<3; i++ )
+     {
+       //consider only hits of muons
+       if ( fabs( (*itc).particleType() ) != 13 )	continue; 
+       
+       int idtrack = (*itc).trackId();
+       
+       //verify there is at least one correspondence, 
+       //if not the muon has not arrived in ME0
+       //atLeastOne = false;
+       
+       if ( idtrack == muTrackId[i]  )
+       {
+       isMuVisible[i] 	 = 1;
+       isMuVisibleCSC[i] = 1;
+       }
+     }
+   }
+
+   //increment the nVisibleMuCSC counter
+   for (int i=0; i<3; i++)
+   {
+     if (isMuVisibleCSC[i])  nVisibleMuCSC++;
+   }
+
+
+   //GEM SimHits
+   Handle<vector<PSimHit>> gemsimHitH;
+   iEvent.getByToken(GEMSimHitToken_, gemsimHitH);
+
+   for ( auto itc = gemsimHitH->begin(); itc != gemsimHitH->end(); ++itc )
+   { 
+     for ( int i=0; i<3; i++ )
+     {
+       //consider only hits of muons
+       if ( fabs( (*itc).particleType() ) != 13 )	continue; 
+       
+       int idtrack = (*itc).trackId();
+       
+       //verify there is at least one correspondence, 
+       
+       if ( idtrack == muTrackId[i]  )
+       {
+       isMuVisible[i] 	 = 1;
+       isMuVisibleGEM[i] = 1;
+       }
+     }
+   }
+
+   //increment the nVisibleMuGEM counter
+   for (int i=0; i<3; i++)
+   {
+     if (isMuVisibleGEM[i])  nVisibleMuGEM++;
+   }
+
+
+   //RPC SimHits
+   //in this way I have the counts of every RPC in CMS (both barrel and endcap)
+   Handle<vector<PSimHit>> rpcsimHitH;
+   iEvent.getByToken(RPCSimHitToken_, rpcsimHitH);
+
+   for ( auto itc = rpcsimHitH->begin(); itc != rpcsimHitH->end(); ++itc )
+   { 
+     for ( int i=0; i<3; i++ )
+     {
+       //consider only hits of muons
+       if ( fabs( (*itc).particleType() ) != 13 )	continue; 
+       
+       int idtrack = (*itc).trackId();
+       
+       //verify there is at least one correspondence, 
+       
+       if ( idtrack == muTrackId[i]  )
+       {
+       isMuVisible[i] 	 = 1;
+       isMuVisibleRPC[i] = 1;
+       }
+     }
+   }
+
+   //increment the nVisibleMuRPC counter
+   for (int i=0; i<3; i++)
+   {
+     if (isMuVisibleRPC[i])  nVisibleMuRPC++;
+   }
+
+
+   //DT SimHits
+   Handle<vector<PSimHit>> dtsimHitH;
+   iEvent.getByToken(DTSimHitToken_, dtsimHitH);
+
+   for ( auto itc = dtsimHitH->begin(); itc != dtsimHitH->end(); ++itc )
+   { 
+     for ( int i=0; i<3; i++ )
+     {
+       //consider only hits of muons
+       if ( fabs( (*itc).particleType() ) != 13 )	continue; 
+       
+       int idtrack = (*itc).trackId();
+       
+       //verify there is at least one correspondence, 
+       
+       if ( idtrack == muTrackId[i]  )
+       {
+       isMuVisible[i] 	 = 1;
+       isMuVisibleDT[i] = 1;
+       }
+     }
+   }
+
+   //increment the nVisibleMuDT counter
+   for (int i=0; i<3; i++)
+   {
+     if (isMuVisibleDT[i])  nVisibleMuDT++;
+   }
+
+
+   //increment the total nVisibleMu counter
+   for (int i=0; i<3; i++)                                                 
+   {
+     if (isMuVisible[i])  nVisibleMu++;
+   }
+
+   //if muon is not seen by neither ME0, GEM, CSC, RPC, DT increment isMuVisibleNONE
+   for (int i=0; i<3; i++)
+   {
+      if ( isMuVisibleME0[i] + isMuVisibleGEM[i] + isMuVisibleCSC[i] + isMuVisibleRPC[i] + isMuVisibleDT[i] == 0 ) isMuVisibleNONE[i]=1;
+      if ( (isMuVisibleME0[i] + isMuVisibleGEM[i] + isMuVisibleCSC[i] + isMuVisibleRPC[i] + isMuVisibleDT[i] > 0) && isMuVisibleNONE[i]>0 )
+      {
+         cout << "ERROR: isMuVisibleME0["<<i<<"] + isMuVisibleGEM["<<i<<"] + isMuVisibleCSC["<<i<<"] + isMuVisibleRPC["<<i<<"] + isMuVisibleDT["<<i<<"] > 0: "<< isMuVisibleME0[i] + isMuVisibleGEM[i] + isMuVisibleCSC[i] + isMuVisibleRPC[i] + isMuVisibleDT[i] << "and isMuVisibleNONE["<<i<<"] > 0: " << isMuVisibleNONE[i] << endl;
+         nIsMuVisibleMoreThanOneERR++;
+      }
+
+   }
+   
+   //a muon can release energy in more than one detector, so one event can be classified in different ways (ex: RGG or RRG)
+   //to summarize the situation I can do a matrix
+   //isMuVisibleNONE[0] isMuVisibleDT[0] isMuVisibleRPC[0] isMuVisibleCSC[0] isMuVisibleGEM[0] isMuVisibleME0[0]
+   //isMuVisibleNONE[1] isMuVisibleDT[1] isMuVisibleRPC[1] isMuVisibleCSC[1] isMuVisibleGEM[1] isMuVisibleME0[1]
+   //isMuVisibleNONE[2] isMuVisibleDT[2] isMuVisibleRPC[2] isMuVisibleCSC[2] isMuVisibleGEM[2] isMuVisibleME0[2]
+
+   //3 numbers for each detector, 5 detectors + NONE
+   std::vector<int> matrixIsMuVisible;
+
+   for ( int i=0; i<3; i++ )
+   {
+      matrixIsMuVisible.push_back( isMuVisibleNONE[i] );
+      matrixIsMuVisible.push_back( isMuVisibleDT[i] );
+      matrixIsMuVisible.push_back( isMuVisibleRPC[i] );
+      matrixIsMuVisible.push_back( isMuVisibleCSC[i] );
+      matrixIsMuVisible.push_back( isMuVisibleGEM[i] );
+      matrixIsMuVisible.push_back( isMuVisibleME0[i] );
+   }
+   
+   cout << "matrixIsMuVisible" << endl;
+   for ( int i=0; i<3; i++ )
+   {
+      cout << matrixIsMuVisible[i*6] << matrixIsMuVisible[i*6+1] << matrixIsMuVisible[i*6+2] << matrixIsMuVisible[i*6+3] << matrixIsMuVisible[i*6+4] << matrixIsMuVisible[i*6+5] << endl;
+   }
+
+   //loop to count all events apart from NONE: count DRCGM events (DT+RPC+CSC+GEM+ME0)
+   bool isMuDRCGM = 1;
+   for ( int i=0; i<3; i++ )
+   {
+      if ( isMuVisibleNONE[i]==1 ) isMuDRCGM = 0;
+   }
+   
+   if ( isMuDRCGM == 1 ) nEventDRCGM++;
+
+   //loop to count all events apart NONE and DT: count RCGM events (RPC+CSC+GEM+ME0)
+   bool isMuRCGM = 1;
+   for ( int i=0; i<3; i++ )
+   {
+      if ( isMuVisibleNONE[i]==1 || isMuVisibleDT[i]==1 ) isMuRCGM = 0;
+   }
+
+   if ( isMuRCGM == 1 ) nEventRCGM++;
+
+   //turn to zero all isMuXXX isMuXX isMuX variables
+   isMuNNN = 0; isMuNND = 0; isMuNNR = 0; isMuNNC = 0; isMuNNG = 0; isMuNNM = 0; 
+   isMuNDD = 0; isMuNDR = 0; isMuNDC = 0; isMuNDG = 0; isMuNDM = 0; 
+   isMuNRR = 0; isMuNRC = 0; isMuNRG = 0; isMuNRM = 0; 
+   isMuNCC = 0; isMuNCG = 0; isMuNCM = 0;
+   isMuNGG = 0; isMuNGM = 0; 
+   isMuNMM = 0; 
+
+   isMuDDD = 0; isMuDDR = 0; isMuDDC = 0; isMuDDG = 0; isMuDDM = 0; 
+   isMuDRR = 0; isMuDRC = 0; isMuDRG = 0; isMuDRM = 0;
+   isMuDCC = 0; isMuDCG = 0; isMuDCM = 0;
+   isMuDGG = 0; isMuDGM = 0; 
+   isMuDMM = 0; 
+
+   isMuRRR = 0; isMuRRC = 0; isMuRRG = 0; isMuRRM = 0; 
+   isMuRCC = 0; isMuRCG = 0; isMuRCM = 0; 
+   isMuRGG = 0; isMuRGM = 0; 
+   isMuRMM = 0;
+
+   isMuCCC = 0; isMuCCG = 0; isMuCCM = 0; 
+   isMuCGG = 0; isMuCGM = 0; 
+   isMuCMM = 0;
+   
+   isMuGGG = 0; isMuGGM = 0; 
+   isMuGMM = 0;
+
+   isMuMMM = 0; 
+
+   //turn to zero all isMuXX variables
+   isMuNN = 0; isMuND = 0; isMuNR = 0; isMuNC = 0; isMuNG = 0; isMuNM = 0;
+   isMuDD = 0; isMuDR = 0; isMuDC = 0; isMuDG = 0; isMuDM = 0;
+   isMuRR = 0; isMuRC = 0; isMuRG = 0; isMuRM = 0; 
+   isMuCC = 0; isMuCG = 0; isMuCM = 0;
+   isMuGG = 0; isMuGM = 0;
+   isMuMM = 0; 
+
+   //turn to zero all isMuX variables
+   isMuN = 0; isMuD = 0; isMuR = 0; isMuC = 0; isMuG = 0; isMuM = 0; 
+
+   //turn to zero all pt cuts triplets
+   for ( int i=0; i<120; i++)
+   {
+      isMuNNNpt[i]=0;       isMuDDDpt[i]=0;      isMuRRRpt[i]=0;      isMuCCCpt[i]=0;       
+      isMuNNDpt[i]=0;       isMuDDRpt[i]=0;      isMuRRCpt[i]=0;      isMuCCGpt[i]=0;             
+      isMuNNRpt[i]=0;       isMuDDCpt[i]=0;      isMuRRGpt[i]=0;      isMuCCMpt[i]=0;
+      isMuNNCpt[i]=0;       isMuDDGpt[i]=0;      isMuRRMpt[i]=0;      isMuCGGpt[i]=0;
+      isMuNNGpt[i]=0;       isMuDDMpt[i]=0;      isMuRCCpt[i]=0;      isMuCGMpt[i]=0;
+      isMuNNMpt[i]=0;       isMuDRRpt[i]=0;      isMuRCGpt[i]=0;      isMuCMMpt[i]=0;
+      isMuNDDpt[i]=0;       isMuDRCpt[i]=0;      isMuRCMpt[i]=0;      
+      isMuNDRpt[i]=0;       isMuDRGpt[i]=0;      isMuRGGpt[i]=0;      isMuGGGpt[i]=0; 
+      isMuNDCpt[i]=0;       isMuDRMpt[i]=0;      isMuRGMpt[i]=0;      isMuGGMpt[i]=0;
+      isMuNDGpt[i]=0;       isMuDCCpt[i]=0;      isMuRMMpt[i]=0;      isMuGMMpt[i]=0;
+      isMuNDMpt[i]=0;       isMuDCGpt[i]=0;
+      isMuNRRpt[i]=0;       isMuDCMpt[i]=0;                           isMuMMMpt[i]=0;
+      isMuNRCpt[i]=0;       isMuDGGpt[i]=0;
+      isMuNRGpt[i]=0;       isMuDGMpt[i]=0;
+      isMuNRMpt[i]=0;       isMuDMMpt[i]=0;
+      isMuNCCpt[i]=0;
+      isMuNCGpt[i]=0;
+      isMuNCMpt[i]=0;
+      isMuNGGpt[i]=0;
+      isMuNGMpt[i]=0;
+      isMuNMMpt[i]=0;
+   }
+
+
+   //loop on first six elements of matrixIsMuVisible
+   for ( int i=0; i<6; i++ )
+   {
+      int contNONE = 0; 
+      int contDT = 0; 
+      int contRPC = 0; 
+      int contCSC = 0; 
+      int contGEM = 0; 
+      int contME0 = 0; 
+      
+      for ( int j=6; j<12; j++ )
+      {
+         for ( int k=12; k<18; k++ )
+         {
+
+	    if ( i==0 ) contNONE = contNONE + matrixIsMuVisible[0];
+            if ( i==1 ) contDT	  = contDT  + matrixIsMuVisible[1];
+            if ( i==2 ) contRPC  = contRPC  + matrixIsMuVisible[2];
+            if ( i==3 ) contCSC  = contCSC  + matrixIsMuVisible[3];
+            if ( i==4 ) contGEM  = contGEM  + matrixIsMuVisible[4];
+            if ( i==5 ) contME0  = contME0  + matrixIsMuVisible[5];
+
+	    if ( j==6  ) contNONE = contNONE + matrixIsMuVisible[6];
+            if ( j==7  ) contDT	  = contDT   + matrixIsMuVisible[7];
+            if ( j==8  ) contRPC  = contRPC  + matrixIsMuVisible[8];
+            if ( j==9  ) contCSC  = contCSC  + matrixIsMuVisible[9];
+            if ( j==10 ) contGEM  = contGEM  + matrixIsMuVisible[10];
+            if ( j==11 ) contME0  = contME0  + matrixIsMuVisible[11];
+
+            if ( k==12 ) contNONE = contNONE + matrixIsMuVisible[12];
+            if ( k==13 ) contDT	  = contDT   + matrixIsMuVisible[13];
+            if ( k==14 ) contRPC  = contRPC  + matrixIsMuVisible[14];
+            if ( k==15 ) contCSC  = contCSC  + matrixIsMuVisible[15];
+            if ( k==16 ) contGEM  = contGEM  + matrixIsMuVisible[16];
+            if ( k==17 ) contME0  = contME0  + matrixIsMuVisible[17];
+            
+            //fill counters for stubs in detectors
+            if ( contNONE == 3 ) 		 { isMuNNN = 1; isMuNN = 1; isMuN = 1; }
+	    if ( contNONE == 2 && contDT  == 1 ) { isMuNND = 1; isMuNN = 1; isMuND = 1; isMuN = 1; isMuD = 1; }
+	    if ( contNONE == 2 && contRPC == 1 ) { isMuNNR = 1; isMuNN = 1; isMuNR = 1; isMuN = 1; isMuR = 1; }
+	    if ( contNONE == 2 && contCSC == 1 ) { isMuNNC = 1; isMuNN = 1; isMuNC = 1; isMuN = 1; isMuC = 1; }
+	    if ( contNONE == 2 && contGEM == 1 ) { isMuNNG = 1; isMuNN = 1; isMuNG = 1; isMuN = 1; isMuG = 1; }
+	    if ( contNONE == 2 && contME0 == 1 ) { isMuNNM = 1; isMuNN = 1; isMuNM = 1; isMuN = 1; isMuM = 1; }
+
+	    if ( contNONE == 1 && contDT == 2 ) 		{ isMuNDD = 1; isMuND = 1; isMuDD = 1; isMuN = 1; isMuD = 1; }
+            if ( contNONE == 1 && contDT == 1 && contRPC == 1 ) { isMuNDR = 1; isMuND = 1; isMuNR = 1; isMuDR = 1; isMuN = 1; isMuD = 1; isMuR = 1; }
+            if ( contNONE == 1 && contDT == 1 && contCSC == 1 ) { isMuNDC = 1; isMuND = 1; isMuNC = 1; isMuDC = 1; isMuN = 1; isMuD = 1; isMuC = 1; }
+            if ( contNONE == 1 && contDT == 1 && contGEM == 1 ) { isMuNDG = 1; isMuND = 1; isMuNG = 1; isMuDG = 1; isMuN = 1; isMuD = 1; isMuG = 1; }
+            if ( contNONE == 1 && contDT == 1 && contME0 == 1 ) { isMuNDM = 1; isMuND = 1; isMuNM = 1; isMuDM = 1; isMuN = 1; isMuD = 1; isMuM = 1; }
+
+	    if ( contNONE == 1 && contRPC == 2 ) 		 { isMuNRR = 1; isMuNR = 1; isMuRR = 1; isMuN = 1; isMuR = 1; }
+	    if ( contNONE == 1 && contRPC == 1 && contCSC == 1 ) { isMuNRC = 1; isMuNR = 1; isMuNC = 1; isMuRC = 1; isMuN = 1; isMuR = 1; isMuC = 1; }
+	    if ( contNONE == 1 && contRPC == 1 && contGEM == 1 ) { isMuNRG = 1; isMuNR = 1; isMuNG = 1; isMuRG = 1; isMuN = 1; isMuR = 1; isMuG = 1; }
+	    if ( contNONE == 1 && contRPC == 1 && contME0 == 1 ) { isMuNRM = 1; isMuNR = 1; isMuNM = 1; isMuRM = 1; isMuN = 1; isMuR = 1; isMuM = 1; }
+
+	    if ( contNONE == 1 && contCSC == 2 ) 		 { isMuNCC = 1; isMuNC = 1; isMuCC = 1; isMuN = 1; isMuC = 1; }
+	    if ( contNONE == 1 && contCSC == 1 && contGEM == 1 ) { isMuNCG = 1; isMuNC = 1; isMuNG = 1; isMuCG = 1; isMuN = 1; isMuC = 1; isMuG = 1; }
+	    if ( contNONE == 1 && contCSC == 1 && contME0 == 1 ) { isMuNCM = 1; isMuNC = 1; isMuNM = 1; isMuCM = 1; isMuN = 1; isMuC = 1; isMuM = 1; }
+	    
+	    if ( contNONE == 1 && contGEM == 2 ) 		 { isMuNGG = 1; isMuNG = 1; isMuGG = 1; isMuN = 1; isMuG = 1; }
+            if ( contNONE == 1 && contGEM == 1 && contME0 == 1 ) { isMuNGM = 1; isMuNG = 1; isMuNM = 1; isMuGM = 1; isMuN = 1; isMuG = 1; isMuM = 1; }
+
+	    if ( contNONE == 1 && contME0 == 2 ) 		 { isMuNMM = 1; isMuNM = 1; isMuMM = 1; isMuN = 1; isMuM = 1; }
+
+	    if ( contDT == 3 ) 	 	       { isMuDDD = 1; isMuDD = 1; isMuD = 1; }
+            if ( contDT == 2 && contRPC == 1 ) { isMuDDR = 1; isMuDD = 1; isMuDR = 1; isMuD = 1; isMuR = 1; }
+            if ( contDT == 2 && contCSC == 1 ) { isMuDDC = 1; isMuDD = 1; isMuDC = 1; isMuD = 1; isMuC = 1; }
+            if ( contDT == 2 && contGEM == 1 ) { isMuDDG = 1; isMuDD = 1; isMuDG = 1; isMuD = 1; isMuG = 1; }
+            if ( contDT == 2 && contME0 == 1 ) { isMuDDM = 1; isMuDD = 1; isMuDM = 1; isMuD = 1; isMuM = 1; }
+
+	    if ( contDT == 1 && contRPC == 2 ) 		       { isMuDRR = 1; isMuDR = 1; isMuRR = 1; isMuD = 1; isMuR = 1; }
+	    if ( contDT == 1 && contRPC == 1 && contCSC == 1 ) { isMuDRC = 1; isMuDR = 1; isMuDC = 1; isMuRC = 1; isMuD = 1; isMuR = 1; isMuC = 1; }
+	    if ( contDT == 1 && contRPC == 1 && contGEM == 1 ) { isMuDRG = 1; isMuDR = 1; isMuDG = 1; isMuRG = 1; isMuD = 1; isMuR = 1; isMuG = 1; }
+	    if ( contDT == 1 && contRPC == 1 && contME0 == 1 ) { isMuDRM = 1; isMuDR = 1; isMuDM = 1; isMuRM = 1; isMuD = 1; isMuR = 1; isMuM = 1; }
+
+	    if ( contDT == 1 && contCSC == 2 ) 		       { isMuDCC = 1; isMuDC = 1; isMuCC = 1; isMuD = 1; isMuC = 1; }
+	    if ( contDT == 1 && contCSC == 1 && contGEM == 1 ) { isMuDCG = 1; isMuDC = 1; isMuDG = 1; isMuCG = 1; isMuD = 1; isMuC = 1; isMuG = 1; }
+	    if ( contDT == 1 && contCSC == 1 && contME0 == 1 ) { isMuDCM = 1; isMuDC = 1; isMuDM = 1; isMuCM = 1; isMuD = 1; isMuC = 1; isMuM = 1; }
+
+	    if ( contDT == 1 && contGEM == 2 ) 		       { isMuDGG = 1; isMuDG = 1; isMuGG = 1; isMuD = 1; isMuG = 1; }
+	    if ( contDT == 1 && contGEM == 1 && contME0 == 1 ) { isMuDGM = 1; isMuDG = 1; isMuDM = 1; isMuGM = 1; isMuD = 1; isMuG = 1; isMuM = 1; }
+
+	    if ( contDT == 1 && contME0 == 2 ) 		       { isMuDMM = 1; isMuDM = 1; isMuMM = 1; isMuD = 1; isMuM = 1; }
+
+	    if ( contRPC == 3 ) 	        { isMuRRR = 1; isMuRR = 1; isMuR = 1; }
+            if ( contRPC == 2 && contCSC == 1 ) { isMuRRC = 1; isMuRR = 1; isMuRC = 1; isMuR = 1; isMuC = 1; }
+            if ( contRPC == 2 && contGEM == 1 ) { isMuRRG = 1; isMuRR = 1; isMuRG = 1; isMuR = 1; isMuG = 1; }
+            if ( contRPC == 2 && contME0 == 1 ) { isMuRRM = 1; isMuRR = 1; isMuRM = 1; isMuR = 1; isMuM = 1; }
+
+	    if ( contRPC == 1 && contCSC == 2 ) 		{ isMuRCC = 1; isMuRC = 1; isMuCC = 1; isMuR = 1; isMuC = 1; }
+            if ( contRPC == 1 && contCSC == 1 && contGEM == 1 ) { isMuRCG = 1; isMuRC = 1; isMuRG = 1; isMuCG = 1; isMuR = 1; isMuC = 1; isMuG = 1; }
+            if ( contRPC == 1 && contCSC == 1 && contME0 == 1 ) { isMuRCM = 1; isMuRC = 1; isMuRM = 1; isMuCM = 1; isMuR = 1; isMuC = 1; isMuM = 1; }
+
+	    if ( contRPC == 1 && contGEM == 2 ) 		{ isMuRGG = 1; isMuRG = 1; isMuGG = 1; isMuR = 1; isMuG = 1; }                 
+            if ( contRPC == 1 && contGEM == 1 && contME0 == 1 ) { isMuRGM = 1; isMuRG = 1; isMuRM = 1; isMuGM = 1; isMuR = 1; isMuG = 1; isMuM = 1; }
+
+	    if ( contRPC == 1 && contME0 == 2 ) { isMuRMM = 1; isMuRM = 1; isMuMM = 1; isMuR = 1; isMuM = 1; }
+
+	    if ( contCSC == 3 ) 	        { isMuCCC = 1; isMuCC = 1; isMuC = 1; }
+            if ( contCSC == 2 && contGEM == 1 ) { isMuCCG = 1; isMuCC = 1; isMuCG = 1; isMuC = 1; isMuG = 1; }
+            if ( contCSC == 2 && contME0 == 1 ) { isMuCCM = 1; isMuCC = 1; isMuCM = 1; isMuC = 1; isMuM = 1; }
+
+	    if ( contCSC == 1 && contGEM == 2 ) 		{ isMuCGG = 1; isMuCG = 1; isMuGG = 1; isMuC = 1; isMuG = 1; }
+            if ( contCSC == 1 && contGEM == 1 && contME0 == 1 ) { isMuCGM = 1; isMuCG = 1; isMuCM = 1; isMuGM = 1; isMuC = 1; isMuG = 1; isMuM = 1; }
+
+	    if ( contCSC == 1 && contME0 == 2 ) 		{ isMuCMM = 1; isMuCM = 1; isMuMM = 1; isMuC = 1; isMuM = 1; }
+
+	    if ( contGEM == 3 ) 		{ isMuGGG = 1; isMuGG = 1; isMuG = 1; }
+            if ( contGEM == 2 && contME0 == 1 ) { isMuGGM = 1; isMuGG = 1; isMuGM = 1; isMuG = 1; isMuM = 1; }
+
+            if ( contGEM == 1 && contME0 == 2 ) { isMuGMM = 1; isMuGM = 1; isMuMM = 1; isMuG = 1; isMuM = 1; }
+
+            if ( contME0 == 3 ) { isMuMMM = 1; isMuMM = 1; isMuM = 1; }
+
+	    //cout << "contNONE:" << contNONE << " contDT:" << contDT << " contRPC:" << contRPC << " contCSC:" << contCSC << " contGEM:" << contGEM << " contME0:" << contME0 << endl;
+
+	    contNONE = 0;
+            contDT = 0; 
+            contRPC = 0; 
+            contCSC = 0; 
+            contGEM = 0; 
+            contME0 = 0;
+
+         }
+
+      }
+   }
+
+   //increment all nMuXXX variables
+   if ( isMuNNN ) nMuNNN++; 
+   if ( isMuNND ) nMuNND++; 
+   if ( isMuNNR ) nMuNNR++; 
+   if ( isMuNNC ) nMuNNC++; 
+   if ( isMuNNG ) nMuNNG++; 
+   if ( isMuNNM ) nMuNNM++;
+
+   if ( isMuNDD ) nMuNDD++; 
+   if ( isMuNDR ) nMuNDR++; 
+   if ( isMuNDC ) nMuNDC++; 
+   if ( isMuNDG ) nMuNDG++; 
+   if ( isMuNDM ) nMuNDM++;
+
+   if ( isMuNRR ) nMuNRR++; 
+   if ( isMuNRC ) nMuNRC++; 
+   if ( isMuNRG ) nMuNRG++; 
+   if ( isMuNRM ) nMuNRM++;
+
+   if ( isMuNCC ) nMuNCC++; 
+   if ( isMuNCG ) nMuNCG++; 
+   if ( isMuNCM ) nMuNCM++;
+
+   if ( isMuNGG ) nMuNGG++; 
+   if ( isMuNGM ) nMuNGM++;
+
+   if ( isMuNMM ) nMuNMM++;
+
+   if ( isMuDDD ) nMuDDD++; 
+   if ( isMuDDR ) nMuDDR++; 
+   if ( isMuDDC ) nMuDDC++; 
+   if ( isMuDDG ) nMuDDG++; 
+   if ( isMuDDM ) nMuDDM++;
+
+   if ( isMuDRR ) nMuDRR++; 
+   if ( isMuDRC ) nMuDRC++; 
+   if ( isMuDRG ) nMuDRG++; 
+   if ( isMuDRM ) nMuDRM++;
+
+   if ( isMuDCC ) nMuDCC++; 
+   if ( isMuDCG ) nMuDCG++; 
+   if ( isMuDCM ) nMuDCM++;
+
+   if ( isMuDGG ) nMuDGG++; 
+   if ( isMuDGM ) nMuDGM++;
+
+   if ( isMuDMM ) nMuDMM++;
+
+   if ( isMuRRR ) nMuRRR++; 
+   if ( isMuRRC ) nMuRRC++; 
+   if ( isMuRRG ) nMuRRG++; 
+   if ( isMuRRM ) nMuRRM++;
+
+   if ( isMuRCC ) nMuRCC++; 
+   if ( isMuRCG ) nMuRCG++; 
+   if ( isMuRCM ) nMuRCM++;
+
+   if ( isMuRGG ) nMuRGG++; 
+   if ( isMuRGM ) nMuRGM++;
+
+   if ( isMuRMM ) nMuRMM++;
+   
+   if ( isMuCCC ) nMuCCC++; 
+   if ( isMuCCG ) nMuCCG++; 
+   if ( isMuCCM ) nMuCCM++;
+
+   if ( isMuCGG ) nMuCGG++; 
+   if ( isMuCGM ) nMuCGM++;
+
+   if ( isMuCMM ) nMuCMM++;
+
+   if ( isMuGGG ) nMuGGG++; 
+   if ( isMuGGM ) nMuGGM++;
+
+   if ( isMuGMM ) nMuGMM++;
+
+   if ( isMuMMM ) nMuMMM++;
+
+   //incrememnt all nMuXX varibles
+   if ( isMuNN ) nMuNN++; 
+   if ( isMuND ) nMuND++; 
+   if ( isMuNR ) nMuNR++; 
+   if ( isMuNC ) nMuNC++; 
+   if ( isMuNG ) nMuNG++; 
+   if ( isMuNM ) nMuNM++;
+
+   if ( isMuDD ) nMuDD++; 
+   if ( isMuDR ) nMuDR++; 
+   if ( isMuDC ) nMuDC++; 
+   if ( isMuDG ) nMuDG++; 
+   if ( isMuDM ) nMuDM++;
+
+   if ( isMuRR ) nMuRR++; 
+   if ( isMuRC ) nMuRC++; 
+   if ( isMuRG ) nMuRG++; 
+   if ( isMuRM ) nMuRM++;
+
+   if ( isMuCC ) nMuCC++; 
+   if ( isMuCG ) nMuCG++; 
+   if ( isMuCM ) nMuCM++;
+
+   if ( isMuGG ) nMuGG++; 
+   if ( isMuGM ) nMuGM++;
+
+   if ( isMuMM ) nMuMM++;
+
+   //increment all nMuX variables
+   if ( isMuN ) nMuN++; 
+   if ( isMuD ) nMuD++; 
+   if ( isMuR ) nMuR++; 
+   if ( isMuC ) nMuC++; 
+   if ( isMuG ) nMuG++; 
+   if ( isMuM ) nMuM++;*///COMMENT STARTS AT LINE 3180 (that with average chamber)
+
+   //write a print for all the 56 nMuXXX variables
+   /*cout << "nMuNNN:" << nMuNNN << " nMuNND:" << nMuNND << " nMuNNR:" << nMuNNR << " nMuNNC:" << nMuNNC << " nMuNNG:" << nMuNNG << " nMuNNM:" << nMuNNM << endl;
+   cout << "nMuNDD:" << nMuNDD << " nMuNDR:" << nMuNDR << " nMuNDC:" << nMuNDC << " nMuNDG:" << nMuNDG << " nMuNDM:" << nMuNDM << endl;
+   cout << "nMuNRR:" << nMuNRR << " nMuNRC:" << nMuNRC << " nMuNRG:" << nMuNRG << " nMuNRM:" << nMuNRM << endl;
+   cout << "nMuNCC:" << nMuNCC << " nMuNCG:" << nMuNCG << " nMuNCM:" << nMuNCM << endl;
+   cout << "nMuNGG:" << nMuNGG << " nMuNGM:" << nMuNGM << endl;
+   cout << "nMuNMM:" << nMuNMM << endl;
+
+   cout << endl;
+
+   cout << "nMuDDD:" << nMuDDD << " nMuDDR:" << nMuDDR << " nMuDDC:" << nMuDDC << " nMuDDG:" << nMuDDG << " nMuDDM:" << nMuDDM << endl;
+   cout << "nMuDRR:" << nMuDRR << " nMuDRC:" << nMuDRC << " nMuDRG:" << nMuDRG << " nMuDRM:" << nMuDRM << endl;
+   cout << "nMuDCC:" << nMuDCC << " nMuDCG:" << nMuDCG << " nMuDCM:" << nMuDCM << endl;
+   cout << "nMuDGG:" << nMuDGG << " nMuDGM:" << nMuDGM << endl;
+   cout << "nMuDMM:" << nMuDMM << endl;
+
+   cout << endl;
+
+   cout << "nMuRRR:" << nMuRRR << " nMuRRC:" << nMuRRC << " nMuRRG:" << nMuRRG << " nMuRRM:" << nMuRRM << endl;
+   cout << "nMuRCC:" << nMuRCC << " nMuRCG:" << nMuRCG << " nMuRCM:" << nMuRCM << endl;
+   cout << "nMuRGG:" << nMuRGG << " nMuRGM:" << nMuRGM << endl;
+   cout << "nMuRMM:" << nMuRMM << endl;
+   
+   cout << endl;
+
+   cout << "nMuCCC:" << nMuCCC << " nMuCCG:" << nMuCCG << " nMuCCM:" << nMuCCM << endl;
+   cout << "nMuCGG:" << nMuCGG << " nMuCGM:" << nMuCGM << endl;
+   cout << "nMuCMM:" << nMuCMM << endl;
+
+   cout << endl;
+
+   cout << "nMuGGG:" << nMuGGG << " nMuGGM:" << nMuGGM << endl;
+   cout << "nMuGMM:" << nMuGMM << endl;
+   
+   cout << endl;
+
+   cout << "nMuMMM:" << nMuMMM << endl;*/
+
+   //fill pt vs eta histograms
+   /*for ( int i=0; i<3; i++ )
+   {
+      if ( isMuNNN ) h_nMuNNN_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNND ) h_nMuNND_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNNR ) h_nMuNNR_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNNC ) h_nMuNNC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNNG ) h_nMuNNG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNNM ) h_nMuNNM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNDD ) h_nMuNDD_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNDR ) h_nMuNDR_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNDC ) h_nMuNDC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNDG ) h_nMuNDG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNDM ) h_nMuNDM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNRR ) h_nMuNRR_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNRC ) h_nMuNRC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNRG ) h_nMuNRG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNRM ) h_nMuNRM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNCC ) h_nMuNCC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNCG ) h_nMuNCG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNCM ) h_nMuNCM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNGG ) h_nMuNGG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNGM ) h_nMuNGM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuNMM ) h_nMuNMM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+                             
+      if ( isMuDDD ) h_nMuDDD_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDDR ) h_nMuDDR_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDDC ) h_nMuDDC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDDG ) h_nMuDDG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDDM ) h_nMuDDM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDRR ) h_nMuDRR_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDRC ) h_nMuDRC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDRG ) h_nMuDRG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDRM ) h_nMuDRM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDCC ) h_nMuDCC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDCG ) h_nMuDCG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDCM ) h_nMuDCM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDGG ) h_nMuDGG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDGM ) h_nMuDGM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuDMM ) h_nMuDMM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+                             
+      if ( isMuRRR ) h_nMuRRR_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRRC ) h_nMuRRC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRRG ) h_nMuRRG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRRM ) h_nMuRRM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRCC ) h_nMuRCC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRCG ) h_nMuRCG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRCM ) h_nMuRCM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRGG ) h_nMuRGG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRGM ) h_nMuRGM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuRMM ) h_nMuRMM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+                             
+      if ( isMuCCC ) h_nMuCCC_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuCCG ) h_nMuCCG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuCCM ) h_nMuCCM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuCGG ) h_nMuCGG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuCGM ) h_nMuCGM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuCMM ) h_nMuCMM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+                             
+      if ( isMuGGG ) h_nMuGGG_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuGGM ) h_nMuGGM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+      if ( isMuGMM ) h_nMuGMM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+                             
+      if ( isMuMMM ) h_nMuMMM_PtVsEta->Fill( muEtalocal[i], muPtlocal[i] );
+
+   }
+
+
+   //pt cuts
+   vector<int> ptThr{ 0, 1, 2, 3, 5, 10, 20, 50 };
+   int ptThrSize = ptThr.size();
+   //cout << "ptThr" << endl;   
+
+   int idxPt = 0;
+   for ( int i=0; i < ptThrSize; i++ )
+   {
+      for ( int j=0; j < ptThrSize; j++ )
+      {
+         if ( ptThr[j] < ptThr[i] ) continue;
+         for ( int k=0; k < ptThrSize; k++ )
+         {
+            if ( ptThr[k] < ptThr[j] ) continue;
+
+            //cout << ptThr[i] << " " << ptThr[j] << " " << ptThr[k] << endl;
+
+            if ( muPtlocal[0] >= ptThr[i] && muPtlocal[1] >= ptThr[j] && muPtlocal[2] >= ptThr[k] )
+            {
+               if ( isMuNNN ) isMuNNNpt[ idxPt ]=1;
+               if ( isMuNND ) isMuNNDpt[ idxPt ]=1;
+               if ( isMuNNR ) isMuNNRpt[ idxPt ]=1;
+               if ( isMuNNC ) isMuNNCpt[ idxPt ]=1;
+               if ( isMuNNG ) isMuNNGpt[ idxPt ]=1;
+               if ( isMuNNM ) isMuNNMpt[ idxPt ]=1;
+
+               if ( isMuNDD ) isMuNDDpt[ idxPt ]=1;
+               if ( isMuNDR ) isMuNDRpt[ idxPt ]=1;
+               if ( isMuNDC ) isMuNDCpt[ idxPt ]=1;
+               if ( isMuNDG ) isMuNDGpt[ idxPt ]=1;
+               if ( isMuNDM ) isMuNDMpt[ idxPt ]=1;
+                                     
+               if ( isMuNRR ) isMuNRRpt[ idxPt ]=1;
+               if ( isMuNRC ) isMuNRCpt[ idxPt ]=1;
+               if ( isMuNRG ) isMuNRGpt[ idxPt ]=1;
+               if ( isMuNRM ) isMuNRMpt[ idxPt ]=1;
+                                     
+               if ( isMuNCC ) isMuNCCpt[ idxPt ]=1;
+               if ( isMuNCG ) isMuNCGpt[ idxPt ]=1;
+               if ( isMuNCM ) isMuNCMpt[ idxPt ]=1;
+                                     
+               if ( isMuNGG ) isMuNGGpt[ idxPt ]=1;
+               if ( isMuNGM ) isMuNGMpt[ idxPt ]=1;
+                                     
+               if ( isMuNMM ) isMuNMMpt[ idxPt ]=1;
+                                     
+               if ( isMuDDD ) isMuDDDpt[ idxPt ]=1;
+               if ( isMuDDR ) isMuDDRpt[ idxPt ]=1;
+               if ( isMuDDC ) isMuDDCpt[ idxPt ]=1;
+               if ( isMuDDG ) isMuDDGpt[ idxPt ]=1;
+               if ( isMuDDM ) isMuDDMpt[ idxPt ]=1;
+                                     
+               if ( isMuDRR ) isMuDRRpt[ idxPt ]=1;
+               if ( isMuDRC ) isMuDRCpt[ idxPt ]=1;
+               if ( isMuDRG ) isMuDRGpt[ idxPt ]=1;
+               if ( isMuDRM ) isMuDRMpt[ idxPt ]=1;
+                                     
+               if ( isMuDCC ) isMuDCCpt[ idxPt ]=1;
+               if ( isMuDCG ) isMuDCGpt[ idxPt ]=1;
+               if ( isMuDCM ) isMuDCMpt[ idxPt ]=1;
+                                     
+               if ( isMuDGG ) isMuDGGpt[ idxPt ]=1;
+               if ( isMuDGM ) isMuDGMpt[ idxPt ]=1;
+                                     
+               if ( isMuDMM ) isMuDMMpt[ idxPt ]=1;
+
+               if ( isMuRRR ) isMuRRRpt[ idxPt ]=1;
+               if ( isMuRRC ) isMuRRCpt[ idxPt ]=1;
+               if ( isMuRRG ) isMuRRGpt[ idxPt ]=1;
+               if ( isMuRRM ) isMuRRMpt[ idxPt ]=1;
+                                     
+               if ( isMuRCC ) isMuRCCpt[ idxPt ]=1;
+               if ( isMuRCG ) isMuRCGpt[ idxPt ]=1;
+               if ( isMuRCM ) isMuRCMpt[ idxPt ]=1;
+                                     
+               if ( isMuRGG ) isMuRGGpt[ idxPt ]=1;
+               if ( isMuRGM ) isMuRGMpt[ idxPt ]=1;
+                                     
+               if ( isMuRMM ) isMuRMMpt[ idxPt ]=1;
+                                     
+               if ( isMuCCC ) isMuCCCpt[ idxPt ]=1;
+               if ( isMuCCG ) isMuCCGpt[ idxPt ]=1;
+               if ( isMuCCM ) isMuCCMpt[ idxPt ]=1;
+                                     
+               if ( isMuCGG ) isMuCGGpt[ idxPt ]=1;
+               if ( isMuCGM ) isMuCGMpt[ idxPt ]=1;
+                                     
+               if ( isMuCMM ) isMuCMMpt[ idxPt ]=1;
+                                     
+               if ( isMuGGG ) isMuGGGpt[ idxPt ]=1;
+               if ( isMuGGM ) isMuGGMpt[ idxPt ]=1;
+                                     
+               if ( isMuGMM ) isMuGMMpt[ idxPt ]=1;
+                                     
+               if ( isMuMMM ) isMuMMMpt[ idxPt ]=1;
+
+            }
+            
+            idxPt++;
+         }
+      }
+   }
+   
+
+   //increment the nMuXXXpt counters
+   for ( int i=0; i<120; i++ )
+   {
+      if ( isMuNNNpt[i] ) nMuNNNpt[i]++;
+      if ( isMuNNDpt[i] ) nMuNNDpt[i]++;
+      if ( isMuNNRpt[i] ) nMuNNRpt[i]++;
+      if ( isMuNNCpt[i] ) nMuNNCpt[i]++;
+      if ( isMuNNGpt[i] ) nMuNNGpt[i]++;
+      if ( isMuNNMpt[i] ) nMuNNMpt[i]++;
+                              
+      if ( isMuNDDpt[i] ) nMuNDDpt[i]++;
+      if ( isMuNDRpt[i] ) nMuNDRpt[i]++;
+      if ( isMuNDCpt[i] ) nMuNDCpt[i]++;
+      if ( isMuNDGpt[i] ) nMuNDGpt[i]++;
+      if ( isMuNDMpt[i] ) nMuNDMpt[i]++;
+                            
+      if ( isMuNRRpt[i] ) nMuNRRpt[i]++;
+      if ( isMuNRCpt[i] ) nMuNRCpt[i]++;
+      if ( isMuNRGpt[i] ) nMuNRGpt[i]++;
+      if ( isMuNRMpt[i] ) nMuNRMpt[i]++;
+                            
+      if ( isMuNCCpt[i] ) nMuNCCpt[i]++;
+      if ( isMuNCGpt[i] ) nMuNCGpt[i]++;
+      if ( isMuNCMpt[i] ) nMuNCMpt[i]++;
+                            
+      if ( isMuNGGpt[i] ) nMuNGGpt[i]++;
+      if ( isMuNGMpt[i] ) nMuNGMpt[i]++;
+                            
+      if ( isMuNMMpt[i] ) nMuNMMpt[i]++;
+                            
+      if ( isMuDDDpt[i] ) nMuDDDpt[i]++;
+      if ( isMuDDRpt[i] ) nMuDDRpt[i]++;
+      if ( isMuDDCpt[i] ) nMuDDCpt[i]++;
+      if ( isMuDDGpt[i] ) nMuDDGpt[i]++;
+      if ( isMuDDMpt[i] ) nMuDDMpt[i]++;
+                            
+      if ( isMuDRRpt[i] ) nMuDRRpt[i]++;
+      if ( isMuDRCpt[i] ) nMuDRCpt[i]++;
+      if ( isMuDRGpt[i] ) nMuDRGpt[i]++;
+      if ( isMuDRMpt[i] ) nMuDRMpt[i]++;
+                            
+      if ( isMuDCCpt[i] ) nMuDCCpt[i]++;
+      if ( isMuDCGpt[i] ) nMuDCGpt[i]++;
+      if ( isMuDCMpt[i] ) nMuDCMpt[i]++;
+                            
+      if ( isMuDGGpt[i] ) nMuDGGpt[i]++;
+      if ( isMuDGMpt[i] ) nMuDGMpt[i]++;
+                            
+      if ( isMuDMMpt[i] ) nMuDMMpt[i]++;
+                              
+      if ( isMuRRRpt[i] ) nMuRRRpt[i]++;
+      if ( isMuRRCpt[i] ) nMuRRCpt[i]++;
+      if ( isMuRRGpt[i] ) nMuRRGpt[i]++;
+      if ( isMuRRMpt[i] ) nMuRRMpt[i]++;
+                            
+      if ( isMuRCCpt[i] ) nMuRCCpt[i]++;
+      if ( isMuRCGpt[i] ) nMuRCGpt[i]++;
+      if ( isMuRCMpt[i] ) nMuRCMpt[i]++;
+                            
+      if ( isMuRGGpt[i] ) nMuRGGpt[i]++;
+      if ( isMuRGMpt[i] ) nMuRGMpt[i]++;
+                            
+      if ( isMuRMMpt[i] ) nMuRMMpt[i]++;
+                            
+      if ( isMuCCCpt[i] ) nMuCCCpt[i]++;
+      if ( isMuCCGpt[i] ) nMuCCGpt[i]++;
+      if ( isMuCCMpt[i] ) nMuCCMpt[i]++;
+                            
+      if ( isMuCGGpt[i] ) nMuCGGpt[i]++;
+      if ( isMuCGMpt[i] ) nMuCGMpt[i]++;
+                            
+      if ( isMuCMMpt[i] ) nMuCMMpt[i]++;
+                            
+      if ( isMuGGGpt[i] ) nMuGGGpt[i]++;
+      if ( isMuGGMpt[i] ) nMuGGMpt[i]++;
+                            
+      if ( isMuGMMpt[i] ) nMuGMMpt[i]++;
+                            
+      if ( isMuMMMpt[i] ) nMuMMMpt[i]++;
+
+   }
+
+   //register maximum pt and eta
+   for ( int i=0; i<3; i++ )
+   {
+      if ( muPtlocal[i]>maxPtAll ) maxPtAll = muPtlocal[i];
+      if ( muEtalocal[i]>maxEtaAll ) maxEtaAll = muEtalocal[i];
+   }*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   //ME0
    ESHandle<ME0Geometry> me0Geom;
    iSetup.get<MuonGeometryRecord>().get(me0Geom);
    Handle<ME0SegmentCollection> me0segmentH;
    iEvent.getByToken(ME0SegmentToken_, me0segmentH);
+   
+   //GEM
+   ESHandle<GEMGeometry> gemGeom;
+   iSetup.get<MuonGeometryRecord>().get(gemGeom);
+   Handle<GEMSegmentCollection> gemsegmentH;
+   iEvent.getByToken(GEMSegmentToken_, gemsegmentH);
+
+   //CSC
+   ESHandle<CSCGeometry> cscGeom;
+   iSetup.get<MuonGeometryRecord>().get(cscGeom); 
+   Handle<CSCSegmentCollection> cscsegmentH;
+   iEvent.getByToken(CSCSegmentToken_, cscsegmentH);
+
+   //L1T
+   Handle<BXVector<l1t::RegionalMuonCand>> l1tsegmentH;
+   iEvent.getByToken(L1TSegmentToken_, l1tsegmentH);
+
+
+
 
    deltaPhiMap.clear();
    alphaMap.clear();
@@ -1874,7 +4067,20 @@ gStyle->SetOptTitle(0);
    nSegments = 0;
 
    nEvent++;
-   if (nME0>0) nEventSel++;
+   if ( nME0>0) nEventSel++;
+   /*if ( nVisibleMuME0>0) nEventVis++;
+   if ( nVisibleMuME0>0) nEventSelME0++;
+   if ( nVisibleMuME0>0) nEventSelME01++;
+   if ( nVisibleMuME0>1) nEventSelME02++;
+   if ( nVisibleMuME0>2) nEventSelME03++;
+   
+   if ( nVisibleMuCSC>0) nEventSelCSC1++; 
+   if ( nVisibleMuCSC>1) nEventSelCSC2++;
+   if ( nVisibleMuCSC>2) nEventSelCSC3++;
+
+   if ( nVisibleMuGEM>0) nEventSelGEM1++;
+   if ( nVisibleMuGEM>1) nEventSelGEM2++;
+   if ( nVisibleMuGEM>2) nEventSelGEM3++;*/
 
    //bool is_singleME0[5], is_doubleME0[15];
    for ( int i=0; i<5; i++)	
@@ -1899,7 +4105,7 @@ gStyle->SetOptTitle(0);
      is_singleME0Quality2Veto1[i] = false;
      is_singleME0Quality2Veto2[i] = false;
      is_singleME0Quality2Veto3[i] = false;
-     multiplicity[i] = 0;
+     multiplicityME0[i] = 0;
      }
    for ( int i=0; i<15; i++)	{
      				is_doubleME0[i] = false;
@@ -1949,6 +4155,154 @@ gStyle->SetOptTitle(0);
    				is_tripleME0nearQuality2Veto3[i] = false;
    				is_tripleME0close[i] = false;
 				}
+   //CSC
+   for ( int i=0; i<5; i++)	
+     {
+     is_singleCSC[i] = false;
+     is_singleCSCQuality0[i] = false;
+     is_singleCSCQuality1[i] = false;
+     is_singleCSCQuality2[i] = false;
+     is_singleCSCVeto0[i] = false;
+     is_singleCSCVeto1[i] = false;
+     is_singleCSCVeto2[i] = false;
+     is_singleCSCVeto3[i] = false;
+     is_singleCSCQuality0Veto0[i] = false;
+     is_singleCSCQuality0Veto1[i] = false;
+     is_singleCSCQuality0Veto2[i] = false;
+     is_singleCSCQuality0Veto3[i] = false;
+     is_singleCSCQuality1Veto0[i] = false;
+     is_singleCSCQuality1Veto1[i] = false;
+     is_singleCSCQuality1Veto2[i] = false;
+     is_singleCSCQuality1Veto3[i] = false;
+     is_singleCSCQuality2Veto0[i] = false;
+     is_singleCSCQuality2Veto1[i] = false;
+     is_singleCSCQuality2Veto2[i] = false;
+     is_singleCSCQuality2Veto3[i] = false;
+     multiplicityCSC[i] = 0;
+     }
+   for ( int i=0; i<15; i++)	{
+     				is_doubleCSC[i] = false;
+     				is_doubleCSCnear[i] = false;
+     				is_doubleCSCnearQuality0[i] = false;
+     				is_doubleCSCnearQuality1[i] = false;
+     				is_doubleCSCnearQuality2[i] = false;
+     				is_doubleCSCnearVeto0[i] = false;
+     				is_doubleCSCnearVeto1[i] = false;
+     				is_doubleCSCnearVeto2[i] = false;
+     				is_doubleCSCnearVeto3[i] = false;
+     				is_doubleCSCnearQuality0Veto0[i] = false;
+     				is_doubleCSCnearQuality0Veto1[i] = false;
+     				is_doubleCSCnearQuality0Veto2[i] = false;
+     				is_doubleCSCnearQuality0Veto3[i] = false;
+     				is_doubleCSCnearQuality1Veto0[i] = false;
+     				is_doubleCSCnearQuality1Veto1[i] = false;
+     				is_doubleCSCnearQuality1Veto2[i] = false;
+     				is_doubleCSCnearQuality1Veto3[i] = false;
+     				is_doubleCSCnearQuality2Veto0[i] = false;
+     				is_doubleCSCnearQuality2Veto1[i] = false;
+     				is_doubleCSCnearQuality2Veto2[i] = false;
+     				is_doubleCSCnearQuality2Veto3[i] = false;
+     				is_doubleCSCclose[i] = false;
+				}
+   for ( int i=0; i<35; i++)	{
+   				is_tripleCSC[i] = false;
+   				is_tripleCSCnear[i] = false;
+   				is_tripleCSCnearQuality0[i] = false;
+   				is_tripleCSCnearQuality1[i] = false;
+   				is_tripleCSCnearQuality2[i] = false;
+   				is_tripleCSCnearVeto0[i] = false;
+   				is_tripleCSCnearVeto1[i] = false;
+   				is_tripleCSCnearVeto2[i] = false;
+   				is_tripleCSCnearVeto3[i] = false;
+   				is_tripleCSCnearQuality0Veto0[i] = false;
+   				is_tripleCSCnearQuality0Veto1[i] = false;
+   				is_tripleCSCnearQuality0Veto2[i] = false;
+   				is_tripleCSCnearQuality0Veto3[i] = false;
+   				is_tripleCSCnearQuality1Veto0[i] = false;
+   				is_tripleCSCnearQuality1Veto1[i] = false;
+   				is_tripleCSCnearQuality1Veto2[i] = false;
+   				is_tripleCSCnearQuality1Veto3[i] = false;
+   				is_tripleCSCnearQuality2Veto0[i] = false;
+   				is_tripleCSCnearQuality2Veto1[i] = false;
+   				is_tripleCSCnearQuality2Veto2[i] = false;
+   				is_tripleCSCnearQuality2Veto3[i] = false;
+   				is_tripleCSCclose[i] = false;
+				}
+
+   //GEM
+   for ( int i=0; i<5; i++)	
+     {
+     is_singleGEM[i] = false;
+     is_singleGEMQuality0[i] = false;
+     is_singleGEMQuality1[i] = false;
+     is_singleGEMQuality2[i] = false;
+     is_singleGEMVeto0[i] = false;
+     is_singleGEMVeto1[i] = false;
+     is_singleGEMVeto2[i] = false;
+     is_singleGEMVeto3[i] = false;
+     is_singleGEMQuality0Veto0[i] = false;
+     is_singleGEMQuality0Veto1[i] = false;
+     is_singleGEMQuality0Veto2[i] = false;
+     is_singleGEMQuality0Veto3[i] = false;
+     is_singleGEMQuality1Veto0[i] = false;
+     is_singleGEMQuality1Veto1[i] = false;
+     is_singleGEMQuality1Veto2[i] = false;
+     is_singleGEMQuality1Veto3[i] = false;
+     is_singleGEMQuality2Veto0[i] = false;
+     is_singleGEMQuality2Veto1[i] = false;
+     is_singleGEMQuality2Veto2[i] = false;
+     is_singleGEMQuality2Veto3[i] = false;
+     multiplicityGEM[i] = 0;
+     }
+   for ( int i=0; i<15; i++)	{
+     				is_doubleGEM[i] = false;
+     				is_doubleGEMnear[i] = false;
+     				is_doubleGEMnearQuality0[i] = false;
+     				is_doubleGEMnearQuality1[i] = false;
+     				is_doubleGEMnearQuality2[i] = false;
+     				is_doubleGEMnearVeto0[i] = false;
+     				is_doubleGEMnearVeto1[i] = false;
+     				is_doubleGEMnearVeto2[i] = false;
+     				is_doubleGEMnearVeto3[i] = false;
+     				is_doubleGEMnearQuality0Veto0[i] = false;
+     				is_doubleGEMnearQuality0Veto1[i] = false;
+     				is_doubleGEMnearQuality0Veto2[i] = false;
+     				is_doubleGEMnearQuality0Veto3[i] = false;
+     				is_doubleGEMnearQuality1Veto0[i] = false;
+     				is_doubleGEMnearQuality1Veto1[i] = false;
+     				is_doubleGEMnearQuality1Veto2[i] = false;
+     				is_doubleGEMnearQuality1Veto3[i] = false;
+     				is_doubleGEMnearQuality2Veto0[i] = false;
+     				is_doubleGEMnearQuality2Veto1[i] = false;
+     				is_doubleGEMnearQuality2Veto2[i] = false;
+     				is_doubleGEMnearQuality2Veto3[i] = false;
+     				is_doubleGEMclose[i] = false;
+				}
+   for ( int i=0; i<35; i++)	{
+   				is_tripleGEM[i] = false;
+   				is_tripleGEMnear[i] = false;
+   				is_tripleGEMnearQuality0[i] = false;
+   				is_tripleGEMnearQuality1[i] = false;
+   				is_tripleGEMnearQuality2[i] = false;
+   				is_tripleGEMnearVeto0[i] = false;
+   				is_tripleGEMnearVeto1[i] = false;
+   				is_tripleGEMnearVeto2[i] = false;
+   				is_tripleGEMnearVeto3[i] = false;
+   				is_tripleGEMnearQuality0Veto0[i] = false;
+   				is_tripleGEMnearQuality0Veto1[i] = false;
+   				is_tripleGEMnearQuality0Veto2[i] = false;
+   				is_tripleGEMnearQuality0Veto3[i] = false;
+   				is_tripleGEMnearQuality1Veto0[i] = false;
+   				is_tripleGEMnearQuality1Veto1[i] = false;
+   				is_tripleGEMnearQuality1Veto2[i] = false;
+   				is_tripleGEMnearQuality1Veto3[i] = false;
+   				is_tripleGEMnearQuality2Veto0[i] = false;
+   				is_tripleGEMnearQuality2Veto1[i] = false;
+   				is_tripleGEMnearQuality2Veto2[i] = false;
+   				is_tripleGEMnearQuality2Veto3[i] = false;
+   				is_tripleGEMclose[i] = false;
+				}
+
 
    float thr[5]={-1,-1,-1,-1,-1};
    //thresholds
@@ -1998,6 +4352,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 
      for ( sg_it = me0segmentH->begin(); sg_it !=me0segmentH->end(); ++sg_it)
         {
+        cout << "\nLooking to new me0segmentH " << endl;
 	ME0DetId segmMe0Id = (*sg_it).me0DetId();
 	int endcap = segmMe0Id.region();
         int segm_chamber = segmMe0Id.chamber();
@@ -2153,7 +4508,7 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	  if ( fabs(sgDeltaGlobalPhi) < thr[pt_ind] )	
 	    {
 	    is_singleME0[pt_ind] = true;
-	    multiplicity[pt_ind]++;
+	    multiplicityME0[pt_ind]++;
 	    if ( qtmp>= 0 )  is_singleME0Quality0[pt_ind] = true; 
 	    if ( qtmp>= 1 )  is_singleME0Quality1[pt_ind] = true; 
 	    if ( qtmp>= 2 )  is_singleME0Quality2[pt_ind] = true; 
@@ -2202,10 +4557,10 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
       int triple_ind = 0;
       for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
         {
-	cout << "pt1_ind " << pt1_ind;
+	//cout << "pt1_ind " << pt1_ind;
         for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
 	  {
-	  cout << "pt2_ind " << pt2_ind;
+	  //cout << "pt2_ind " << pt2_ind;
           found_double1 = false;
 	  found_double2 = false;
           for ( auto dp=(*deltaGlobalPhiLayer21List).begin(); dp!=(*deltaGlobalPhiLayer21List).end(); ++dp)
@@ -2220,15 +4575,15 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	      }
 	    //cout << "deltaPhi = " << *dp << "   found_double1 = " << found_double1 << "   found_double2 = " << found_double2 << endl;
 	    }
-          if ( found_double1 && found_double2 )			is_doubleME0[mixed_ind] = true;
+          if ( found_double1 && found_double2 ) is_doubleME0[mixed_ind] = true;
 	  //cout << "result: is_doubleME0 = " << is_doubleME0[mixed_ind] << endl;
 
-	  cout << "mixed_ind =" << mixed_ind << endl;
+	  //cout << "mixed_ind =" << mixed_ind << endl;
 	  mixed_ind++;
           
 	  for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
             {
-	    cout << "pt3_ind " << pt2_ind;
+	    //cout << "pt3_ind " << pt2_ind;
 	    found_triple1 = false;
 	    found_triple2 = false;
 	    found_triple3 = false;
@@ -2248,10 +4603,10 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 	        }
 	      //cout << "deltaPhi = " << *dp << "   found_triple3 = " << found_triple3 << "   found_triple2 = " << found_triple2 << "   found_triple1 = " << found_triple1 << endl;
   	      }
-            if ( found_triple1 && found_triple2 && found_triple3 )	is_tripleME0[triple_ind] = true;
+            if ( found_triple1 && found_triple2 && found_triple3 ) is_tripleME0[triple_ind] = true;
   	    //cout << "result: is_tripleME0 = " << is_tripleME0[triple_ind] << endl;
   
-	    cout << "triple_ind =" << triple_ind << endl;
+	    //cout << "triple_ind =" << triple_ind << endl;
 	    triple_ind++;
 	    }
 	  }
@@ -2260,125 +4615,125 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
       cout << "Starting to evaluate double triggers with vicinity request" << endl;
 
       cout << "deltaGlobalPhiLayer21List size = " << (*deltaGlobalPhiLayer21List).size() << endl;
-      cout << "me0List size = " << (*me0List).size() << endl;
+      cout << "me0List size = " << (*me0List).size() << " nME0:" << nME0 << " nSegments:" << nSegments << endl;
 
       //Trigger WITH chamber vicinity request (doubles)
-
-      if ( (*deltaGlobalPhiLayer21List).size() > 1 )
-      {
-      mixed_ind = 0;
-      for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
+      
+        if ( (*deltaGlobalPhiLayer21List).size() > 1 )
         {
-	cout << "pt1_ind = " << pt1_ind << endl;
-        for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
-	  {
-	  cout << "pt2_ind = " << pt2_ind << endl;
-	    bool good = false;
-            for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
-              {
-	      cout << "dp1_ind = " << dp1_ind << endl;
-	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
+        mixed_ind = 0;
+        for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
+          {
+          //cout << "pt1_ind = " << pt1_ind << endl;
+            for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
+  	    {
+	    //cout << "pt2_ind = " << pt2_ind << endl;
+	      bool good = false;
+              for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
                 {
-	          cout << "dp2_ind = " << dp2_ind << endl;
-	       	  ME0DetId me01( (*me0List)[dp1_ind] );
-	       	  ME0DetId me02( (*me0List)[dp2_ind] );
-		  int end1 = me01.region(); 
-		  int end2 = me02.region(); 
-		  int ch1  = me01.chamber();
-		  int ch2  = me02.chamber();
-		  if ( end1!=end2 ) continue; //two segments must be in the same endcap
-  		  if ( fabs(ch1-ch2)>1 ) continue; //three segments must be in the same chamber or in adjacent chambers
-		  //order deltaPhi by absolute value
-		  float dPhiFabs[2] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) };
-		  float maxDP = *std::max_element(dPhiFabs,dPhiFabs+2);
-		  float minDP = *std::min_element(dPhiFabs,dPhiFabs+2);
-                  if ( (minDP<thr[pt2_ind]) && (maxDP<thr[pt1_ind]) )	good=true;
-	        }
-	      } //end loop over 3 deltaPhi combinations
-	    if (good) is_doubleME0near[mixed_ind] = true;
+	        //cout << "dp1_ind = " << dp1_ind << endl;
+	        for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
+                  {
+	            //cout << "dp2_ind = " << dp2_ind << endl;
+	       	    ME0DetId me01( (*me0List)[dp1_ind] );
+	       	    ME0DetId me02( (*me0List)[dp2_ind] );
+		    int end1 = me01.region(); 
+		    int end2 = me02.region(); 
+	 	    int ch1  = me01.chamber();
+		    int ch2  = me02.chamber();
+		    if ( end1!=end2 ) continue; //two segments must be in the same endcap
+  		    if ( fabs(ch1-ch2)>1 ) continue; //three segments must be in the same chamber or in adjacent chambers
+		    //order deltaPhi by absolute value
+		    float dPhiFabs[2] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) };
+		    float maxDP = *std::max_element(dPhiFabs,dPhiFabs+2);
+		    float minDP = *std::min_element(dPhiFabs,dPhiFabs+2);
+                    if ( (minDP<thr[pt2_ind]) && (maxDP<thr[pt1_ind]) )	good=true;
+	          }
+	        } //end loop over 3 deltaPhi combinations
+	      if (good)  is_doubleME0near[mixed_ind] = true;
   
-	  mixed_ind++;
-	  cout << "mixed_ind = " << mixed_ind << endl;
-	  } //loop over pt2_ind (2nd thr value)
-	} //loop over pt1_ind (1st thr value)
-      } //if there are at least 2 segments
-
+	    mixed_ind++;
+	    //cout << "mixed_ind = " << mixed_ind << endl;
+	    } //loop over pt2_ind (2nd thr value)
+ 	  } //loop over pt1_ind (1st thr value)
+        } //if there are at least 2 segments
+      
 
       cout << "Starting to evaluate triple triggers with vicinity request" << endl;
 
       //Trigger WITH chamber vicinity request (triples)
-      if ( (*deltaGlobalPhiLayer21List).size() > 2 )
-      {
-      triple_ind = 0;
-      for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
+        if ( (*deltaGlobalPhiLayer21List).size() > 2 )
         {
-	cout << "pt1_ind = " << pt1_ind << endl;
-        for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
-	  {
-	  cout << "pt2_ind = " << pt2_ind << endl;
-	  for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
-            {
-	    cout << "pt3_ind = " << pt3_ind << endl;
-	    bool good = false;
-            for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
+          triple_ind = 0;
+          for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
+          {
+	    //cout << "pt1_ind = " << pt1_ind << endl;
+            for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
+	    {
+	      //cout << "pt2_ind = " << pt2_ind << endl;
+	      for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
               {
-	      cout << "dp1_ind = " << dp1_ind << endl;
-	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
+	        //cout << "pt3_ind = " << pt3_ind << endl;
+	        bool good = false;
+                for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
                 {
-	        cout << "dp2_ind = " << dp2_ind << endl;
-	        for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
-	          {
-	          cout << "dp3_ind = " << dp3_ind << endl;
-	       	  ME0DetId me01( (*me0List)[dp1_ind] );
-	       	  ME0DetId me02( (*me0List)[dp2_ind] );
-	       	  ME0DetId me03( (*me0List)[dp3_ind] );
-		  int end1 = me01.region(); 
-		  int end2 = me02.region(); 
-		  int end3 = me03.region(); 
-		  int ch1  = me01.chamber();
-		  int ch2  = me02.chamber();
-		  int ch3  = me03.chamber();
-		  if ( !(end1==end2 && end1==end3) ) continue; //three segments must be in the same endcap
-		  //three segments must be in the same chamber or in adjacent chambers
-		  if ( fabs(ch1-ch2)>1 ) continue;
-		  if ( fabs(ch1-ch3)>1 ) continue;
-		  if ( fabs(ch2-ch3)>1 ) continue;
-		  //order deltaPhi by absolute value
-		  float dPhiFabs[3] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp3_ind]) };
-		  float maxDP = *std::max_element(dPhiFabs,dPhiFabs+3);
-		  float minDP = *std::min_element(dPhiFabs,dPhiFabs+3);
-		  float medDP = dPhiFabs[0]+dPhiFabs[1]+dPhiFabs[2]-maxDP-minDP;
-                  if ( (minDP<thr[pt3_ind]) && (maxDP<thr[pt1_ind]) && (medDP<thr[pt2_ind]) )	good=true;
-		  }
-	        }
-	      } //end loop over 3 deltaPhi combinations
-	    if (good) is_tripleME0near[triple_ind] = true;
-            cout << "triple_ind = " << triple_ind << endl; 
-	    triple_ind++;
-	    } // loop over pt3_ind (3rd thr value)
-	  } //loop over pt2_ind (2nd thr value)
-	} //loop over pt1_ind (1st thr value)
-       } // if there are at least 3 segments
-       
+	          //cout << "dp1_ind = " << dp1_ind << endl;
+	          for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
+                  {
+	            //cout << "dp2_ind = " << dp2_ind << endl;
+	            for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
+	            {
+	              //cout << "dp3_ind = " << dp3_ind << endl;
+	       	      ME0DetId me01( (*me0List)[dp1_ind] );
+	       	      ME0DetId me02( (*me0List)[dp2_ind] );
+	       	      ME0DetId me03( (*me0List)[dp3_ind] );
+		      int end1 = me01.region(); 
+		      int end2 = me02.region(); 
+		      int end3 = me03.region(); 
+		      int ch1  = me01.chamber();
+		      int ch2  = me02.chamber();
+		      int ch3  = me03.chamber();
+		      if ( !(end1==end2 && end1==end3) ) continue; //three segments must be in the same endcap
+		      //three segments must be in the same chamber or in adjacent chambers
+		      if ( fabs(ch1-ch2)>1 ) continue;
+		      if ( fabs(ch1-ch3)>1 ) continue;
+		      if ( fabs(ch2-ch3)>1 ) continue;
+		      //order deltaPhi by absolute value
+		      float dPhiFabs[3] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp3_ind]) };
+		      float maxDP = *std::max_element(dPhiFabs,dPhiFabs+3);
+		      float minDP = *std::min_element(dPhiFabs,dPhiFabs+3);
+		      float medDP = dPhiFabs[0]+dPhiFabs[1]+dPhiFabs[2]-maxDP-minDP;
+                      if ( (minDP<thr[pt3_ind]) && (maxDP<thr[pt1_ind]) && (medDP<thr[pt2_ind]) )	good=true;
+		    }
+	          }
+	        } //end loop over 3 deltaPhi combinations
+	        if (good) is_tripleME0near[triple_ind] = true;
+                //cout << "triple_ind = " << triple_ind << endl; 
+	        triple_ind++;
+	      } // loop over pt3_ind (3rd thr value)
+	    } //loop over pt2_ind (2nd thr value)
+	  } //loop over pt1_ind (1st thr value)
+        } // if there are at least 3 segments
+
 
       //Trigger WITH eta partition vicinity request (doubles)
 
-      if ( (*deltaGlobalPhiLayer21List).size() > 1 )
-      {
-      mixed_ind = 0;
-      for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
+        if ( (*deltaGlobalPhiLayer21List).size() > 1 )
         {
-	cout << "pt1_ind = " << pt1_ind << endl;
-        for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
-	  {
-	  cout << "pt2_ind = " << pt2_ind << endl;
-	    bool good = false;
-            for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
+          mixed_ind = 0;
+          for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
+          {
+ 	    //cout << "pt1_ind = " << pt1_ind << endl;
+            for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
+	    {
+	      //cout << "pt2_ind = " << pt2_ind << endl;
+	      bool good = false;
+              for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
               {
-	      cout << "dp1_ind = " << dp1_ind << endl;
-	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
+	        //cout << "dp1_ind = " << dp1_ind << endl;
+	        for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
                 {
-	          cout << "dp2_ind = " << dp2_ind << endl;
+	          //cout << "dp2_ind = " << dp2_ind << endl;
 	       	  ME0DetId me01( (*me0List)[dp1_ind] );
 	       	  ME0DetId me02( (*me0List)[dp2_ind] );
 		  int end1 = me01.region(); 	//endcap
@@ -2397,307 +4752,306 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
                   if ( (minDP<thr[pt2_ind]) && (maxDP<thr[pt1_ind]) )	good=true;
 	        }
 	      } //end loop over 3 deltaPhi combinations
-	    if (good) is_doubleME0close[mixed_ind] = true;
+	      if (good) is_doubleME0close[mixed_ind] = true;
   
-	  mixed_ind++;
-	  cout << "mixed_ind = " << mixed_ind << endl;
-	  } //loop over pt2_ind (2nd thr value)
-	} //loop over pt1_ind (1st thr value)
-      } //if there are at least 2 segments
-
+ 	    mixed_ind++;
+	    //cout << "mixed_ind = " << mixed_ind << endl;
+	    } //loop over pt2_ind (2nd thr value)
+	  } //loop over pt1_ind (1st thr value)
+        } //if there are at least 2 segments
 
       cout << "Starting to evaluate triple triggers with vicinity request" << endl;
 
       //Trigger WITH eta partition vicinity request (triples)
-      if ( (*deltaGlobalPhiLayer21List).size() > 2 )
-      {
-      triple_ind = 0;
-      for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
+        if ( (*deltaGlobalPhiLayer21List).size() > 2 )
         {
-	cout << "pt1_ind = " << pt1_ind << endl;
-        for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
-	  {
-	  cout << "pt2_ind = " << pt2_ind << endl;
-	  for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
-            {
-	    cout << "pt3_ind = " << pt3_ind << endl;
-	    bool good = false;
-            for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
+          triple_ind = 0;
+          for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
+          {
+	    //cout << "pt1_ind = " << pt1_ind << endl;
+            for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
+	    {
+	      //cout << "pt2_ind = " << pt2_ind << endl;
+	      for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
               {
-	      cout << "dp1_ind = " << dp1_ind << endl;
-	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
+	        //cout << "pt3_ind = " << pt3_ind << endl;
+	        bool good = false;
+                for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
                 {
-	        cout << "dp2_ind = " << dp2_ind << endl;
-	        for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
-	          {
-	          cout << "dp3_ind = " << dp3_ind << endl;
-	       	  ME0DetId me01( (*me0List)[dp1_ind] );
-	       	  ME0DetId me02( (*me0List)[dp2_ind] );
-	       	  ME0DetId me03( (*me0List)[dp3_ind] );
-		  int end1 = me01.region(); 
-		  int end2 = me02.region(); 
-		  int end3 = me03.region(); 
-		  int ch1  = me01.chamber();
-		  int ch2  = me02.chamber();
-		  int ch3  = me03.chamber();
-		  int etap1= (*etaPartList)[dp1_ind];
-		  int etap2= (*etaPartList)[dp2_ind];
-		  int etap3= (*etaPartList)[dp3_ind];
-		  if ( fabs(etap1-etap2)>1 ) continue;
-		  if ( fabs(etap1-etap3)>1 ) continue;
-		  if ( fabs(etap2-etap3)>1 ) continue; //two segments must be in nearby eta partition (limit to be defined)
-		  if ( !(end1==end2 && end1==end3) ) continue; //three segments must be in the same endcap
-		  //three segments must be in the same chamber or in adjacent chambers
-		  if ( fabs(ch1-ch2)>1 ) continue;
-		  if ( fabs(ch1-ch3)>1 ) continue;
-		  if ( fabs(ch2-ch3)>1 ) continue;
-		  //order deltaPhi by absolute value
-		  float dPhiFabs[3] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp3_ind]) };
-		  float maxDP = *std::max_element(dPhiFabs,dPhiFabs+3);
-		  float minDP = *std::min_element(dPhiFabs,dPhiFabs+3);
-		  float medDP = dPhiFabs[0]+dPhiFabs[1]+dPhiFabs[2]-maxDP-minDP;
-                  if ( (minDP<thr[pt3_ind]) && (maxDP<thr[pt1_ind]) && (medDP<thr[pt2_ind]) )	good=true;
-		  }
-	        }
-	      } //end loop over 3 deltaPhi combinations
-	    if (good) is_tripleME0close[triple_ind] = true;
-            cout << "triple_ind = " << triple_ind << endl; 
-	    triple_ind++;
-	    } // loop over pt3_ind (3rd thr value)
-	  } //loop over pt2_ind (2nd thr value)
-	} //loop over pt1_ind (1st thr value)
-       } // if there are at least 3 segments
+	          //cout << "dp1_ind = " << dp1_ind << endl;
+	          for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
+                  {
+	            //cout << "dp2_ind = " << dp2_ind << endl;
+	            for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
+	            {
+	              //cout << "dp3_ind = " << dp3_ind << endl;
+	       	      ME0DetId me01( (*me0List)[dp1_ind] );
+	       	      ME0DetId me02( (*me0List)[dp2_ind] );
+	       	      ME0DetId me03( (*me0List)[dp3_ind] );
+		      int end1 = me01.region(); 
+		      int end2 = me02.region(); 
+		      int end3 = me03.region(); 
+		      int ch1  = me01.chamber();
+		      int ch2  = me02.chamber();
+		      int ch3  = me03.chamber();
+		      int etap1= (*etaPartList)[dp1_ind];
+		      int etap2= (*etaPartList)[dp2_ind];
+		      int etap3= (*etaPartList)[dp3_ind];
+		      if ( fabs(etap1-etap2)>1 ) continue;
+		      if ( fabs(etap1-etap3)>1 ) continue;
+		      if ( fabs(etap2-etap3)>1 ) continue; //two segments must be in nearby eta partition (limit to be defined)
+		      if ( !(end1==end2 && end1==end3) ) continue; //three segments must be in the same endcap
+		      //three segments must be in the same chamber or in adjacent chambers
+		      if ( fabs(ch1-ch2)>1 ) continue;
+		      if ( fabs(ch1-ch3)>1 ) continue;
+		      if ( fabs(ch2-ch3)>1 ) continue;
+		      //order deltaPhi by absolute value
+		      float dPhiFabs[3] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp3_ind]) };
+		      float maxDP = *std::max_element(dPhiFabs,dPhiFabs+3);
+		      float minDP = *std::min_element(dPhiFabs,dPhiFabs+3);
+		      float medDP = dPhiFabs[0]+dPhiFabs[1]+dPhiFabs[2]-maxDP-minDP;
+                      if ( (minDP<thr[pt3_ind]) && (maxDP<thr[pt1_ind]) && (medDP<thr[pt2_ind]) )	good=true;
+		    }
+	          }
+	        } //end loop over 3 deltaPhi combinations
+	        if (good) is_tripleME0close[triple_ind] = true;
+                //cout << "triple_ind = " << triple_ind << endl; 
+	        triple_ind++;
+	      } // loop over pt3_ind (3rd thr value)
+	    } //loop over pt2_ind (2nd thr value)
+	   } //loop over pt1_ind (1st thr value)
+         } // if there are at least 3 segments
 
 
 
 
       //Trigger WITH chamber vicinity and Quality request (doubles)
 
-      if ( (*deltaGlobalPhiLayer21List).size() > 1 )
-      {
-      mixed_ind = 0;
-      for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
+        if ( (*deltaGlobalPhiLayer21List).size() > 1 )
         {
-	cout << "pt1_ind = " << pt1_ind << endl;
-        for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
-	  {
-	  cout << "pt2_ind = " << pt2_ind << endl;
-	    bool goodQ0 = false;
-	    bool goodQ1 = false;
-	    bool goodQ2 = false;
-	    bool eveto0 = false;
-	    bool eveto1 = false;
-	    bool eveto2 = false;
-	    bool eveto3 = false;
-            bool goodQ0eveto0 = false;
-            bool goodQ0eveto1 = false;
-            bool goodQ0eveto2 = false;
-            bool goodQ0eveto3 = false;
-            bool goodQ1eveto0 = false;
-            bool goodQ1eveto1 = false;
-            bool goodQ1eveto2 = false;
-            bool goodQ1eveto3 = false;
-            bool goodQ2eveto0 = false;
-            bool goodQ2eveto1 = false;
-            bool goodQ2eveto2 = false;
-            bool goodQ2eveto3 = false;
-            for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
+          mixed_ind = 0;
+          for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
+          {
+ 	    //cout << "pt1_ind = " << pt1_ind << endl;
+            for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
+	    {
+	      //cout << "pt2_ind = " << pt2_ind << endl;
+	      bool goodQ0 = false;
+	      bool goodQ1 = false;
+	      bool goodQ2 = false;
+	      bool eveto0 = false;
+	      bool eveto1 = false;
+	      bool eveto2 = false;
+	      bool eveto3 = false;
+              bool goodQ0eveto0 = false;
+              bool goodQ0eveto1 = false;
+              bool goodQ0eveto2 = false;
+              bool goodQ0eveto3 = false;
+              bool goodQ1eveto0 = false;
+              bool goodQ1eveto1 = false;
+              bool goodQ1eveto2 = false;
+              bool goodQ1eveto3 = false;
+              bool goodQ2eveto0 = false;
+              bool goodQ2eveto1 = false;
+              bool goodQ2eveto2 = false;
+              bool goodQ2eveto3 = false;
+              for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp1_ind++ )
               {
-	      cout << "dp1_ind = " << dp1_ind << endl;
-	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
-                {
-	          cout << "dp2_ind = " << dp2_ind << endl;
-	       	  ME0DetId me01( (*me0List)[dp1_ind] );
-	       	  ME0DetId me02( (*me0List)[dp2_ind] );
-		  int end1 = me01.region(); 
-		  int end2 = me02.region(); 
-		  int ch1  = me01.chamber();
-		  int ch2  = me02.chamber();
-		  if ( end1!=end2 ) continue; //two segments must be in the same endcap
-  		  if ( fabs(ch1-ch2)>1 ) continue; //three segments must be in the same chamber or in adjacent chambers
-		  //order deltaPhi by absolute value
-		  float dPhiFabs[2] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) };
-		  float maxDP = *std::max_element(dPhiFabs,dPhiFabs+2);
-		  float minDP = *std::min_element(dPhiFabs,dPhiFabs+2);
-                  if ( ! ((minDP<thr[pt2_ind]) && (maxDP<thr[pt1_ind])) ) continue;
-		  if ( ((*qualityList)[dp1_ind]>=0) && ((*qualityList)[dp2_ind]>=0) ) goodQ0 = true;
-		  if ( ((*qualityList)[dp1_ind]>=1) && ((*qualityList)[dp2_ind]>=1) ) goodQ1 = true;
-		  if ( ((*qualityList)[dp1_ind]>=2) && ((*qualityList)[dp2_ind]>=2) ) goodQ2 = true;
-		  eveto0 = true;
-		  if ( ((*etaPartList)[dp1_ind]<8)  && ((*etaPartList)[dp2_ind]<8) )  eveto1  = true;
-		  if ( ((*etaPartList)[dp1_ind]<7)  && ((*etaPartList)[dp2_ind]<7) )  eveto2  = true;
-		  if ( ((*etaPartList)[dp1_ind]<6)  && ((*etaPartList)[dp2_ind]<6) )  eveto3  = true;
-		  //combinations
-		  if (goodQ0)
+	        //cout << "dp1_ind = " << dp1_ind << endl;
+	        for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size() ; dp2_ind++ )
+                  {
+	            //cout << "dp2_ind = " << dp2_ind << endl;
+	       	    ME0DetId me01( (*me0List)[dp1_ind] );
+	       	    ME0DetId me02( (*me0List)[dp2_ind] );
+		    int end1 = me01.region(); 
+		    int end2 = me02.region(); 
+		    int ch1  = me01.chamber();
+		    int ch2  = me02.chamber();
+		    if ( end1!=end2 ) continue; //two segments must be in the same endcap
+  		    if ( fabs(ch1-ch2)>1 ) continue; //three segments must be in the same chamber or in adjacent chambers
+		    //order deltaPhi by absolute value
+		    float dPhiFabs[2] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) };
+		    float maxDP = *std::max_element(dPhiFabs,dPhiFabs+2);
+		    float minDP = *std::min_element(dPhiFabs,dPhiFabs+2);
+                    if ( ! ((minDP<thr[pt2_ind]) && (maxDP<thr[pt1_ind])) ) continue;
+		    if ( ((*qualityList)[dp1_ind]>=0) && ((*qualityList)[dp2_ind]>=0) ) goodQ0 = true;
+		    if ( ((*qualityList)[dp1_ind]>=1) && ((*qualityList)[dp2_ind]>=1) ) goodQ1 = true;
+		    if ( ((*qualityList)[dp1_ind]>=2) && ((*qualityList)[dp2_ind]>=2) ) goodQ2 = true;
+		    eveto0 = true;
+		    if ( ((*etaPartList)[dp1_ind]<8)  && ((*etaPartList)[dp2_ind]<8) )  eveto1  = true;
+		    if ( ((*etaPartList)[dp1_ind]<7)  && ((*etaPartList)[dp2_ind]<7) )  eveto2  = true;
+		    if ( ((*etaPartList)[dp1_ind]<6)  && ((*etaPartList)[dp2_ind]<6) )  eveto3  = true;
+		    //combinations
+		    if (goodQ0)
 		    { 
-		    if (eveto0)	goodQ0eveto0 = true;
-		    if (eveto1)	goodQ0eveto1 = true;
-		    if (eveto2)	goodQ0eveto2 = true;
-		    if (eveto3)	goodQ0eveto3 = true;
+		      if (eveto0)	goodQ0eveto0 = true;
+		      if (eveto1)	goodQ0eveto1 = true;
+		      if (eveto2)	goodQ0eveto2 = true;
+		      if (eveto3)	goodQ0eveto3 = true;
 		    }
-		  if (goodQ1)
+		    if (goodQ1)
 		    { 
-		    if (eveto0)	goodQ1eveto0 = true;
-		    if (eveto1)	goodQ1eveto1 = true;
-		    if (eveto2)	goodQ1eveto2 = true;
-		    if (eveto3)	goodQ1eveto3 = true;
+		      if (eveto0)	goodQ1eveto0 = true;
+		      if (eveto1)	goodQ1eveto1 = true;
+		      if (eveto2)	goodQ1eveto2 = true;
+		      if (eveto3)	goodQ1eveto3 = true;
 		    }
-		  if (goodQ2)
+		    if (goodQ2)
 		    { 
-		    if (eveto0)	goodQ2eveto0 = true;
-		    if (eveto1)	goodQ2eveto1 = true;
-		    if (eveto2)	goodQ2eveto2 = true;
-		    if (eveto3)	goodQ2eveto3 = true;
+		      if (eveto0)	goodQ2eveto0 = true;
+		      if (eveto1)	goodQ2eveto1 = true;
+		      if (eveto2)	goodQ2eveto2 = true;
+		      if (eveto3)	goodQ2eveto3 = true;
 		    }
-	        }
-	      } //end loop over 3 deltaPhi combinations
-	    if (goodQ0) is_doubleME0nearQuality0[mixed_ind] = true;
-	    if (goodQ1) is_doubleME0nearQuality1[mixed_ind] = true;
-	    if (goodQ2) is_doubleME0nearQuality2[mixed_ind] = true;
-	    if (eveto0) is_doubleME0nearVeto0[mixed_ind] = true;
-	    if (eveto1) is_doubleME0nearVeto1[mixed_ind] = true;
-	    if (eveto2) is_doubleME0nearVeto2[mixed_ind] = true;
-	    if (eveto3) is_doubleME0nearVeto3[mixed_ind] = true;
-            if (goodQ0eveto0) is_doubleME0nearQuality0Veto0[mixed_ind] = true;
-            if (goodQ0eveto1) is_doubleME0nearQuality0Veto1[mixed_ind] = true;
-            if (goodQ0eveto2) is_doubleME0nearQuality0Veto2[mixed_ind] = true;
-            if (goodQ0eveto3) is_doubleME0nearQuality0Veto3[mixed_ind] = true;
-            if (goodQ1eveto0) is_doubleME0nearQuality1Veto0[mixed_ind] = true;
-            if (goodQ1eveto1) is_doubleME0nearQuality1Veto1[mixed_ind] = true;
-            if (goodQ1eveto2) is_doubleME0nearQuality1Veto2[mixed_ind] = true;
-            if (goodQ1eveto3) is_doubleME0nearQuality1Veto3[mixed_ind] = true;
-            if (goodQ2eveto0) is_doubleME0nearQuality2Veto0[mixed_ind] = true;
-            if (goodQ2eveto1) is_doubleME0nearQuality2Veto1[mixed_ind] = true;
-            if (goodQ2eveto2) is_doubleME0nearQuality2Veto2[mixed_ind] = true;
-            if (goodQ2eveto3) is_doubleME0nearQuality2Veto3[mixed_ind] = true;
+	          }
+	        } //end loop over 3 deltaPhi combinations
+	      if (goodQ0) is_doubleME0nearQuality0[mixed_ind] = true;
+	      if (goodQ1) is_doubleME0nearQuality1[mixed_ind] = true;
+	      if (goodQ2) is_doubleME0nearQuality2[mixed_ind] = true;
+	      if (eveto0) is_doubleME0nearVeto0[mixed_ind] = true;
+	      if (eveto1) is_doubleME0nearVeto1[mixed_ind] = true;
+	      if (eveto2) is_doubleME0nearVeto2[mixed_ind] = true;
+	      if (eveto3) is_doubleME0nearVeto3[mixed_ind] = true;
+              if (goodQ0eveto0) is_doubleME0nearQuality0Veto0[mixed_ind] = true;
+              if (goodQ0eveto1) is_doubleME0nearQuality0Veto1[mixed_ind] = true;
+              if (goodQ0eveto2) is_doubleME0nearQuality0Veto2[mixed_ind] = true;
+              if (goodQ0eveto3) is_doubleME0nearQuality0Veto3[mixed_ind] = true;
+              if (goodQ1eveto0) is_doubleME0nearQuality1Veto0[mixed_ind] = true;
+              if (goodQ1eveto1) is_doubleME0nearQuality1Veto1[mixed_ind] = true;
+              if (goodQ1eveto2) is_doubleME0nearQuality1Veto2[mixed_ind] = true;
+              if (goodQ1eveto3) is_doubleME0nearQuality1Veto3[mixed_ind] = true;
+              if (goodQ2eveto0) is_doubleME0nearQuality2Veto0[mixed_ind] = true;
+              if (goodQ2eveto1) is_doubleME0nearQuality2Veto1[mixed_ind] = true;
+              if (goodQ2eveto2) is_doubleME0nearQuality2Veto2[mixed_ind] = true;
+              if (goodQ2eveto3) is_doubleME0nearQuality2Veto3[mixed_ind] = true;
   
-	  mixed_ind++;
-	  cout << "mixed_ind = " << mixed_ind << endl;
-	  } //loop over pt2_ind (2nd thr value)
-	} //loop over pt1_ind (1st thr value)
-      } //if there are at least 2 segments
+	      mixed_ind++;
+	      //cout << "mixed_ind = " << mixed_ind << endl;
+	    } //loop over pt2_ind (2nd thr value)
+	  } //loop over pt1_ind (1st thr value)
+        } //if there are at least 2 segments
 
 
       cout << "Starting to evaluate triple triggers with vicinity and quality request" << endl;
 
       //Trigger WITH chamber vicinity and Quality request (triples)
-      if ( (*deltaGlobalPhiLayer21List).size() > 2 )
-      {
-      triple_ind = 0;
-      for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
+        if ( (*deltaGlobalPhiLayer21List).size() > 2 )
         {
-	cout << "pt1_ind = " << pt1_ind << endl;
-        for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
-	  {
-	  cout << "pt2_ind = " << pt2_ind << endl;
-	  for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
-            {
-	    cout << "pt3_ind = " << pt3_ind << endl;
-	    bool goodQ0 = false;
-	    bool goodQ1 = false;
-	    bool goodQ2 = false;
-	    bool eveto0 = false;
-	    bool eveto1 = false;
-	    bool eveto2 = false;
-	    bool eveto3 = false;
-            bool goodQ0eveto0 = false;
-            bool goodQ0eveto1 = false;
-            bool goodQ0eveto2 = false;
-            bool goodQ0eveto3 = false;
-            bool goodQ1eveto0 = false;
-            bool goodQ1eveto1 = false;
-            bool goodQ1eveto2 = false;
-            bool goodQ1eveto3 = false;
-            bool goodQ2eveto0 = false;
-            bool goodQ2eveto1 = false;
-            bool goodQ2eveto2 = false;
-            bool goodQ2eveto3 = false;
-            for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
+          triple_ind = 0;
+          for ( int pt1_ind = 0; pt1_ind < 5 ; pt1_ind++)
+          {
+	    //cout << "pt1_ind = " << pt1_ind << endl;
+            for ( int pt2_ind = pt1_ind; pt2_ind < 5 ; pt2_ind++)
+	    {
+	      //cout << "pt2_ind = " << pt2_ind << endl;
+	      for ( int pt3_ind = pt2_ind; pt3_ind < 5 ; pt3_ind++)
               {
-	      cout << "dp1_ind = " << dp1_ind << endl;
-	      for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
+	        //cout << "pt3_ind = " << pt3_ind << endl;
+	        bool goodQ0 = false;
+	        bool goodQ1 = false;
+	        bool goodQ2 = false;
+	        bool eveto0 = false;
+	        bool eveto1 = false;
+	        bool eveto2 = false;
+	        bool eveto3 = false;
+                bool goodQ0eveto0 = false;
+                bool goodQ0eveto1 = false;
+                bool goodQ0eveto2 = false;
+                bool goodQ0eveto3 = false;
+                bool goodQ1eveto0 = false;
+                bool goodQ1eveto1 = false;
+                bool goodQ1eveto2 = false;
+                bool goodQ1eveto3 = false;
+                bool goodQ2eveto0 = false;
+                bool goodQ2eveto1 = false;
+                bool goodQ2eveto2 = false;
+                bool goodQ2eveto3 = false;
+                for ( unsigned int dp1_ind=0 ; dp1_ind<(*deltaGlobalPhiLayer21List).size()-2 ; dp1_ind++ )
                 {
-	        cout << "dp2_ind = " << dp2_ind << endl;
-	        for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
-	          {
-	          cout << "dp3_ind = " << dp3_ind << endl;
-	       	  ME0DetId me01( (*me0List)[dp1_ind] );
-	       	  ME0DetId me02( (*me0List)[dp2_ind] );
-	       	  ME0DetId me03( (*me0List)[dp3_ind] );
-		  int end1 = me01.region(); 
-		  int end2 = me02.region(); 
-		  int end3 = me03.region(); 
-		  int ch1  = me01.chamber();
-		  int ch2  = me02.chamber();
-		  int ch3  = me03.chamber();
-		  if ( !(end1==end2 && end1==end3) ) continue; //three segments must be in the same endcap
-		  //three segments must be in the same chamber or in adjacent chambers
-		  if ( fabs(ch1-ch2)>1 ) continue;
-		  if ( fabs(ch1-ch3)>1 ) continue;
-		  if ( fabs(ch2-ch3)>1 ) continue;
-		  //order deltaPhi by absolute value
-		  float dPhiFabs[3] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp3_ind]) };
-		  float maxDP = *std::max_element(dPhiFabs,dPhiFabs+3);
-		  float minDP = *std::min_element(dPhiFabs,dPhiFabs+3);
-		  float medDP = dPhiFabs[0]+dPhiFabs[1]+dPhiFabs[2]-maxDP-minDP;
-                  if ( !((minDP<thr[pt3_ind]) && (maxDP<thr[pt1_ind]) && (medDP<thr[pt2_ind])) )   continue;
-		  if ( ((*qualityList)[dp1_ind]>=0) && ((*qualityList)[dp2_ind]>=0) &&((*qualityList)[dp3_ind]>=0) )  goodQ0 = true;
-		  if ( ((*qualityList)[dp1_ind]>=1) && ((*qualityList)[dp2_ind]>=1) &&((*qualityList)[dp3_ind]>=1) )  goodQ1 = true;
-		  if ( ((*qualityList)[dp1_ind]>=2) && ((*qualityList)[dp2_ind]>=2) &&((*qualityList)[dp3_ind]>=2) )  goodQ2 = true;
-		  eveto0 = true;
-		  if ( ((*etaPartList)[dp1_ind]<8)  && ((*etaPartList)[dp2_ind]<8)  &&((*etaPartList)[dp3_ind]<8) )  eveto1 = true;
-		  if ( ((*etaPartList)[dp1_ind]<7)  && ((*etaPartList)[dp2_ind]<7)  &&((*etaPartList)[dp3_ind]<7) )  eveto2 = true;
-		  if ( ((*etaPartList)[dp1_ind]<6)  && ((*etaPartList)[dp2_ind]<6)  &&((*etaPartList)[dp3_ind]<6) )  eveto3 = true;
-		  //combinations
-		  if (goodQ0)
-		    { 
-		    if (eveto0)	goodQ0eveto0 = true;
-		    if (eveto1)	goodQ0eveto1 = true;
-		    if (eveto2)	goodQ0eveto2 = true;
-		    if (eveto3)	goodQ0eveto3 = true;
-		    }
-		  if (goodQ1)
-		    { 
-		    if (eveto0)	goodQ1eveto0 = true;
-		    if (eveto1)	goodQ1eveto1 = true;
-		    if (eveto2)	goodQ1eveto2 = true;
-		    if (eveto3)	goodQ1eveto3 = true;
-		    }
-		  if (goodQ2)
-		    { 
-		    if (eveto0)	goodQ2eveto0 = true;
-		    if (eveto1)	goodQ2eveto1 = true;
-		    if (eveto2)	goodQ2eveto2 = true;
-		    if (eveto3)	goodQ2eveto3 = true;
-		    }
+	          //cout << "dp1_ind = " << dp1_ind << endl;
+	          for ( unsigned int dp2_ind=dp1_ind+1 ; dp2_ind<(*deltaGlobalPhiLayer21List).size()-1 ; dp2_ind++ )
+                  {
+	            //cout << "dp2_ind = " << dp2_ind << endl;
+	            for ( unsigned int dp3_ind=dp2_ind+1 ; dp3_ind<(*deltaGlobalPhiLayer21List).size() ; dp3_ind++ )
+	            {
+	              //cout << "dp3_ind = " << dp3_ind << endl;
+	       	      ME0DetId me01( (*me0List)[dp1_ind] );
+	       	      ME0DetId me02( (*me0List)[dp2_ind] );
+	       	      ME0DetId me03( (*me0List)[dp3_ind] );
+		      int end1 = me01.region(); 
+		      int end2 = me02.region(); 
+		      int end3 = me03.region(); 
+		      int ch1  = me01.chamber();
+		      int ch2  = me02.chamber();
+		      int ch3  = me03.chamber();
+		      if ( !(end1==end2 && end1==end3) ) continue; //three segments must be in the same endcap
+		      //three segments must be in the same chamber or in adjacent chambers
+		      if ( fabs(ch1-ch2)>1 ) continue;
+		      if ( fabs(ch1-ch3)>1 ) continue;
+		      if ( fabs(ch2-ch3)>1 ) continue;
+		      //order deltaPhi by absolute value
+		      float dPhiFabs[3] = { fabs((*deltaGlobalPhiLayer21List)[dp1_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp2_ind]) , fabs((*deltaGlobalPhiLayer21List)[dp3_ind]) };
+		      float maxDP = *std::max_element(dPhiFabs,dPhiFabs+3);
+		      float minDP = *std::min_element(dPhiFabs,dPhiFabs+3);
+		      float medDP = dPhiFabs[0]+dPhiFabs[1]+dPhiFabs[2]-maxDP-minDP;
+                      if ( !((minDP<thr[pt3_ind]) && (maxDP<thr[pt1_ind]) && (medDP<thr[pt2_ind])) )   continue;
+		      if ( ((*qualityList)[dp1_ind]>=0) && ((*qualityList)[dp2_ind]>=0) &&((*qualityList)[dp3_ind]>=0) )  goodQ0 = true;
+		      if ( ((*qualityList)[dp1_ind]>=1) && ((*qualityList)[dp2_ind]>=1) &&((*qualityList)[dp3_ind]>=1) )  goodQ1 = true;
+		      if ( ((*qualityList)[dp1_ind]>=2) && ((*qualityList)[dp2_ind]>=2) &&((*qualityList)[dp3_ind]>=2) )  goodQ2 = true;
+		      eveto0 = true;
+		      if ( ((*etaPartList)[dp1_ind]<8)  && ((*etaPartList)[dp2_ind]<8)  &&((*etaPartList)[dp3_ind]<8) )  eveto1 = true;
+		      if ( ((*etaPartList)[dp1_ind]<7)  && ((*etaPartList)[dp2_ind]<7)  &&((*etaPartList)[dp3_ind]<7) )  eveto2 = true;
+		      if ( ((*etaPartList)[dp1_ind]<6)  && ((*etaPartList)[dp2_ind]<6)  &&((*etaPartList)[dp3_ind]<6) )  eveto3 = true;
+		      //combinations
+		      if (goodQ0)
+		      { 
+		        if (eveto0)	goodQ0eveto0 = true;
+		        if (eveto1)	goodQ0eveto1 = true;
+		        if (eveto2)	goodQ0eveto2 = true;
+		        if (eveto3)	goodQ0eveto3 = true;
+		      }
+		      if (goodQ1)
+		      { 
+		        if (eveto0)	goodQ1eveto0 = true;
+		        if (eveto1)	goodQ1eveto1 = true;
+		        if (eveto2)	goodQ1eveto2 = true;
+		        if (eveto3)	goodQ1eveto3 = true;
+		      }
+		      if (goodQ2)
+		      { 
+		        if (eveto0)	goodQ2eveto0 = true;
+		        if (eveto1)	goodQ2eveto1 = true;
+		        if (eveto2)	goodQ2eveto2 = true;
+		        if (eveto3)	goodQ2eveto3 = true;
+		      }
 
-		  }
-	        }
-	      } //end loop over 3 deltaPhi combinations
-	    if (goodQ0) is_tripleME0nearQuality0[triple_ind] = true;
-	    if (goodQ1) is_tripleME0nearQuality1[triple_ind] = true;
-	    if (goodQ2) is_tripleME0nearQuality2[triple_ind] = true;
-	    if (eveto0) is_tripleME0nearVeto0[triple_ind] = true;
-	    if (eveto1) is_tripleME0nearVeto1[triple_ind] = true;
-	    if (eveto2) is_tripleME0nearVeto2[triple_ind] = true;
-            if (goodQ0eveto0) is_tripleME0nearQuality0Veto0[triple_ind] = true;
-            if (goodQ0eveto1) is_tripleME0nearQuality0Veto1[triple_ind] = true;
-            if (goodQ0eveto2) is_tripleME0nearQuality0Veto2[triple_ind] = true;
-            if (goodQ0eveto3) is_tripleME0nearQuality0Veto3[triple_ind] = true;
-            if (goodQ1eveto0) is_tripleME0nearQuality1Veto0[triple_ind] = true;
-            if (goodQ1eveto1) is_tripleME0nearQuality1Veto1[triple_ind] = true;
-            if (goodQ1eveto2) is_tripleME0nearQuality1Veto2[triple_ind] = true;
-            if (goodQ1eveto3) is_tripleME0nearQuality1Veto3[triple_ind] = true;
-            if (goodQ2eveto0) is_tripleME0nearQuality2Veto0[triple_ind] = true;
-            if (goodQ2eveto1) is_tripleME0nearQuality2Veto1[triple_ind] = true;
-            if (goodQ2eveto2) is_tripleME0nearQuality2Veto2[triple_ind] = true;
-            if (goodQ2eveto3) is_tripleME0nearQuality2Veto3[triple_ind] = true;
-            cout << "triple_ind = " << triple_ind << endl; 
-	    triple_ind++;
-	    } // loop over pt3_ind (3rd thr value)
-	  } //loop over pt2_ind (2nd thr value)
-	} //loop over pt1_ind (1st thr value)
-       } // if there are at least 3 segments
+		    }
+	          }
+	        } //end loop over 3 deltaPhi combinations
+	        if (goodQ0) is_tripleME0nearQuality0[triple_ind] = true;
+	        if (goodQ1) is_tripleME0nearQuality1[triple_ind] = true;
+	        if (goodQ2) is_tripleME0nearQuality2[triple_ind] = true;
+	        if (eveto0) is_tripleME0nearVeto0[triple_ind] = true;
+	        if (eveto1) is_tripleME0nearVeto1[triple_ind] = true;
+	        if (eveto2) is_tripleME0nearVeto2[triple_ind] = true;
+                if (goodQ0eveto0) is_tripleME0nearQuality0Veto0[triple_ind] = true;
+                if (goodQ0eveto1) is_tripleME0nearQuality0Veto1[triple_ind] = true;
+                if (goodQ0eveto2) is_tripleME0nearQuality0Veto2[triple_ind] = true;
+                if (goodQ0eveto3) is_tripleME0nearQuality0Veto3[triple_ind] = true;
+                if (goodQ1eveto0) is_tripleME0nearQuality1Veto0[triple_ind] = true;
+                if (goodQ1eveto1) is_tripleME0nearQuality1Veto1[triple_ind] = true;
+                if (goodQ1eveto2) is_tripleME0nearQuality1Veto2[triple_ind] = true;
+                if (goodQ1eveto3) is_tripleME0nearQuality1Veto3[triple_ind] = true;
+                if (goodQ2eveto0) is_tripleME0nearQuality2Veto0[triple_ind] = true;
+                if (goodQ2eveto1) is_tripleME0nearQuality2Veto1[triple_ind] = true;
+                if (goodQ2eveto2) is_tripleME0nearQuality2Veto2[triple_ind] = true;
+                if (goodQ2eveto3) is_tripleME0nearQuality2Veto3[triple_ind] = true;
+                //cout << "triple_ind = " << triple_ind << endl; 
+	        triple_ind++;
+	      } // loop over pt3_ind (3rd thr value)
+	    } //loop over pt2_ind (2nd thr value)
+	  } //loop over pt1_ind (1st thr value)
+        } // if there are at least 3 segments
 
 
 
@@ -2794,6 +5148,83 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
 
 }
 
+//CSC loop on RegionalMuonCand
+/*using namespace l1t;
+BXVector<l1t::RegionalMuonCand>::const_iterator l1t_sg_it;
+
+enum tftype { bmtf, omtf_neg, omtf_pos, emtf_neg, emtf_pos };
+
+for ( l1t_sg_it = l1tsegmentH->begin(); l1t_sg_it !=l1tsegmentH->end(); ++l1t_sg_it )
+{ 
+   if ( (*l1t_sg_it).trackFinderType() == bmtf  )
+   {
+     nBarrel++;
+   }     
+   else if ( (*l1t_sg_it).trackFinderType() == omtf_neg || (*l1t_sg_it).trackFinderType() == omtf_pos )
+   {
+     nOverlap++;
+   }
+   else if ( (*l1t_sg_it).trackFinderType() == emtf_neg || (*l1t_sg_it).trackFinderType() == emtf_pos )
+   {
+     nEndcap++;
+     if ( fabs((*l1t_sg_it).hwEta()*0.010875) < 3.0 && fabs((*l1t_sg_it).hwEta()*0.010875) > 1.8  )
+     {
+       nEndcapME0++;
+     }  
+   }
+   else
+   {
+   cout << "TRACKFINDER ERROR" << endl;
+   } 
+
+if ( nBarrel + nOverlap + nEndcap == 3 )//only for triple mu
+{
+  if      ( nBarrel == 3 )					 nBBB++;
+  else if ( nBarrel == 2 && nOverlap == 1 )	 		 nBBO++;			
+  else if ( nBarrel == 2 && nEndcap == 1 ) 			 nBBE++;
+  else if ( nBarrel == 1 && nOverlap == 2 ) 			 nBOO++;
+  else if ( nBarrel == 1 && nOverlap == 1 && nEndcap == 1 )	 nBBE++;
+  else if ( nBarrel == 1 && nEndcap == 2 ) 			 nBEE++;
+  else if ( nOverlap == 3 )					 nOOO++;
+  else if ( nOverlap == 2 && nEndcap == 1 ) 			 nOOE++;
+  else if ( nOverlap == 1 && nEndcap == 2 ) 			 nOEE++;
+  else if ( nEndcap == 3 )					 nEEE++;
+  else {cout << "ERROR emtf-bmtf-omtf" << endl;}
+
+}      
+
+if ( nEndcapME0 == 3 ) nEEEME0++;
+ 
+    if ( fabs((*l1t_sg_it).hwEta())*0.010875 < ptVal[i] ) //Get compressed pT (returned int * 0.5 = pT (GeV))
+    {
+      /// Get compressed eta (returned int * 0.010875 = eta)
+      //cout << "ptVal:" << ptVal[i] << " l1t_segment_pt:" << (*l1t_sg_it).hwPt()*0.5 << " eta:" << (*l1t_sg_it).hwEta()*0.010875 << endl;
+      if ( fabs((*l1t_sg_it).hwEta())*0.010875 > 0.7 &&  fabs((*l1t_sg_it).hwEta())*0.010875 < 2.6 ) //eta range for csc is 0.9<=eta<=2.4
+      {
+        cout << "ptVal:" << ptVal[i] << " csc_segment_pt:" << (*l1t_sg_it).hwPt()*0.5 << " eta:" << (*l1t_sg_it).hwEta()*0.010875 << endl;
+        cout << "hwQual:" << (*l1t_sg_it).hwQual() << " link:" << (*l1t_sg_it).link() << " processor:" <<  (*l1t_sg_it).processor() << endl;
+      }
+    }
+}//end for segments*/
+
+
+
+//CSCsegments
+/*CSCSegmentCollection::const_iterator csc_sg_it;
+
+if ( ( nVisibleMuCSC>0 && signal ) || !signal )
+{
+  for ( csc_sg_it = cscsegmentH->begin(); csc_sg_it !=cscsegmentH->end(); ++csc_sg_it )
+  {
+    int polenta=1;
+  }
+}*/
+
+
+
+
+
+
 //============= INSERTED TO HERE ========================
  
 
@@ -2811,23 +5242,23 @@ if ( (nME0>0 && signal) || !signal ) {//run trigger analysis only if there is at
   
 //=================GEN PARATICLES===========================
 
-// //Handle<GenParticleCollection> genParticles;
-// iEvent.getByToken(genToken_, genParticles);
-//
-// for(size_t i = 0; i < genParticles->size(); ++ i) 
-//  {
-//  //if (v) cout << "GenParticle index: " << i << endl;
-//  const GenParticle & p = (*genParticles)[i];
-//  //const Candidate * mom =( p.mother());
-//
-//  if (fabs(p.pdgId()) != 13)	continue; 
-//  //(*muPdgId).push_back(p.pdgId());
-//  //(*muPt).push_back(p.pt());
-//  //(*muEta).push_back(p.eta());
-//  //(*muPx).push_back(p.px());
-//  //(*muPy).push_back(p.py());
-//  //(*muPz).push_back(p.pz());
-//  }
+ //Handle<GenParticleCollection> genParticles;
+ /*iEvent.getByToken(genToken_, genParticles);
+
+ for(size_t i = 0; i < genParticles->size(); ++ i) 
+  {
+  //if (v) cout << "GenParticle index: " << i << endl;
+  const GenParticle & p = (*genParticles)[i];
+  //const Candidate * mom =( p.mother());
+
+  if (fabs(p.pdgId()) != 13)	continue; 
+  //(*muPdgId).push_back(p.pdgId());
+  //(*muPt).push_back(p.pt());
+  //(*muEta).push_back(p.eta());
+  //(*muPx).push_back(p.px());
+  //(*muPy).push_back(p.py());
+  //(*muPz).push_back(p.pz());
+  }*/
 
  tr->Fill();
  cout << "etaPartList size = " << (*etaPartList).size() << endl;
@@ -2850,10 +5281,171 @@ DeltaGlobalPhiAnalyzerMinbias::endJob()
  cout << "EndJob started:" << endl;
  lastEvent=nEvent;
  lastEventSel=nEventSel;
- Int_t denom=-1;
- if (nME0>0 && signal)  denom=lastEventSel;
- if ( signal ) denom=lastEvent;//run trigger analysis only if there is at least one mu from the tau decay in the eta range 1.8<|eta!|<3 
+ //lastEventVis=nEvent; //for the rate I have to use the total number of events, also the invisibles
+ lastEventDRCGM = nEventDRCGM;
+ lastEventRCGM  = nEventRCGM; 
+ /*lastEventSelME0=nEventSelME0;
+ lastEventSelME01=nEventSelME01;
+ lastEventSelME02=nEventSelME02;
+ lastEventSelME03=nEventSelME03;*/
 
+ Int_t denom=-1;
+ /*Int_t denom1=-1;
+ Int_t denom2=-1;
+ Int_t denom3=-1;*/
+
+ //count the couples of detector that aare activated by the three canditdate muons
+ //sum the triplets
+ //nMuNN = nMuNNN + nMuNND + nMuNNR + nMuNNC + nMuNNG + nMuNNM;
+ //nMuND = nMuNND + nMuNDD + nMuNDR + nMuNDC + nMuNDG + nMuNDM;
+ //nMuNR = nMuNNR + nMuNDR + nMuNRR + nMuNRC + nMuNRG + nMuNRM;
+ //nMuNC = nMuNNC + nMuNDC + nMuNRC + nMuNCC + nMuNCG + nMuNCM;
+ //nMuNG = nMuNNG + nMuNDG + nMuNRG + nMuNCG + nMuNGG + nMuNGM;
+ //nMuNM = nMuNNM + nMuNDM + nMuNRM + nMuNCM + nMuNGM + nMuNMM;
+
+ //nMuDD = nMuDDD + nMuDDR + nMuDDC + nMuDDG + nMuDDM + nMuNDD;
+ //nMuDR = nMuDDR + nMuDRR + nMuDRC + nMuDRG + nMuDRM + nMuNDR;
+ //nMuDC = nMuDDC + nMuDRC + nMuDCC + nMuDCG + nMuDCM + nMuNDC;
+ //nMuDG = nMuDDG + nMuDRG + nMuDCG + nMuDGG + nMuDGM + nMuNDG;
+ //nMuDM = nMuDDM + nMuDRM + nMuDCM + nMuDGM + nMuDMM + nMuNDM;
+ //nMuRR = nMuDRR + nMuRRR + nMuRRC + nMuRRG + nMuRRM + nMuNRR;
+ //nMuRC = nMuDRC + nMuRRC + nMuRCC + nMuRCG + nMuRCM + nMuNRC;
+ //nMuRG = nMuDRG + nMuRRG + nMuRCG + nMuRGG + nMuRGM + nMuNRG;
+ //nMuRM = nMuDRM + nMuRRM + nMuRCM + nMuRGM + nMuRMM + nMuNRM;
+ //nMuCC = nMuDCC + nMuRCC + nMuCCC + nMuCCG + nMuCCM + nMuNCC;
+ //nMuCG = nMuDCG + nMuRCG + nMuCCG + nMuCGG + nMuCGM + nMuNCG;
+ //nMuCM = nMuDCM + nMuRCM + nMuCCM + nMuCGM + nMuCMM + nMuNCM;
+ //nMuGG = nMuDGG + nMuRGG + nMuCGG + nMuGGG + nMuGGM + nMuNGG;
+ //nMuGM = nMuDGM + nMuRGM + nMuCGM + nMuGGM + nMuGMM + nMuNGM;
+ //nMuMM = nMuDMM + nMuRMM + nMuCMM + nMuGMM + nMuMMM + nMuNMM;
+
+ /*cout << "nMuNN:" << nMuNN << " nMuND:" << nMuND << " nMuNR:" << nMuNR << " nMuNC:" << nMuNC << " nMuNG:" << nMuNG << " nMuNM:" << nMuNM << endl;
+ cout << "nMuDD:" << nMuDD << " nMuDR:" << nMuDR << " nMuDC:" << nMuDC << " nMuDG:" << nMuDG << " nMuDM:" << nMuDM << endl;
+ cout << "nMuRR:" << nMuRR << " nMuRC:" << nMuRC << " nMuRG:" << nMuRG << " nMuRM:" << nMuRM << endl;
+ cout << "nMuCC:" << nMuCC << " nMuCG:" << nMuCG << " nMuCM:" << nMuCM << endl;
+ cout << "nMuGG:" << nMuGG << " nMuGM:" << nMuGM << endl;
+ cout << "nMuMM:" << nMuMM << endl;*/
+
+ //nMuN = nMuNN + nMuND + nMuNR + nMuNC + nMuNG + nMuNM; 
+ //nMuD = nMuND + nMuDD + nMuDR + nMuDC + nMuDG + nMuDM; 
+ //nMuR = nMuNR + nMuDR + nMuRR + nMuRC + nMuRG + nMuRM; 
+ //nMuC = nMuNC + nMuDC + nMuRC + nMuCC + nMuCG + nMuCM; 
+ //nMuG = nMuNG + nMuDG + nMuRG + nMuCG + nMuGG + nMuGM; 
+ //nMuM = nMuNM + nMuDM + nMuRM + nMuCM + nMuGM + nMuMM; 
+
+ /*cout << "nMuN:" << nMuN << " nMuD:" << nMuD << " nMuR:" << nMuR << " nMuC:" << nMuC << " nMuG:" << nMuG << " nMuM:" << nMuM << endl;
+
+ cout << "nBBB:" << nBBB << " nBBO:" << nBBO << " nBBE:" << nBBE << " nBOO:" << nBOO << " nBOE:" << nBOE << endl;
+ cout << "nBEE:" << nBEE << " nOOO:" << nOOO << " nOOE:" << nOOE << " nOEE:" << nOEE << " nEEE:" << nEEE << " nEEEME0:" << nEEEME0 << endl; */
+
+/* for ( int i=0; i<120; i++)
+ {
+    cout << "nMuNNNpt[" << i << "]: " << nMuNNNpt[i] << endl;
+    cout << "nMuNNDpt[" << i << "]: " << nMuNNDpt[i] << endl;
+    cout << "nMuNNRpt[" << i << "]: " << nMuNNRpt[i] << endl;
+    cout << "nMuNNCpt[" << i << "]: " << nMuNNCpt[i] << endl;
+    cout << "nMuNNGpt[" << i << "]: " << nMuNNGpt[i] << endl;
+    cout << "nMuNNMpt[" << i << "]: " << nMuNNMpt[i] << endl;
+    cout << "nMuNDDpt[" << i << "]: " << nMuNDDpt[i] << endl;
+    cout << "nMuNDRpt[" << i << "]: " << nMuNDRpt[i] << endl;
+    cout << "nMuNDCpt[" << i << "]: " << nMuNDCpt[i] << endl;
+    cout << "nMuNDGpt[" << i << "]: " << nMuNDGpt[i] << endl;
+    cout << "nMuNDMpt[" << i << "]: " << nMuNDMpt[i] << endl;
+    cout << "nMuNRRpt[" << i << "]: " << nMuNRRpt[i] << endl;
+    cout << "nMuNRCpt[" << i << "]: " << nMuNRCpt[i] << endl;
+    cout << "nMuNRGpt[" << i << "]: " << nMuNRGpt[i] << endl;
+    cout << "nMuNRMpt[" << i << "]: " << nMuNRMpt[i] << endl;
+    cout << "nMuNCCpt[" << i << "]: " << nMuNCCpt[i] << endl;
+    cout << "nMuNCGpt[" << i << "]: " << nMuNCGpt[i] << endl;
+    cout << "nMuNCMpt[" << i << "]: " << nMuNCMpt[i] << endl;
+    cout << "nMuNGGpt[" << i << "]: " << nMuNGGpt[i] << endl;
+    cout << "nMuNGMpt[" << i << "]: " << nMuNGMpt[i] << endl;
+    cout << "nMuNMMpt[" << i << "]: " << nMuNMMpt[i] << endl;
+    
+    cout << endl;
+
+    cout << "nMuDDDpt[" << i << "]: " << nMuDDDpt[i] << endl;
+    cout << "nMuDDRpt[" << i << "]: " << nMuDDRpt[i] << endl;
+    cout << "nMuDDCpt[" << i << "]: " << nMuDDCpt[i] << endl;
+    cout << "nMuDDGpt[" << i << "]: " << nMuDDGpt[i] << endl;
+    cout << "nMuDDMpt[" << i << "]: " << nMuDDMpt[i] << endl;
+    cout << "nMuDRRpt[" << i << "]: " << nMuDRRpt[i] << endl;
+    cout << "nMuDRCpt[" << i << "]: " << nMuDRCpt[i] << endl;
+    cout << "nMuDRGpt[" << i << "]: " << nMuDRGpt[i] << endl;
+    cout << "nMuDRMpt[" << i << "]: " << nMuDRMpt[i] << endl;
+    cout << "nMuDCCpt[" << i << "]: " << nMuDCCpt[i] << endl;
+    cout << "nMuDCGpt[" << i << "]: " << nMuDCGpt[i] << endl;
+    cout << "nMuDCMpt[" << i << "]: " << nMuDCMpt[i] << endl;
+    cout << "nMuDGGpt[" << i << "]: " << nMuDGGpt[i] << endl;
+    cout << "nMuDGMpt[" << i << "]: " << nMuDGMpt[i] << endl;
+    cout << "nMuDMMpt[" << i << "]: " << nMuDMMpt[i] << endl;
+
+    cout << endl;
+
+    cout << "nMuRRRpt[" << i << "]: " << nMuRRRpt[i] << endl;
+    cout << "nMuRRCpt[" << i << "]: " << nMuRRCpt[i] << endl;
+    cout << "nMuRRGpt[" << i << "]: " << nMuRRGpt[i] << endl;
+    cout << "nMuRRMpt[" << i << "]: " << nMuRRMpt[i] << endl;
+    cout << "nMuRCCpt[" << i << "]: " << nMuRCCpt[i] << endl;
+    cout << "nMuRCGpt[" << i << "]: " << nMuRCGpt[i] << endl;
+    cout << "nMuRCMpt[" << i << "]: " << nMuRCMpt[i] << endl;
+    cout << "nMuRGGpt[" << i << "]: " << nMuRGGpt[i] << endl;
+    cout << "nMuRGMpt[" << i << "]: " << nMuRGMpt[i] << endl;
+    cout << "nMuRMMpt[" << i << "]: " << nMuRMMpt[i] << endl;
+
+    cout << endl;
+
+    cout << "nMuCCCpt[" << i << "]: " << nMuCCCpt[i] << endl;
+    cout << "nMuCCGpt[" << i << "]: " << nMuCCGpt[i] << endl;
+    cout << "nMuCCMpt[" << i << "]: " << nMuCCMpt[i] << endl;
+    cout << "nMuCGGpt[" << i << "]: " << nMuCGGpt[i] << endl;
+    cout << "nMuCGMpt[" << i << "]: " << nMuCGMpt[i] << endl;
+    cout << "nMuCMMpt[" << i << "]: " << nMuCMMpt[i] << endl;
+
+    cout << endl;
+
+    cout << "nMuGGGpt[" << i << "]: " << nMuGGGpt[i] << endl;
+    cout << "nMuGGMpt[" << i << "]: " << nMuGGMpt[i] << endl;
+    cout << "nMuGMMpt[" << i << "]: " << nMuGMMpt[i] << endl;
+
+    cout << endl;
+
+    cout << "nMuMMMpt[" << i << "]: " << nMuMMMpt[i] << endl;
+
+    cout << endl;
+ }*/
+
+
+ //mME0 is only the number of muons that are generate din eta region of ME0
+ //but they have to be visible: this is controlled by nVisibleMuME0
+  
+ 
+ //if (nME0>0 && nVisibleMuME0>0 && signal)  denom1=lastEventSel1; 
+ //if (nME0>1 && nVisibleMuME0>1 && signal)  denom2=lastEventSel2;
+ //if (nME0>2 && nVisibleMuME0>2 && signal)  denom3=lastEventSel3;
+ //if (nME0>0 && nVisibleMuME0>0 && signal)  denom=lastEventSel;
+ 
+ //I have to do in this way because the nME0 seen in the endjob is only that of the last event
+ //same for nVisibleMuME0  
+ /*if ( signal ) 
+ {
+   //to make efficiencies with the total of visibles
+   //denom1   = lastEventVis;
+   //denom2   = lastEventVis;
+   //denom3   = lastEventVis;
+   
+   //to make efficiencies with single visibles, double visibles, triple visibles
+   //denom1 = lastEventSelME01;
+   //denom2 = lastEventSelME02;
+   //denom3 = lastEventSelME03;
+ }*/
+ cout << "signal:" << signal << endl;
+ if (nME0>0 && signal)  denom=lastEventSel; 
+ denom=lastEvent;//run trigger analysis only if there is at least one mu from the tau decay in the eta range 1.8<|eta!|<3
+
+// cout << "lastEventSelME01=" << lastEventSelME01 << " lastEventSelME02=" << lastEventSelME02 << " lastEventSelME03=" << lastEventSelME03 << endl;
+
+ 
  cout << "Calculating rates and efficiencies (triggers without vicinity)" << endl;
  for (int kk=0; kk<5; kk++)	singleME0rate[kk] = singleME0count[kk]/(denom*25.0*1e-9); //Hz
  for (int kk=0; kk<15; kk++)   	doubleME0rate[kk] = doubleME0count[kk]/(denom*25.0*1e-9);  //Hz
@@ -3838,6 +6430,9 @@ TPaveText *ttriple=new TPaveText(p1,p2,p3,p4,"brNDC");
 TLatex textriple;
 textriple.SetTextSize(0.028);
 textriple.DrawLatexNDC(0.61,0.82, "#splitline{Triple muon}{#splitline{Threshold: muon p_{t}>10 GeV}{PU200}}");
+
+      cout << "\nTotal mismatchCount = " << mismatchCount << endl;
+      cout << "over considered totalmismatchCount = " << totalmismatchCount << endl;
 
 }
 

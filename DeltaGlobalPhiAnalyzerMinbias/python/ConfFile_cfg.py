@@ -29,7 +29,8 @@ process.source = cms.Source("PoolSource",
 	#'root://cms-xrd-global.cern.ch//store/mc/PhaseIITDRFall17DR/SingleGammaPt50Eta1p6_2p8/GEN-SIM-RECO/PU200FEVT_93X_upgrade2023_realistic_v2-v1/150000/0EEE9C34-94B4-E711-8E23-5065F381E251.root',
 	#'root://cms-xrd-global.cern.ch//store/mc/PhaseIITDRFall17DR/SingleGammaPt50Eta1p6_2p8/GEN-SIM-RECO/PU200FEVT_93X_upgrade2023_realistic_v2-v1/150000/FEC761B6-6BB3-E711-87FF-003048C91B0E.root',),
 	#'root://cms-xrd-global.cern.ch//store/user/mressego/ME0trigger/B0ToTau_To3Mu_beamspot14TeV_filterME0_padbased-step3_200evt/180716_110330/0000/step3_beamspot14TeV_1.root'),
-	'root://cms-xrd-global.cern.ch://store/mc/PhaseIITDRSpring17DR/DoubleNuE1Eta14_31/GEN-SIM-RECO/PU200_NoSmear_91X_upgrade2023_realistic_v3-v2/110000/000DC127-7371-E711-9E21-F02FA768CCE6.root'),
+	#'root://cms-xrd-global.cern.ch://store/mc/PhaseIITDRSpring17DR/DoubleNuE1Eta14_31/GEN-SIM-RECO/PU200_NoSmear_91X_upgrade2023_realistic_v3-v2/110000/000DC127-7371-E711-9E21-F02FA768CCE6.root'
+         'root://cms-xrd-global.cern.ch://store/mc/PhaseIITDRSpring17DR/DoubleNuE1Eta14_31/GEN-SIM-RECO/PU200_NoSmear_91X_upgrade2023_realistic_v3-v2/110000/221DC244-B971-E711-8285-3417EBE643E7.root'),
 #    dropDescendantsOfDroppedBranches=cms.untracked.bool(False),
 #    inputCommands = cms.untracked.vstring( 'drop *',
 #    'keep *_simMuonGEMDigis_GEM_HLT',     
@@ -253,9 +254,11 @@ process.source = cms.Source("PoolSource",
 
 process.demo = cms.EDAnalyzer('DeltaGlobalPhiAnalyzerMinbias',
     me0Segments = cms.InputTag("me0Segments","","RECO"),
+    cscSegments = cms.InputTag("cscSegments","","RECO"),
+    gemSegments = cms.InputTag("gemSegments","","RECO"),
+    l1tSegments = cms.InputTag("simEmtfDigis", "EMTF", "HLT"),
     genParticles = cms.InputTag("genParticles"),
     verbose = cms.bool(True),
-    me0SimHits = cms.InputTag("g4SimHits","MuonME0Hits","SIM"),
     reco = cms.bool(True), #True if DIGI, False if PAD based
     mutype = cms.bool(True), #True to use thresholds for PROMPT muons , False to use thresholds for DISPLACED muons
     signal = cms.bool(False) #True if running on dataset with simulated signal, False if running on minBias dataset
